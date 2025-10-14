@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_sign_in_service.dart';
 import 'logbook_screen.dart';
 import 'river_levels_screen.dart';
+import 'searchable_stations_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -152,12 +153,16 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   _buildActionCard(
                     context,
-                    icon: Icons.info,
-                    title: 'About',
-                    subtitle: 'App information',
-                    color: Colors.orange,
+                    icon: Icons.search,
+                    title: 'Find Stations',
+                    subtitle: 'Search water stations',
+                    color: Colors.teal,
                     onTap: () {
-                      _showAboutDialog(context);
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const NewStationSearchScreen(),
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -258,39 +263,6 @@ class DashboardScreen extends StatelessWidget {
             ),
           ),
           Expanded(child: Text(value)),
-        ],
-      ),
-    );
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About BrownClaw'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('BrownClaw - Whitewater Kayaking LogBook'),
-            SizedBox(height: 8),
-            Text('Version: 1.0.0'),
-            SizedBox(height: 8),
-            Text('A Firebase-powered app for whitewater kayakers featuring:'),
-            SizedBox(height: 8),
-            Text('• Firebase Authentication'),
-            Text('• Google Sign-In'),
-            Text('• Cloud Firestore'),
-            Text('• River descent logging'),
-            Text('• Difficulty class tracking'),
-            Text('• Water level recording'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
         ],
       ),
     );

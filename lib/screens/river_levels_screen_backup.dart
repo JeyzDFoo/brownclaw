@@ -11,15 +11,21 @@ class RiverLevelsScreen extends StatefulWidget {
 }
 
 class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
+  bool _isLoading = false;
   List<Map<String, dynamic>> _rivers = [];
   List<String> _favoriteStationIds = [];
   String? _error;
-  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _loadRiverData();
     _loadFavorites();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   void _loadFavorites() {
@@ -33,14 +39,6 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   void _loadRiverData() async {
-    if (_favoriteStationIds.isEmpty) {
-      setState(() {
-        _rivers = [];
-        _isLoading = false;
-      });
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -82,16 +80,29 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
 
   Future<void> _toggleFavorite(Map<String, dynamic> river) async {
     final stationId = river['stationId'] as String;
+    final isFavorite = _favoriteStationIds.contains(stationId);
 
     try {
-      await FavoriteRiversService.removeFavorite(stationId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${river['riverName']} removed from favorites'),
-            backgroundColor: Colors.orange,
-          ),
-        );
+      if (isFavorite) {
+        await FavoriteRiversService.removeFavorite(stationId);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${river['name']} removed from favorites'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } else {
+        await FavoriteRiversService.addFavorite(stationId, river);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('${river['name']} added to favorites'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
