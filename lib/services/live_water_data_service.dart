@@ -1,20 +1,48 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'water_station_service.dart';
 
 class LiveWaterDataService {
+  // New Government of Canada API (found Oct 2025)
   static const String baseUrl =
+      'https://api.weather.gc.ca/collections/hydrometric-realtime/items';
+
+  // Legacy CSV endpoint (for fallback)
+  static const String legacyUrl =
       'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline';
 
   /// Fetch live data for a specific station
   static Future<Map<String, dynamic>?> fetchStationData(
     String stationId,
   ) async {
+    // Try new Government of Canada JSON API first
+    final jsonData = await _fetchFromJsonApi(stationId);
+    if (jsonData != null) return jsonData;
+
+    // Fallback to legacy CSV API (temporarily disabled)
+    // final csvData = await _fetchFromCsvApi(stationId);
+    // if (csvData != null) return csvData;
+
+    // Special handling for known stations
+    if (stationId == '08NA011') {
+      return await _fetchSpecialStation(stationId);
+    }
+
+    return null;
+  }
+
+  /// Fetch data from new JSON API
+  static Future<Map<String, dynamic>?> _fetchFromJsonApi(
+    String stationId,
+  ) async {
     try {
-      final url =
-          '$baseUrl?stations[]=$stationId&parameters[]=47'; // Parameter 47 is discharge
-      print('🌊 Fetching live data for station $stationId');
+      final url = '$baseUrl?station_number=$stationId&limit=1';
+      if (kDebugMode) {
+        print('🌊 Fetching live data for station $stationId');
+        print('📡 URL: $url');
+      }
 
       final response = await http
           .get(Uri.parse(url))
@@ -25,22 +53,88 @@ class LiveWaterDataService {
             },
           );
 
+      if (kDebugMode) {
+        print('📊 Response status: ${response.statusCode}');
+        print('📊 Response size: ${response.body.length} chars');
+      }
+
       if (response.statusCode == 200) {
         final csvData = response.body;
         final flowRate = _parseLatestFlow(csvData);
 
         if (flowRate != null) {
+          if (kDebugMode) {
+            print('✅ Live data retrieved: ${flowRate}m³/s for $stationId');
+          }
           return {
             'flowRate': flowRate,
             'status': 'live',
             'lastUpdate': DateTime.now().toIso8601String(),
           };
+        } else {
+          if (kDebugMode) {
+            print('⚠️ No flow data found in CSV response');
+          }
         }
       } else {
-        print('❌ HTTP ${response.statusCode} for station $stationId');
+        if (kDebugMode) {
+          print('❌ HTTP ${response.statusCode} for station $stationId');
+          if (response.body.isNotEmpty) {
+            print('💬 Response body: ${response.body.substring(0, 200)}');
+          }
+        }
       }
     } catch (e) {
-      print('❌ Error fetching live data for station $stationId: $e');
+      if (kDebugMode) {
+        print('❌ Error fetching live data for station $stationId: $e');
+      }
+    }
+
+    return null;
+  }
+
+  /// Special handling for stations we know should be online
+  static Future<Map<String, dynamic>?> _fetchSpecialStation(
+    String stationId,
+  ) async {
+    // Try multiple API formats for known online stations
+    final formats = [
+      '$baseUrl?stations[]=$stationId&parameters[]=47',
+      '$baseUrl?stations=$stationId&parameters=47',
+      '$baseUrl?stations[]=$stationId',
+      'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=$stationId&parameters[]=46', // water level
+    ];
+
+    for (int i = 0; i < formats.length; i++) {
+      try {
+        if (kDebugMode) {
+          print('🧪 Trying format ${i + 1} for $stationId: ${formats[i]}');
+        }
+
+        final response = await http
+            .get(Uri.parse(formats[i]))
+            .timeout(const Duration(seconds: 10));
+
+        if (response.statusCode == 200 && response.body.isNotEmpty) {
+          final flowRate = _parseLatestFlow(response.body);
+          if (flowRate != null) {
+            if (kDebugMode) {
+              print('✅ Success with format ${i + 1}: ${flowRate}m³/s');
+            }
+            return {
+              'flowRate': flowRate,
+              'status': 'live',
+              'lastUpdate': DateTime.now().toIso8601String(),
+            };
+          }
+        } else if (kDebugMode) {
+          print('❌ Format ${i + 1} failed: HTTP ${response.statusCode}');
+        }
+      } catch (e) {
+        if (kDebugMode) {
+          print('❌ Format ${i + 1} error: $e');
+        }
+      }
     }
 
     return null;
@@ -104,6 +198,44 @@ class LiveWaterDataService {
       }
     } catch (e) {
       print('❌ Error parsing CSV data: $e');
+    }
+    return null;
+  }
+
+  /// Parse flow data from JSON API response
+  static double? _parseJsonFlow(String jsonData) {
+    try {
+      final data = json.decode(jsonData);
+
+      if (data['features'] != null && data['features'].isNotEmpty) {
+        final features = data['features'] as List;
+
+        // Look through features for discharge data
+        for (final feature in features) {
+          final props = feature['properties'];
+          if (props != null) {
+            final discharge = props['DISCHARGE'];
+            if (discharge != null) {
+              final flowRate = double.tryParse(discharge.toString());
+              if (flowRate != null && flowRate >= 0) {
+                if (kDebugMode) {
+                  print('✅ Found JSON flow rate: ${flowRate}m³/s');
+                }
+                return flowRate;
+              }
+            }
+          }
+        }
+      }
+
+      if (kDebugMode) {
+        print('⚠️ No valid flow data found in JSON response');
+        print('Response: ${jsonData.substring(0, 200)}...');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error parsing JSON data: $e');
+      }
     }
     return null;
   }
@@ -236,6 +368,8 @@ class LiveWaterDataService {
         baseFlow = 120.0;
       } else if (stationName.contains('chilliwack')) {
         baseFlow = 45.0;
+      } else if (stationName.contains('spillimacheen')) {
+        baseFlow = 12.0; // Spillimacheen River - smaller BC mountain stream
       } else {
         baseFlow = 65.0; // BC mountain rivers
       }
