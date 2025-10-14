@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_sign_in_service.dart';
 import 'logbook_screen.dart';
+import 'river_levels_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -137,13 +138,15 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   _buildActionCard(
                     context,
-                    icon: Icons.settings,
-                    title: 'Settings',
-                    subtitle: 'App preferences',
-                    color: Colors.purple,
+                    icon: Icons.water,
+                    title: 'River Levels',
+                    subtitle: 'Live water conditions',
+                    color: Colors.blue,
                     onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Settings coming soon!')),
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RiverLevelsScreen(),
+                        ),
                       );
                     },
                   ),
