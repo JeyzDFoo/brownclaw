@@ -336,23 +336,26 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                   Icon(
                                     dataSource == 'live'
                                         ? Icons.live_tv
-                                        : Icons.info,
+                                        : Icons.auto_graph,
                                     size: 12,
                                     color: dataSource == 'live'
                                         ? Colors.green
-                                        : Colors.orange,
+                                        : Colors.amber.shade700,
                                   ),
                                   const SizedBox(width: 4),
-                                  Text(
-                                    dataSource == 'live'
-                                        ? 'Live data'
-                                        : 'Demo data',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: dataSource == 'live'
-                                          ? Colors.green
-                                          : Colors.orange,
-                                      fontWeight: FontWeight.bold,
+                                  Expanded(
+                                    child: Text(
+                                      river['lastUpdate'] as String? ??
+                                          (dataSource == 'live'
+                                              ? 'Live data'
+                                              : 'Simulated data'),
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: dataSource == 'live'
+                                            ? Colors.green
+                                            : Colors.amber.shade700,
+                                        fontWeight: FontWeight.bold,
+                                      ),
                                     ),
                                   ),
                                 ],
