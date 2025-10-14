@@ -83,7 +83,7 @@ class FirestoreStationService {
   static const String collectionName = 'water_stations';
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Search stations by name with text matching
+  /// Search stations by name with text matching (AB and BC only)
   Future<List<StationModel>> searchStationsByName(String query) async {
     try {
       if (query.isEmpty) {
@@ -92,15 +92,14 @@ class FirestoreStationService {
         ); // Return limited results when no query
       }
 
-      // For better text search, we'll get all stations and filter locally
-      // In production, you might want to use Algolia or similar for better search
-      final QuerySnapshot snapshot = await _firestore
-          .collection(collectionName)
-          .limit(1000) // Limit to avoid memory issues
-          .get();
+      // Get all AB and BC stations (much smaller dataset, no limit needed)
+      final albertaStations = await getStationsByProvince('AB');
+      final bcStations = await getStationsByProvince('BC');
 
-      final stations = snapshot.docs
-          .map((doc) => StationModel.fromFirestore(doc))
+      // Combine AB and BC stations
+      final allWhitewaterStations = [...albertaStations, ...bcStations];
+
+      final stations = allWhitewaterStations
           .where(
             (station) =>
                 station.name.toLowerCase().contains(query.toLowerCase()) ||
@@ -133,20 +132,22 @@ class FirestoreStationService {
     }
   }
 
-  /// Get all stations (with optional limit)
+  /// Get all stations (AB and BC only, with optional limit)
   Future<List<StationModel>> getAllStations({int? limit}) async {
     try {
-      Query query = _firestore.collection(collectionName);
+      // Get all AB and BC stations (the most relevant for whitewater)
+      final albertaStations = await getStationsByProvince('AB');
+      final bcStations = await getStationsByProvince('BC');
 
-      if (limit != null) {
-        query = query.limit(limit);
+      // Combine stations
+      final allStations = [...albertaStations, ...bcStations];
+
+      // Apply limit if specified
+      if (limit != null && allStations.length > limit) {
+        return allStations.take(limit).toList();
       }
 
-      final QuerySnapshot snapshot = await query.get();
-
-      return snapshot.docs
-          .map((doc) => StationModel.fromFirestore(doc))
-          .toList();
+      return allStations;
     } catch (e) {
       if (kDebugMode) {
         print('Error getting all stations: $e');

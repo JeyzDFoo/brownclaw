@@ -81,7 +81,13 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   Future<void> _toggleFavorite(Map<String, dynamic> river) async {
-    final stationId = river['stationId'] as String;
+    final stationId =
+        river['stationId'] as String? ?? river['id'] as String? ?? '';
+
+    if (stationId.isEmpty) {
+      print('❌ Error: No station ID found in river data: $river');
+      return;
+    }
 
     try {
       await FavoriteRiversService.removeFavorite(stationId);
