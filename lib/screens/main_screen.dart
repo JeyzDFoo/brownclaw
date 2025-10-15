@@ -16,8 +16,9 @@ class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
-    const LogBookScreen(),
     const RiverLevelsScreen(),
+
+    const LogBookScreen(),
     const NewStationSearchScreen(),
   ];
 
@@ -77,11 +78,11 @@ class _MainScreenState extends State<MainScreen> {
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.kayaking), label: 'Logbook'),
           BottomNavigationBarItem(
             icon: Icon(Icons.favorite),
             label: 'Favourites',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.kayaking), label: 'Logbook'),
           BottomNavigationBarItem(
             icon: Icon(Icons.search),
             label: 'Find Stations',
