@@ -89,10 +89,12 @@ class GaugeStation {
     if (updatedAt != null) map['updatedAt'] = Timestamp.fromDate(updatedAt!);
     if (currentDischarge != null) map['currentDischarge'] = currentDischarge;
     if (currentWaterLevel != null) map['currentWaterLevel'] = currentWaterLevel;
-    if (currentTemperature != null)
+    if (currentTemperature != null) {
       map['currentTemperature'] = currentTemperature;
-    if (lastDataUpdate != null)
+    }
+    if (lastDataUpdate != null) {
       map['lastDataUpdate'] = Timestamp.fromDate(lastDataUpdate!);
+    }
     if (dataStatus != null) map['dataStatus'] = dataStatus;
 
     return map;

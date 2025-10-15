@@ -48,7 +48,24 @@ class GaugeStationService {
     }
   }
 
-  // Get gauge station associated with a river run
+  // Get gauge stations associated with a river run (stream)
+  static Stream<List<GaugeStation>> getStationsForRun(String runId) {
+    return _stationsCollection
+        .where('riverRunId', isEqualTo: runId)
+        .where('isActive', isEqualTo: true)
+        .orderBy('name')
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            return GaugeStation.fromMap(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            );
+          }).toList();
+        });
+  }
+
+  // Get gauge station associated with a river run (single result, backward compatibility)
   static Future<GaugeStation?> getStationForRun(String runId) async {
     try {
       final snapshot = await _stationsCollection
@@ -101,9 +118,7 @@ class GaugeStationService {
       stationData['createdAt'] = FieldValue.serverTimestamp();
       stationData['updatedAt'] = FieldValue.serverTimestamp();
 
-      final docRef = await _stationsCollection
-          .doc(station.stationId)
-          .set(stationData);
+      await _stationsCollection.doc(station.stationId).set(stationData);
 
       if (kDebugMode) {
         print('✅ Successfully added gauge station: ${station.name}');

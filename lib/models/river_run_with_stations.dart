@@ -1,0 +1,106 @@
+import '../models/models.dart';
+
+/// Composite model that represents a RiverRun with its associated GaugeStations
+/// This makes it easier to work with the hierarchical data in UI components
+class RiverRunWithStations {
+  final RiverRun run;
+  final List<GaugeStation> stations;
+  final River? river; // Optional parent river information
+
+  const RiverRunWithStations({
+    required this.run,
+    required this.stations,
+    this.river,
+  });
+
+  // Convenience getters
+  String get id => run.id;
+  String get name => run.name;
+  String get difficultyClass => run.difficultyClass;
+  String? get description => run.description;
+
+  // Enhanced display name that includes river name when available
+  String get displayName {
+    if (river != null) {
+      return '${river!.name} (${run.name}) - ${run.difficultyClass}';
+    }
+    return run.displayName; // Fallback to original format
+  }
+
+  // Flow status based on first station with current data
+  String get flowStatus {
+    if (stations.isEmpty) return 'No Data';
+
+    final stationWithData = stations.firstWhere(
+      (station) => station.currentDischarge != null,
+      orElse: () => stations.first,
+    );
+
+    if (stationWithData.currentDischarge == null) {
+      return 'No Data';
+    }
+
+    return run.getFlowStatus(stationWithData.currentDischarge);
+  }
+
+  // Get the primary station (first one or the one with best data)
+  GaugeStation? get primaryStation {
+    if (stations.isEmpty) return null;
+
+    // Prefer stations with live data
+    final liveStations = stations.where((s) => s.hasLiveData).toList();
+    if (liveStations.isNotEmpty) {
+      return liveStations.first;
+    }
+
+    return stations.first;
+  }
+
+  // Get current discharge from primary station
+  double? get currentDischarge => primaryStation?.currentDischarge;
+
+  // Get current water level from primary station
+  double? get currentWaterLevel => primaryStation?.currentWaterLevel;
+
+  // Check if we have live data
+  bool get hasLiveData => stations.any((station) => station.hasLiveData);
+
+  // Get the most recent data update time
+  DateTime? get lastDataUpdate {
+    final updates = stations
+        .map((s) => s.lastDataUpdate)
+        .where((d) => d != null)
+        .cast<DateTime>()
+        .toList();
+
+    if (updates.isEmpty) return null;
+
+    updates.sort((a, b) => b.compareTo(a));
+    return updates.first;
+  }
+
+  // Create a copy with modified values
+  RiverRunWithStations copyWith({
+    RiverRun? run,
+    List<GaugeStation>? stations,
+    River? river,
+  }) {
+    return RiverRunWithStations(
+      run: run ?? this.run,
+      stations: stations ?? this.stations,
+      river: river ?? this.river,
+    );
+  }
+
+  @override
+  String toString() => '$displayName (${stations.length} stations)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is RiverRunWithStations && other.run.id == run.id;
+  }
+
+  @override
+  int get hashCode => run.id.hashCode;
+}

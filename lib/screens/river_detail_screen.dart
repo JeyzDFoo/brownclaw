@@ -235,23 +235,77 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final riverName =
-        widget.riverData['riverName'] as String? ?? 'Unknown River';
-    final stationId = widget.riverData['stationId'] as String? ?? 'Unknown';
-    final location =
-        widget.riverData['location'] as String? ?? 'Unknown Location';
+    // Add debugging for riverData
+    if (kDebugMode) {
+      print('🐛 RiverDetailScreen received riverData: ${widget.riverData}');
+    }
 
-    // Handle section data (could be Map or String for backward compatibility)
-    final sectionData = widget.riverData['section'];
-    final section = sectionData is Map<String, dynamic>
-        ? (sectionData['name'] as String? ?? '')
-        : (sectionData as String? ?? '');
-    final sectionClass = sectionData is Map<String, dynamic>
-        ? (sectionData['class'] as String? ?? 'Unknown')
-        : (widget.riverData['difficulty'] as String? ?? 'Unknown');
+    // Safely extract data with null checks and error handling
+    String riverName;
+    String stationId;
+    String location;
+    String section;
+    String sectionClass;
+    String difficulty;
+    String status;
 
-    final difficulty = widget.riverData['difficulty'] as String? ?? 'Unknown';
-    final status = widget.riverData['status'] as String? ?? 'Unknown';
+    try {
+      riverName = widget.riverData['riverName'] as String? ?? 'Unknown River';
+      stationId = widget.riverData['stationId'] as String? ?? 'Unknown';
+      location = widget.riverData['location'] as String? ?? 'Unknown Location';
+
+      // Handle section data (could be Map or String for backward compatibility)
+      final sectionData = widget.riverData['section'];
+      section = sectionData is Map<String, dynamic>
+          ? (sectionData['name'] as String? ?? '')
+          : (sectionData as String? ?? '');
+      sectionClass = sectionData is Map<String, dynamic>
+          ? (sectionData['class'] as String? ?? 'Unknown')
+          : (widget.riverData['difficulty'] as String? ?? 'Unknown');
+
+      difficulty = widget.riverData['difficulty'] as String? ?? 'Unknown';
+      status = widget.riverData['status'] as String? ?? 'Unknown';
+
+      if (kDebugMode) {
+        print(
+          '✅ Successfully parsed river data: riverName=$riverName, stationId=$stationId',
+        );
+      }
+    } catch (e, stackTrace) {
+      if (kDebugMode) {
+        print('❌ Error parsing river data: $e');
+        print('📊 Stack trace: $stackTrace');
+      }
+
+      // Return an error screen if data parsing fails
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Data Error'),
+          backgroundColor: Colors.red,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                'Error loading river data',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              Text('Error: $e'),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Go Back'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(

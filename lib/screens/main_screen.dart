@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_sign_in_service.dart';
 import 'logbook_screen.dart';
 import 'river_levels_screen.dart';
-import 'searchable_stations_screen.dart';
+import 'river_run_search_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -19,7 +19,7 @@ class _MainScreenState extends State<MainScreen> {
     const RiverLevelsScreen(),
 
     const LogBookScreen(),
-    const NewStationSearchScreen(),
+    const RiverRunSearchScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -83,10 +83,7 @@ class _MainScreenState extends State<MainScreen> {
             label: 'Favourites',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.kayaking), label: 'Logbook'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Find Stations',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Find Runs'),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
+import 'river_service.dart';
 
 /// Service for managing river runs (sections) in the new architecture
 class RiverRunService {
@@ -199,11 +200,7 @@ class RiverRunService {
         .snapshots()
         .asyncMap((gaugeSnapshot) async {
           final runIds = gaugeSnapshot.docs
-              .map(
-                (doc) =>
-                    (doc.data() as Map<String, dynamic>)['riverRunId']
-                        as String?,
-              )
+              .map((doc) => doc.data()['riverRunId'] as String?)
               .where((id) => id != null)
               .cast<String>()
               .toList();
@@ -258,5 +255,108 @@ class RiverRunService {
       }
       return [];
     }
+  }
+
+  // Get run with its associated gauge stations (single result)
+  static Future<RiverRunWithStations?> getRunWithStations(String runId) async {
+    try {
+      final run = await getRunById(runId);
+      if (run == null) return null;
+
+      // Get associated gauge stations
+      final stationsSnapshot = await _firestore
+          .collection('gauge_stations')
+          .where('riverRunId', isEqualTo: runId)
+          .where('isActive', isEqualTo: true)
+          .get();
+
+      final stations = stationsSnapshot.docs.map((doc) {
+        return GaugeStation.fromMap(doc.data(), docId: doc.id);
+      }).toList();
+
+      // Get the parent river information
+      River? river;
+      if (run.riverId.isNotEmpty) {
+        river = await RiverService.getRiverById(run.riverId);
+      }
+
+      return RiverRunWithStations(run: run, stations: stations, river: river);
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error getting run with stations: $e');
+      }
+      return null;
+    }
+  }
+
+  // Get all runs for a river with their associated gauge stations (stream)
+  static Stream<List<RiverRunWithStations>> getRunsWithStationsForRiver(
+    String riverId,
+  ) {
+    return getRunsForRiver(riverId).asyncMap((runs) async {
+      final runWithStationsFutures = runs.map((run) async {
+        final stationsSnapshot = await _firestore
+            .collection('gauge_stations')
+            .where('riverRunId', isEqualTo: run.id)
+            .where('isActive', isEqualTo: true)
+            .get();
+
+        final stations = stationsSnapshot.docs.map((doc) {
+          return GaugeStation.fromMap(doc.data(), docId: doc.id);
+        }).toList();
+
+        return RiverRunWithStations(run: run, stations: stations);
+      });
+
+      return Future.wait(runWithStationsFutures);
+    });
+  }
+
+  // Get runs with stations that have live data (stream)
+  static Stream<List<RiverRunWithStations>> getRunsWithLiveData() {
+    return _firestore
+        .collection('gauge_stations')
+        .where('isActive', isEqualTo: true)
+        .where('dataStatus', isEqualTo: 'live')
+        .snapshots()
+        .asyncMap((snapshot) async {
+          final runIds = snapshot.docs
+              .map((doc) => doc.data()['riverRunId'] as String?)
+              .where((id) => id != null)
+              .cast<String>()
+              .toSet()
+              .toList();
+
+          if (runIds.isEmpty) return <RiverRunWithStations>[];
+
+          final runWithStationsFutures = runIds.map((runId) async {
+            return getRunWithStations(runId);
+          });
+
+          final results = await Future.wait(runWithStationsFutures);
+          return results
+              .where((result) => result != null)
+              .cast<RiverRunWithStations>()
+              .toList();
+        });
+  }
+
+  // Get all runs with stations (stream)
+  static Stream<List<RiverRunWithStations>> getAllRunsWithStations() {
+    return _runsCollection.snapshots().asyncMap((snapshot) async {
+      final runIds = snapshot.docs.map((doc) => doc.id).toList();
+
+      if (runIds.isEmpty) return <RiverRunWithStations>[];
+
+      final runWithStationsFutures = runIds.map((runId) async {
+        return getRunWithStations(runId);
+      });
+
+      final results = await Future.wait(runWithStationsFutures);
+      return results
+          .where((result) => result != null)
+          .cast<RiverRunWithStations>()
+          .toList();
+    });
   }
 }

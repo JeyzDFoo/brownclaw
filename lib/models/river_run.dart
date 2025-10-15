@@ -88,10 +88,12 @@ class RiverRun {
     if (season != null) map['season'] = season;
     if (permits != null) map['permits'] = permits;
     if (hazards != null) map['hazards'] = hazards;
-    if (minRecommendedFlow != null)
+    if (minRecommendedFlow != null) {
       map['minRecommendedFlow'] = minRecommendedFlow;
-    if (maxRecommendedFlow != null)
+    }
+    if (maxRecommendedFlow != null) {
       map['maxRecommendedFlow'] = maxRecommendedFlow;
+    }
     if (optimalFlowMin != null) map['optimalFlowMin'] = optimalFlowMin;
     if (optimalFlowMax != null) map['optimalFlowMax'] = optimalFlowMax;
     if (flowUnit != null) map['flowUnit'] = flowUnit;
@@ -152,6 +154,11 @@ class RiverRun {
 
   // Get display name (section name with difficulty)
   String get displayName => '$name ($difficultyClass)';
+
+  // Helper method to determine if this run has associated gauge stations
+  // This would typically be checked by querying the GaugeStationService
+  bool get hasAssociatedStations =>
+      true; // Placeholder - to be implemented in service layer
 
   // Create a copy with modified values
   RiverRun copyWith({

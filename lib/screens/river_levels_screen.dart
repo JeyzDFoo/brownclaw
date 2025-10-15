@@ -1,10 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../services/live_water_data_service.dart';
-import '../services/favorite_rivers_service.dart';
+import '../services/river_run_service.dart';
+import '../services/gauge_station_service.dart';
+import '../services/user_favorites_service.dart';
 import '../models/models.dart';
-import 'station_search_screen.dart';
+import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
 
 class RiverLevelsScreen extends StatefulWidget {
@@ -15,8 +17,8 @@ class RiverLevelsScreen extends StatefulWidget {
 }
 
 class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
-  List<Map<String, dynamic>> _rivers = [];
-  List<String> _favoriteStationIds = [];
+  List<RiverRunWithStations> _favoriteRuns = [];
+  List<String> _favoriteRunIds = [];
   String? _error;
   bool _isLoading = false;
 
@@ -27,21 +29,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   void _loadFavorites() {
-    FavoriteRiversService.getFavoriteRiversDetails().listen((favoriteStations) {
+    UserFavoritesService.getUserFavoriteRunIds().listen((favoriteRunIds) {
       setState(() {
-        _favoriteStationIds = favoriteStations
-            .map((station) => station.stationId)
-            .toList();
+        _favoriteRunIds = favoriteRunIds;
       });
-      // Reload river data when favorites change with the original names
-      _loadRiverData(favoriteStations);
+      _loadFavoriteRunsData();
     });
   }
 
-  void _loadRiverData([List<RiverStation>? favoriteStations]) async {
-    if (_favoriteStationIds.isEmpty) {
+  void _loadFavoriteRunsData() async {
+    if (_favoriteRunIds.isEmpty) {
       setState(() {
-        _rivers = [];
+        _favoriteRuns = [];
         _isLoading = false;
       });
       return;
@@ -52,64 +51,32 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     });
 
     try {
-      // Get live data for all favorite stations
-      final liveDataResults = <Map<String, dynamic>>[];
+      final favoriteRunsWithStations = <RiverRunWithStations>[];
 
-      for (final stationId in _favoriteStationIds) {
-        // Find the original favorite station for this station ID
-        final originalStation = favoriteStations?.firstWhere(
-          (station) => station.stationId == stationId,
-          orElse: () => RiverStation(
-            stationId: stationId,
-            name: 'Unknown Station',
-            section: RiverSection.empty(),
-            location: 'Unknown Location',
-            difficulty: 'Unknown',
-            minRunnable: 0.0,
-            maxSafe: 1000.0,
-            flow: 0.0,
-            status: 'Unknown',
-            province: 'Unknown',
-          ),
-        );
-
-        // Get live data for this station
-        final liveData = await LiveWaterDataService.fetchStationData(stationId);
-
-        // Create merged data using original station data
-        final mergedData = <String, dynamic>{
-          'stationId': stationId,
-          'riverName': originalStation?.name ?? 'Unknown River',
-          'section':
-              originalStation?.section.toMap() ?? RiverSection.empty().toMap(),
-          'location': originalStation?.location ?? 'Unknown Location',
-          'difficulty': originalStation?.difficulty ?? 'Unknown',
-          'minRunnable': originalStation?.minRunnable ?? 0.0,
-          'maxSafe': originalStation?.maxSafe ?? 1000.0,
-          // Live data
-          'flowRate': liveData?['flowRate'] ?? 0.0,
-          'waterLevel': liveData?['waterLevel'] ?? 0.0,
-          'temperature': liveData?['temperature'] ?? 0.0,
-          'lastUpdated':
-              liveData?['lastUpdated'] ?? DateTime.now().toIso8601String(),
-          'dataSource': liveData != null ? 'live' : 'unavailable',
-          'isLive': liveData != null,
-          'status': _determineStatus(
-            liveData?['flowRate'] ?? 0.0,
-            originalStation?.minRunnable ?? 0.0,
-            originalStation?.maxSafe ?? 1000.0,
-          ),
-        };
-
-        liveDataResults.add(mergedData);
+      for (final runId in _favoriteRunIds) {
+        final runWithStations = await RiverRunService.getRunWithStations(runId);
+        if (runWithStations != null) {
+          // Update live data for all stations in this run
+          for (final station in runWithStations.stations) {
+            await GaugeStationService.updateStationLiveData(station.stationId);
+          }
+          // Get updated run with fresh live data
+          final updatedRunWithStations =
+              await RiverRunService.getRunWithStations(runId);
+          if (updatedRunWithStations != null) {
+            favoriteRunsWithStations.add(updatedRunWithStations);
+          }
+        }
       }
 
       setState(() {
-        _rivers = liveDataResults;
+        _favoriteRuns = favoriteRunsWithStations;
         _error = null;
       });
     } catch (e) {
-      print('❌ Error loading river data: $e');
+      if (kDebugMode) {
+        print('❌ Error loading favorite runs data: $e');
+      }
       setState(() {
         _error = e.toString();
       });
@@ -120,32 +87,36 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     }
   }
 
-  String _determineStatus(
-    double flowRate,
-    dynamic minRunnable,
-    dynamic maxSafe,
+  // Convert new RiverRunWithStations to legacy format for compatibility
+  Map<String, dynamic> _convertRunToLegacyFormat(
+    RiverRunWithStations runWithStations,
   ) {
-    if (minRunnable == null || maxSafe == null) {
-      return 'Unknown';
-    }
-
-    final min = (minRunnable as num).toDouble();
-    final max = (maxSafe as num).toDouble();
-
-    if (flowRate < min) {
-      return 'Too Low';
-    } else if (flowRate > max) {
-      return 'Too High';
-    } else {
-      return 'Runnable';
-    }
+    final primaryStation = runWithStations.primaryStation;
+    return {
+      'stationId': primaryStation?.stationId ?? runWithStations.run.id,
+      'riverName': runWithStations.run.name,
+      'section': {
+        'name': runWithStations.run.name,
+        'difficulty': runWithStations.run.difficultyClass,
+      },
+      'location': runWithStations.run.putIn ?? 'Unknown Location',
+      'difficulty': runWithStations.run.difficultyClass,
+      'minRunnable': runWithStations.run.minRecommendedFlow ?? 0.0,
+      'maxSafe': runWithStations.run.maxRecommendedFlow ?? 1000.0,
+      'flowRate': runWithStations.currentDischarge ?? 0.0,
+      'waterLevel': runWithStations.currentWaterLevel ?? 0.0,
+      'temperature': primaryStation?.currentTemperature ?? 0.0,
+      'lastUpdated':
+          runWithStations.lastDataUpdate?.toIso8601String() ??
+          DateTime.now().toIso8601String(),
+      'dataSource': runWithStations.hasLiveData ? 'live' : 'unavailable',
+      'isLive': runWithStations.hasLiveData,
+      'status': runWithStations.flowStatus,
+    };
   }
 
   Future<void> _refreshData() async {
-    // Get the current favorite stations to preserve names
-    final favoriteStations =
-        await FavoriteRiversService.getFavoriteRiversDetails().first;
-    _loadRiverData(favoriteStations);
+    _loadFavoriteRunsData();
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -157,21 +128,15 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     }
   }
 
-  Future<void> _toggleFavorite(Map<String, dynamic> river) async {
-    final stationId =
-        river['stationId'] as String? ?? river['id'] as String? ?? '';
-
-    if (stationId.isEmpty) {
-      print('❌ Error: No station ID found in river data: $river');
-      return;
-    }
-
+  Future<void> _toggleFavorite(RiverRunWithStations runWithStations) async {
     try {
-      await FavoriteRiversService.removeFavorite(stationId);
+      await UserFavoritesService.removeFavoriteRun(runWithStations.run.id);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${river['riverName']} removed from favorites'),
+            content: Text(
+              '${runWithStations.run.displayName} removed from favorites',
+            ),
             backgroundColor: Colors.orange,
           ),
         );
@@ -509,12 +474,12 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                   onPressed: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const StationSearchScreen(),
+                        builder: (context) => const RiverRunSearchScreen(),
                       ),
                     );
                   },
                   icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Add Stations'),
+                  label: const Text('Add River Runs'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
                     foregroundColor: Colors.white,
@@ -572,7 +537,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                       ],
                     ),
                   )
-                : _rivers.isEmpty
+                : _favoriteRuns.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -584,7 +549,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No Favorite Stations Yet',
+                          'No Favorite River Runs Yet',
                           style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
@@ -593,7 +558,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          'Add water stations to see live data here',
+                          'Add favorite river runs to see live flow data here',
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[600],
@@ -606,12 +571,12 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                             Navigator.of(context).push(
                               MaterialPageRoute(
                                 builder: (context) =>
-                                    const StationSearchScreen(),
+                                    const RiverRunSearchScreen(),
                               ),
                             );
                           },
                           icon: const Icon(Icons.search),
-                          label: const Text('Find Stations'),
+                          label: const Text('Find River Runs'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.teal,
                             foregroundColor: Colors.white,
@@ -627,21 +592,21 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                 : Column(
                     children: [
                       // Data source info banner
-                      if (_rivers.isNotEmpty)
+                      if (_favoriteRuns.isNotEmpty)
                         Container(
                           width: double.infinity,
                           margin: const EdgeInsets.all(16),
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color:
-                                (_rivers.first['dataSource'] == 'live'
+                                (_favoriteRuns.first.hasLiveData
                                         ? Colors.green
                                         : Colors.orange)
                                     .withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color:
-                                  (_rivers.first['dataSource'] == 'live'
+                                  (_favoriteRuns.first.hasLiveData
                                           ? Colors.green
                                           : Colors.orange)
                                       .withOpacity(0.3),
@@ -650,10 +615,10 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                           child: Row(
                             children: [
                               Icon(
-                                _rivers.first['dataSource'] == 'live'
+                                _favoriteRuns.first.hasLiveData
                                     ? Icons.live_tv
                                     : Icons.info_outline,
-                                color: _rivers.first['dataSource'] == 'live'
+                                color: _favoriteRuns.first.hasLiveData
                                     ? Colors.green[700]
                                     : Colors.orange[700],
                                 size: 20,
@@ -661,11 +626,11 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
-                                  _rivers.first['dataSource'] == 'live'
+                                  _favoriteRuns.first.hasLiveData
                                       ? 'Showing live data from Environment Canada'
                                       : 'Data temporarily unavailable - please try again later',
                                   style: TextStyle(
-                                    color: _rivers.first['dataSource'] == 'live'
+                                    color: _favoriteRuns.first.hasLiveData
                                         ? Colors.green[700]
                                         : Colors.grey[600],
                                     fontSize: 13,
@@ -679,21 +644,29 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                       Expanded(
                         child: ListView.builder(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: _rivers.length,
+                          itemCount: _favoriteRuns.length,
                           itemBuilder: (context, index) {
-                            final river = _rivers[index];
-                            final flowRate = river['flowRate'] as double?;
-                            final dataSource =
-                                river['dataSource'] as String? ?? 'unknown';
+                            final runWithStations = _favoriteRuns[index];
+                            final currentDischarge =
+                                runWithStations.currentDischarge;
+                            final hasLiveData = runWithStations.hasLiveData;
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
                               child: ListTile(
                                 onTap: () {
+                                  if (kDebugMode) {
+                                    print(
+                                      '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
+                                    );
+                                  }
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          RiverDetailScreen(riverData: river),
+                                      builder: (context) => RiverDetailScreen(
+                                        riverData: _convertRunToLegacyFormat(
+                                          runWithStations,
+                                        ),
+                                      ),
                                     ),
                                   );
                                 },
@@ -702,12 +675,13 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                     Icons.add,
                                     color: Colors.blue,
                                   ),
-                                  onPressed: () => _showLogDescentDialog(river),
+                                  onPressed: () => _showLogDescentDialog(
+                                    _convertRunToLegacyFormat(runWithStations),
+                                  ),
                                   tooltip: 'Log Descent',
                                 ),
                                 title: Text(
-                                  river['riverName'] as String? ??
-                                      'Unknown River',
+                                  runWithStations.run.displayName,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -721,32 +695,33 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                     //   style: const TextStyle(fontSize: 13),
                                     // ),
                                     //   Text('Province: ${river['province']}'),
-                                    if (flowRate != null)
+                                    if (currentDischarge != null)
                                       Text(
-                                        'Flow: ${flowRate.toStringAsFixed(2)} m³/s',
+                                        'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s',
                                       ),
                                     //  Text('Status: $status'),
                                     Row(
                                       children: [
                                         Icon(
-                                          dataSource == 'live'
+                                          hasLiveData
                                               ? Icons.live_tv
                                               : Icons.auto_graph,
                                           size: 12,
-                                          color: dataSource == 'live'
+                                          color: hasLiveData
                                               ? Colors.green
                                               : Colors.amber.shade700,
                                         ),
                                         const SizedBox(width: 4),
                                         Expanded(
                                           child: Text(
-                                            river['lastUpdate'] as String? ??
-                                                (dataSource == 'live'
+                                            runWithStations.lastDataUpdate
+                                                    ?.toIso8601String() ??
+                                                (hasLiveData
                                                     ? 'Live data'
-                                                    : 'Simulated data'),
+                                                    : 'No recent data'),
                                             style: TextStyle(
                                               fontSize: 12,
-                                              color: dataSource == 'live'
+                                              color: hasLiveData
                                                   ? Colors.green
                                                   : Colors.amber.shade700,
                                               fontWeight: FontWeight.bold,
@@ -769,7 +744,8 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                         Icons.favorite,
                                         color: Colors.red,
                                       ),
-                                      onPressed: () => _toggleFavorite(river),
+                                      onPressed: () =>
+                                          _toggleFavorite(runWithStations),
                                       tooltip: 'Remove from favorites',
                                     ),
                                   ],
