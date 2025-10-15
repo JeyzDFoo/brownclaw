@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../services/live_water_data_service.dart';
 import '../services/favorite_rivers_service.dart';
 import 'station_search_screen.dart';
+import 'river_detail_screen.dart';
 
 class RiverLevelsScreen extends StatefulWidget {
   const RiverLevelsScreen({super.key});
@@ -393,6 +394,14 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
                               child: ListTile(
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          RiverDetailScreen(riverData: river),
+                                    ),
+                                  );
+                                },
                                 leading: CircleAvatar(
                                   backgroundColor: statusColor.withOpacity(0.1),
                                   child: Icon(statusIcon, color: statusColor),
@@ -407,17 +416,17 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      river['stationName'] as String? ??
-                                          'Unknown Station',
-                                      style: const TextStyle(fontSize: 13),
-                                    ),
-                                    Text('Province: ${river['province']}'),
+                                    // Text(
+                                    //   river['stationName'] as String? ??
+                                    //       'Unknown Station',
+                                    //   style: const TextStyle(fontSize: 13),
+                                    // ),
+                                    //   Text('Province: ${river['province']}'),
                                     if (flowRate != null)
                                       Text(
                                         'Flow: ${flowRate.toStringAsFixed(2)} m³/s',
                                       ),
-                                    Text('Status: $status'),
+                                    //  Text('Status: $status'),
                                     Row(
                                       children: [
                                         Icon(
