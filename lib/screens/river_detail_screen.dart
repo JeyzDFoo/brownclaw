@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
 import '../services/live_water_data_service.dart';
 
 class RiverDetailScreen extends StatefulWidget {
@@ -18,6 +20,19 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingChart = true;
   String? _error;
   String? _chartError;
+  int _selectedDays = 7; // Default to 7 days
+
+  // Define the available time ranges
+  final List<int> _timeRanges = [
+    7,
+    14,
+    30,
+    90,
+    180,
+    365,
+    1825,
+  ]; // 7 days to 5 years
+  final List<String> _rangeLabels = ['7D', '2W', '1M', '3M', '6M', '1Y', '5Y'];
 
   @override
   void initState() {
@@ -90,66 +105,120 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
-    print('🔍 Fetching historical data for station: $stationId (Web App)');
+    print('🔍 Fetching REAL historical data for station: $stationId');
 
     try {
-      // For web apps, direct API calls to government endpoints often fail due to CORS
-      // Let's try using the same CSV data source that works for live data
-      // and simulate historical data by fetching current data with slight variations
-
-      final now = DateTime.now();
       final spots = <FlSpot>[];
+      final selectedDays = _selectedDays.toInt();
+      final endDate = DateTime.now();
+      final startDate = endDate.subtract(Duration(days: selectedDays));
 
-      // Try to get current flow rate first
-      final currentData = await LiveWaterDataService.fetchStationData(
-        stationId,
-      );
-      final baseFlow = currentData?['flowRate'] as double? ?? 20.0;
+      // Format dates for Environment Canada API (YYYY-MM-DD)
+      final startDateStr =
+          '${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
+      final endDateStr =
+          '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
 
-      print('📊 Base flow for station $stationId: $baseFlow cms');
+      print('📅 Fetching historical data from $startDateStr to $endDateStr');
 
-      // Generate realistic historical trend based on current flow
-      for (int i = 6; i >= 0; i--) {
-        final date = now.subtract(Duration(days: i));
-        final timestamp = date.millisecondsSinceEpoch.toDouble();
+      // Determine province from station ID (same logic as live data service)
+      String province = 'BC'; // Default to BC
+      if (stationId.startsWith('02')) {
+        province = 'ON'; // Ontario/Quebec
+      } else if (stationId.startsWith('05')) {
+        province = 'AB'; // Alberta
+      } else if (stationId.startsWith('08') || stationId.startsWith('09')) {
+        province = 'BC'; // British Columbia
+      }
 
-        // Create realistic variations around the current flow
-        final dayFactor = 1.0 + (0.1 * (i % 3 - 1)); // ±10% daily variation
-        final trendFactor =
-            1.0 + (0.05 * (6 - i)); // Slight upward trend to current
-        final randomFactor =
-            0.95 +
-            (0.1 * ((timestamp.toInt() + i) % 100) / 100); // Slight randomness
+      // Environment Canada Real-Time Hydrometric Data API
+      // This endpoint provides historical data in CSV format
+      final csvUrl =
+          'https://dd.weather.gc.ca/hydrometric/csv/$province/hourly/${province}_${stationId}_hourly_hydrometric.csv';
 
-        final historicalFlow =
-            baseFlow * dayFactor * trendFactor * randomFactor;
-        spots.add(
-          FlSpot(
-            timestamp,
-            historicalFlow.clamp(baseFlow * 0.5, baseFlow * 1.5),
-          ),
+      // Use CORS proxy for web platform (same as live data service)
+      final url = kIsWeb ? 'https://corsproxy.io/?$csvUrl' : csvUrl;
+
+      print('🌐 Attempting to fetch from: $url');
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: kIsWeb ? {'X-Requested-With': 'XMLHttpRequest'} : null,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        print('❌ HTTP Error ${response.statusCode} for station $stationId');
+        print('🔗 URL attempted: $url');
+        throw Exception(
+          'Failed to fetch historical data: ${response.statusCode} - Station file may not exist',
         );
       }
 
+      // Parse CSV data
+      final lines = response.body.split('\n');
+      print('📄 Received ${lines.length} lines of CSV data');
+
+      // Skip header and process data lines
+      for (int i = 1; i < lines.length; i++) {
+        final line = lines[i].trim();
+        if (line.isEmpty) continue;
+
+        final columns = line.split(',');
+        if (columns.length < 5) continue;
+
+        try {
+          // CSV format: ID,Date,Water Level,Grade,Symbol,QA/QC,Discharge,Grade,Symbol,QA/QC
+          if (columns.length < 7) continue;
+
+          final dateTimeStr =
+              columns[1]; // ISO format: 2025-10-13T00:00:00-08:00
+          final dischargeStr = columns[6]; // Discharge column
+
+          if (dischargeStr.isEmpty ||
+              dischargeStr == 'null' ||
+              dischargeStr.trim().isEmpty)
+            continue;
+
+          // Parse ISO 8601 date format
+          final dataDate = DateTime.parse(dateTimeStr);
+
+          // Filter data within our date range
+          if (dataDate.isBefore(startDate) || dataDate.isAfter(endDate))
+            continue;
+
+          final discharge = double.parse(dischargeStr.trim());
+          final timestamp = dataDate.millisecondsSinceEpoch.toDouble();
+
+          spots.add(FlSpot(timestamp, discharge));
+        } catch (e) {
+          // Skip invalid lines
+          continue;
+        }
+      }
+
+      // Sort by timestamp
+      spots.sort((a, b) => a.x.compareTo(b.x));
+
       print(
-        '✅ Generated historical trend with ${spots.length} points based on current flow',
+        '✅ Successfully parsed ${spots.length} real historical data points',
       );
-      return spots;
-    } catch (e) {
-      print('💥 Error generating historical data: $e');
 
-      // If even the live data service fails, create a basic trend
-      final now = DateTime.now();
-      final spots = <FlSpot>[];
-
-      for (int i = 6; i >= 0; i--) {
-        final date = now.subtract(Duration(days: i));
-        final timestamp = date.millisecondsSinceEpoch.toDouble();
-        final flow = 15.0 + (5.0 * (i % 3)); // Simple pattern
-        spots.add(FlSpot(timestamp, flow));
+      if (spots.isNotEmpty) {
+        print(
+          '📊 Data range: ${spots.first.y.toStringAsFixed(1)} to ${spots.last.y.toStringAsFixed(1)} cms',
+        );
+        print(
+          '📅 Time range: ${DateTime.fromMillisecondsSinceEpoch(spots.first.x.toInt())} to ${DateTime.fromMillisecondsSinceEpoch(spots.last.x.toInt())}',
+        );
       }
 
       return spots;
+    } catch (e) {
+      print('💥 Error fetching real historical data: $e');
+      // No fallback - rethrow the error to show proper error message
+      rethrow;
     }
   }
 
@@ -435,10 +504,47 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Discharge History (7 Days)',
+                        'Discharge History (${_rangeLabels[_timeRanges.indexOf(_selectedDays)]})',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
+                      ),
+                      const SizedBox(height: 16),
+
+                      // Time range slider
+                      Row(
+                        children: [
+                          Text(
+                            '7D',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          Expanded(
+                            child: Slider(
+                              value: _timeRanges
+                                  .indexOf(_selectedDays)
+                                  .toDouble(),
+                              min: 0,
+                              max: (_timeRanges.length - 1).toDouble(),
+                              divisions: _timeRanges.length - 1,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedDays = _timeRanges[value.round()];
+                                });
+                                _loadHistoricalData();
+                              },
+                            ),
+                          ),
+                          Text(
+                            '5Y',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -462,12 +568,12 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                'Historical data unavailable',
+                                'Real historical data unavailable',
                                 style: TextStyle(color: Colors.red[600]),
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                'Showing estimated trend based on current flow',
+                                'Unable to fetch government historical data for this station',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 12,
@@ -630,7 +736,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                                     color: Colors.teal.withOpacity(0.1),
                                   ),
                                   dotData: FlDotData(
-                                    show: true,
+                                    show: false,
                                     getDotPainter:
                                         (spot, percent, barData, index) {
                                           return FlDotCirclePainter(
