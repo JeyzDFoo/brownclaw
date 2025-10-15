@@ -20,19 +20,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingChart = true;
   String? _error;
   String? _chartError;
-  int _selectedDays = 7; // Default to 7 days
-
-  // Define the available time ranges
-  final List<int> _timeRanges = [
-    7,
-    14,
-    30,
-    90,
-    180,
-    365,
-    1825,
-  ]; // 7 days to 5 years
-  final List<String> _rangeLabels = ['7D', '2W', '1M', '3M', '6M', '1Y', '5Y'];
 
   @override
   void initState() {
@@ -105,21 +92,12 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
-    print('🔍 Fetching REAL historical data for station: $stationId');
+    print('🔍 Fetching real-time data for station: $stationId');
 
     try {
       final spots = <FlSpot>[];
-      final selectedDays = _selectedDays.toInt();
-      final endDate = DateTime.now();
-      final startDate = endDate.subtract(Duration(days: selectedDays));
 
-      // Format dates for Environment Canada API (YYYY-MM-DD)
-      final startDateStr =
-          '${startDate.year}-${startDate.month.toString().padLeft(2, '0')}-${startDate.day.toString().padLeft(2, '0')}';
-      final endDateStr =
-          '${endDate.year}-${endDate.month.toString().padLeft(2, '0')}-${endDate.day.toString().padLeft(2, '0')}';
-
-      print('📅 Fetching historical data from $startDateStr to $endDateStr');
+      print('📅 Fetching all available real-time data');
 
       // Determine province from station ID (same logic as live data service)
       String province = 'BC'; // Default to BC
@@ -131,14 +109,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         province = 'BC'; // British Columbia
       }
 
-      // Environment Canada Real-Time Hydrometric Data API
-      // This endpoint provides historical data in CSV format
+      // Environment Canada Real-time Data API
+      // Use hourly data for detailed recent history
       final csvUrl =
           'https://dd.weather.gc.ca/hydrometric/csv/$province/hourly/${province}_${stationId}_hourly_hydrometric.csv';
 
       // Use CORS proxy for web platform (same as live data service)
       final url = kIsWeb ? 'https://corsproxy.io/?$csvUrl' : csvUrl;
 
+      print('🌐 Fetching hourly real-time data');
       print('🌐 Attempting to fetch from: $url');
 
       final response = await http
@@ -183,10 +162,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
           // Parse ISO 8601 date format
           final dataDate = DateTime.parse(dateTimeStr);
-
-          // Filter data within our date range
-          if (dataDate.isBefore(startDate) || dataDate.isAfter(endDate))
-            continue;
 
           final discharge = double.parse(dischargeStr.trim());
           final timestamp = dataDate.millisecondsSinceEpoch.toDouble();
@@ -504,47 +479,10 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Discharge History (${_rangeLabels[_timeRanges.indexOf(_selectedDays)]})',
+                        'Real-time Discharge History',
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-
-                      // Time range slider
-                      Row(
-                        children: [
-                          Text(
-                            '7D',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                          Expanded(
-                            child: Slider(
-                              value: _timeRanges
-                                  .indexOf(_selectedDays)
-                                  .toDouble(),
-                              min: 0,
-                              max: (_timeRanges.length - 1).toDouble(),
-                              divisions: _timeRanges.length - 1,
-                              onChanged: (value) {
-                                setState(() {
-                                  _selectedDays = _timeRanges[value.round()];
-                                });
-                                _loadHistoricalData();
-                              },
-                            ),
-                          ),
-                          Text(
-                            '5Y',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                        ],
                       ),
                       const SizedBox(height: 16),
 
@@ -791,7 +729,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                'Discharge in cms over the last 7 days',
+                                'Discharge in cms',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 12,
