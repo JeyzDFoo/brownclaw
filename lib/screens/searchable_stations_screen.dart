@@ -37,22 +37,41 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    // Cancel any active queries when navigating away
+    _stationService.cancelActiveQueries();
     super.dispose();
   }
 
   Future<void> _loadInitialData() async {
+    // Prevent multiple concurrent loads
+    if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Load available provinces
+      // Load available provinces first
       final provinces = await _stationService.getAvailableProvinces();
-      _availableProvinces = ['All Provinces', ...provinces];
+      if (mounted) {
+        _availableProvinces = ['All Provinces', ...provinces];
+      }
 
-      // Load initial stations (whitewater + popular ones)
-      final whitewater = await _stationService.getWhitewaterStations();
-      final popular = await _stationService.getAllStations(limit: 50);
+      // Load initial stations with better error handling
+      List<StationModel> whitewater = [];
+      List<StationModel> popular = [];
+
+      try {
+        whitewater = await _stationService.getWhitewaterStations();
+      } catch (e) {
+        print('Warning: Failed to load whitewater stations: $e');
+      }
+
+      try {
+        popular = await _stationService.getAllStations(limit: 50);
+      } catch (e) {
+        print('Warning: Failed to load popular stations: $e');
+      }
 
       // Combine and deduplicate
       final stationMap = <String, StationModel>{};
@@ -62,22 +81,24 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
 
       final stations = stationMap.values.toList();
 
-      setState(() {
-        _stations = stations;
-        _filteredStations = stations;
-        _isLoading = false;
-      });
-
-      // Load river data for initial stations
-      _loadRiverData();
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
       if (mounted) {
+        setState(() {
+          _stations = stations;
+          _filteredStations = stations;
+          _isLoading = false;
+        });
+
+        // Load river data for initial stations
+        _loadRiverData();
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error loading stations: $e'),
+            content: Text('Error loading stations: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );

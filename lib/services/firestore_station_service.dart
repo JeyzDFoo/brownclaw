@@ -155,17 +155,38 @@ class FirestoreStationService {
   /// Get all stations (AB and BC only, with optional limit)
   Future<List<StationModel>> getAllStations({int? limit}) async {
     try {
-      // Use Future.wait to fetch both provinces concurrently but safely
-      final results = await Future.wait([
-        getStationsByProvince('AB'),
-        getStationsByProvince('BC'),
-      ]);
+      if (kDebugMode) {
+        print('Getting all stations for AB and BC provinces');
+      }
 
-      final albertaStations = results[0];
-      final bcStations = results[1];
+      // Fetch provinces individually with error handling for each
+      List<StationModel> albertaStations = [];
+      List<StationModel> bcStations = [];
+
+      try {
+        albertaStations = await getStationsByProvince('AB');
+      } catch (e) {
+        if (kDebugMode) {
+          print('Failed to fetch Alberta stations: $e');
+        }
+      }
+
+      try {
+        bcStations = await getStationsByProvince('BC');
+      } catch (e) {
+        if (kDebugMode) {
+          print('Failed to fetch BC stations: $e');
+        }
+      }
 
       // Combine stations
       final allStations = [...albertaStations, ...bcStations];
+
+      if (kDebugMode) {
+        print(
+          'Combined ${allStations.length} stations (AB: ${albertaStations.length}, BC: ${bcStations.length})',
+        );
+      }
 
       // Apply limit if specified
       if (limit != null && allStations.length > limit) {
@@ -188,6 +209,16 @@ class FirestoreStationService {
     _activeQueries.clear();
     if (kDebugMode) {
       print('Station cache cleared');
+    }
+  }
+
+  /// Cancel active queries (useful when navigating away quickly)
+  void cancelActiveQueries() {
+    if (_activeQueries.isNotEmpty) {
+      if (kDebugMode) {
+        print('Cancelling ${_activeQueries.length} active queries');
+      }
+      _activeQueries.clear();
     }
   }
 
@@ -216,7 +247,15 @@ class FirestoreStationService {
         if (kDebugMode) {
           print('Waiting for active query for province: $province');
         }
-        return await _activeQueries[cacheKey]!;
+        try {
+          return await _activeQueries[cacheKey]!;
+        } catch (e) {
+          if (kDebugMode) {
+            print('Active query failed for province $province: $e');
+          }
+          // Remove the failed query and continue to fallback logic
+          _activeQueries.remove(cacheKey);
+        }
       }
 
       // Check cache first
@@ -240,29 +279,44 @@ class FirestoreStationService {
       final queryFuture = _fetchProvinceData(province, cacheKey);
       _activeQueries[cacheKey] = queryFuture;
 
-      final result = await queryFuture;
+      try {
+        final result = await queryFuture;
+        // Clean up the active query on success
+        _activeQueries.remove(cacheKey);
+        return result;
+      } catch (e) {
+        // Clean up the active query on error
+        _activeQueries.remove(cacheKey);
 
-      // Clean up the active query
-      _activeQueries.remove(cacheKey);
+        if (kDebugMode) {
+          print('Query failed for province $province: $e');
+        }
 
-      return result;
+        // Fallback to cached data if available
+        throw e; // Let the outer catch handle this
+      }
     } catch (e) {
-      // Clean up the active query on error
-      _activeQueries.remove(cacheKey);
-
       if (kDebugMode) {
         print('Error getting stations by province $province: $e');
-        print('Stack trace: ${StackTrace.current}');
+        print('Error type: ${e.runtimeType}');
       }
 
       // Return cached data if available, even if expired
       if (_provinceCache.containsKey(cacheKey)) {
         if (kDebugMode) {
-          print('Returning stale cached data due to error');
+          print(
+            'Returning stale cached data due to error for province: $province',
+          );
         }
         return _provinceCache[cacheKey]!;
       }
 
+      // If no cached data available, return empty list instead of throwing
+      if (kDebugMode) {
+        print(
+          'No cached data available for province: $province, returning empty list',
+        );
+      }
       return [];
     }
   }
@@ -271,35 +325,60 @@ class FirestoreStationService {
     String province,
     String cacheKey,
   ) async {
-    final QuerySnapshot snapshot = await _firestore
-        .collection(collectionName)
-        .where('province', isEqualTo: province.toUpperCase())
-        .get()
-        .timeout(
-          const Duration(seconds: 30),
-          onTimeout: () {
-            if (kDebugMode) {
-              print('Query timeout for province: $province');
+    try {
+      if (kDebugMode) {
+        print('Starting Firestore query for province: $province');
+      }
+
+      final QuerySnapshot snapshot = await _firestore
+          .collection(collectionName)
+          .where('province', isEqualTo: province.toUpperCase())
+          .get()
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              if (kDebugMode) {
+                print('Query timeout for province: $province');
+              }
+              throw Exception('Query timeout for province: $province');
+            },
+          );
+
+      final stations = snapshot.docs
+          .map((doc) {
+            try {
+              return StationModel.fromFirestore(doc);
+            } catch (e) {
+              if (kDebugMode) {
+                print('Error parsing document ${doc.id}: $e');
+              }
+              return null;
             }
-            throw Exception('Query timeout for province: $province');
-          },
+          })
+          .where((station) => station != null)
+          .cast<StationModel>()
+          .toList();
+
+      // Update cache only if query was successful
+      _provinceCache[cacheKey] = stations;
+      _cacheTimestamps[cacheKey] = DateTime.now();
+
+      if (kDebugMode) {
+        print(
+          'Successfully fetched ${stations.length} stations for province: $province',
         );
+      }
 
-    final stations = snapshot.docs
-        .map((doc) => StationModel.fromFirestore(doc))
-        .toList();
+      return stations;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in _fetchProvinceData for province $province: $e');
+        print('Error type: ${e.runtimeType}');
+      }
 
-    // Update cache
-    _provinceCache[cacheKey] = stations;
-    _cacheTimestamps[cacheKey] = DateTime.now();
-
-    if (kDebugMode) {
-      print(
-        'Successfully fetched ${stations.length} stations for province: $province',
-      );
+      // Don't update cache on error, let the calling method handle fallback
+      rethrow;
     }
-
-    return stations;
   }
 
   /// Get whitewater stations only

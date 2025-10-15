@@ -32,20 +32,28 @@ class _StationSearchScreenState extends State<StationSearchScreen> {
   @override
   void dispose() {
     _searchController.dispose();
+    // Cancel any active queries when navigating away
+    _stationService.cancelActiveQueries();
     super.dispose();
   }
 
   void _loadInitialData() async {
+    // Prevent multiple concurrent loads
+    if (_isLoading) return;
+
     setState(() {
       _isLoading = true;
     });
 
     try {
-      // Load stations from Firestore
+      // Load stations from Firestore with better error handling
       final stations = await _stationService.getAllStations();
       if (mounted) {
-        _stations = stations;
-        _filteredStations = stations;
+        setState(() {
+          _stations = stations;
+          _filteredStations = stations;
+          _isLoading = false;
+        });
       }
     } catch (e) {
       print('❌ Error loading initial data: $e');

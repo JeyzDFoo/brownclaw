@@ -19,9 +19,17 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Brown Claw - Whitewater Logbook',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
         useMaterial3: true,
       ),
+      builder: (context, child) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: child!,
+          ),
+        );
+      },
       home: const HomePage(),
     );
   }

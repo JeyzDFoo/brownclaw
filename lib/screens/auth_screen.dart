@@ -21,13 +21,15 @@ class _AuthScreenState extends State<AuthScreen> {
       final userCredential = await GoogleSignInService.signInWithGoogle();
 
       if (userCredential == null && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sign in cancelled')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Sign in cancelled')));
       } else if (userCredential != null && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Welcome ${userCredential.user?.displayName ?? userCredential.user?.email ?? 'Kayaker'}!'),
+            content: Text(
+              'Welcome ${userCredential.user?.displayName ?? userCredential.user?.email ?? 'Kayaker'}!',
+            ),
             backgroundColor: Colors.green,
             duration: const Duration(seconds: 2),
           ),
@@ -58,10 +60,7 @@ class _AuthScreenState extends State<AuthScreen> {
         }
 
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text(errorMessage), backgroundColor: Colors.red),
         );
       }
     } catch (e) {
@@ -85,10 +84,10 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('BrownClaw - Sign In'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
+      // appBar: AppBar(
+      //   title: const Text('BrownClaw - Sign In'),
+      //   backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+      // ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -100,14 +99,10 @@ class _AuthScreenState extends State<AuthScreen> {
                 color: Colors.blue.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(
-                Icons.kayaking,
-                size: 100,
-                color: Colors.blue,
-              ),
+              child: const Icon(Icons.kayaking, size: 100, color: Colors.blue),
             ),
             const SizedBox(height: 40),
-            
+
             const Text(
               'BrownClaw',
               style: TextStyle(
@@ -117,7 +112,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            
+
             Text(
               'Whitewater Kayaking LogBook',
               style: TextStyle(
@@ -127,29 +122,28 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            
+
             Text(
               'Track your river descents, difficulty classes,\nand kayaking adventures',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 60),
-            
+
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _signInWithGoogle,
-                icon: _isLoading 
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.login, color: Colors.red),
-                label: Text(_isLoading ? 'Signing in...' : 'Continue with Google'),
+                icon: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.login, color: Colors.red),
+                label: Text(
+                  _isLoading ? 'Signing in...' : 'Continue with Google',
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.white,
@@ -160,14 +154,11 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            
+
             Text(
               'Sign in with your Google account to start\nlogging your whitewater adventures',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[500],
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
