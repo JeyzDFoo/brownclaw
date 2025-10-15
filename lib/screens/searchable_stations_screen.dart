@@ -446,7 +446,9 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('${station.id} • ${station.province}'),
+                                Text(
+                                  '${station.id} • ${station.province == 'null' ? 'Unknown Province' : station.province}',
+                                ),
                                 if (station.isWhitewater &&
                                     station.section != null)
                                   Text(

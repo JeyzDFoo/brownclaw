@@ -42,7 +42,11 @@ class StationModel {
     return StationModel(
       id: data['id'] ?? doc.id,
       name: data['name'] ?? 'Unknown Station',
-      province: data['province'] ?? 'Unknown',
+      province:
+          (data['province'] == null ||
+              data['province'].toString().toLowerCase() == 'null')
+          ? 'Unknown'
+          : data['province'],
       latitude: data['latitude']?.toDouble(),
       longitude: data['longitude']?.toDouble(),
       drainageArea: data['drainage_area']?.toDouble(),

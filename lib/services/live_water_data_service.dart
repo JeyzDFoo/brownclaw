@@ -5,42 +5,137 @@ import 'package:http/http.dart' as http;
 import 'water_station_service.dart';
 
 class LiveWaterDataService {
-  // New Government of Canada API (found Oct 2025)
-  static const String baseUrl =
-      'https://api.weather.gc.ca/collections/hydrometric-realtime/items';
+  // Government of Canada Data Mart (reliable CSV source)
+  static const String csvBaseUrl = 'https://dd.weather.gc.ca/hydrometric/csv';
 
-  // Legacy CSV endpoint (for fallback)
-  static const String legacyUrl =
-      'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline';
+  // Government of Canada API (has stale data issues)
+  static const String jsonBaseUrl =
+      'https://api.weather.gc.ca/collections/hydrometric-realtime/items';
 
   /// Fetch live data for a specific station
   static Future<Map<String, dynamic>?> fetchStationData(
     String stationId,
   ) async {
-    // Try new Government of Canada JSON API first
+    print('🔥 FETCHSTATIONDATA CALLED FOR: $stationId');
+    print('🔥 NEW CODE IS RUNNING!');
+
+    // Try CSV endpoint first (more reliable)
+    print('🔥 Trying CSV first...');
+    final csvData = await _fetchFromCsvDataMart(stationId);
+    if (csvData != null) {
+      print('🔥 CSV SUCCESS: ${csvData['flowRate']} m³/s');
+      return csvData;
+    }
+
+    // Fallback to JSON API
+    print('🔥 CSV failed, trying JSON...');
     final jsonData = await _fetchFromJsonApi(stationId);
-    if (jsonData != null) return jsonData;
+    if (jsonData != null) {
+      print('🔥 JSON FALLBACK: ${jsonData['flowRate']} m³/s');
+      return jsonData;
+    }
 
-    // Fallback to legacy CSV API (temporarily disabled)
-    // final csvData = await _fetchFromCsvApi(stationId);
-    // if (csvData != null) return csvData;
+    print('🔥 NO DATA FOUND');
+    return null;
+  }
 
-    // Special handling for known stations
-    if (stationId == '08NA011') {
-      return await _fetchSpecialStation(stationId);
+  /// Fetch data from CSV Data Mart (most reliable)
+  static Future<Map<String, dynamic>?> _fetchFromCsvDataMart(
+    String stationId,
+  ) async {
+    try {
+      print('🔥 _fetchFromCsvDataMart called for station: $stationId');
+
+      // Determine province from station ID (first 2 digits)
+      String province = 'BC'; // Default to BC
+      if (stationId.startsWith('02')) {
+        province = 'ON'; // Ontario/Quebec
+      } else if (stationId.startsWith('05')) {
+        province = 'AB'; // Alberta
+      } else if (stationId.startsWith('08') || stationId.startsWith('09')) {
+        province = 'BC'; // British Columbia
+      }
+
+      final csvUrl =
+          '$csvBaseUrl/$province/hourly/${province}_${stationId}_hourly_hydrometric.csv';
+
+      // Use CORS proxy for web platform
+      final url = kIsWeb ? 'https://corsproxy.io/?$csvUrl' : csvUrl;
+
+      print('🔥 Fetching CSV from: $url');
+
+      if (kDebugMode) {
+        print('📊 Fetching CSV data for station $stationId from: $url');
+      }
+
+      final response = await http
+          .get(
+            Uri.parse(url),
+            headers: kIsWeb ? {'X-Requested-With': 'XMLHttpRequest'} : null,
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final lines = response.body.split('\n');
+
+        // Find the latest data (last non-empty line)
+        for (int i = lines.length - 1; i >= 0; i--) {
+          final line = lines[i].trim();
+          if (line.isNotEmpty && !line.startsWith('ID')) {
+            final parts = line.split(',');
+            if (parts.length >= 7) {
+              final timestamp = parts[1];
+              final waterLevel = parts[2];
+              final discharge = parts[6];
+
+              if (discharge.isNotEmpty &&
+                  discharge.toLowerCase() != 'no data') {
+                final flowRate = double.tryParse(discharge);
+                final level = double.tryParse(waterLevel);
+
+                print(
+                  '🔥 RAW CSV DISCHARGE VALUE: "$discharge" for station $stationId',
+                );
+                print('🔥 PARSED FLOW RATE: $flowRate m³/s');
+
+                if (flowRate != null) {
+                  if (kDebugMode) {
+                    print('✅ CSV data: ${flowRate}m³/s at $timestamp');
+                  }
+
+                  print(
+                    '🔥 RETURNING CSV DATA: flowRate=$flowRate, timestamp=$timestamp',
+                  );
+                  return {
+                    'flowRate': flowRate,
+                    'level': level,
+                    'stationName': 'Station $stationId',
+                    'status': 'live',
+                    'lastUpdate': timestamp,
+                  };
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ CSV fetch error for $stationId: $e');
+      }
     }
 
     return null;
   }
 
-  /// Fetch data from new JSON API
+  /// Fetch data from JSON API (fallback)
   static Future<Map<String, dynamic>?> _fetchFromJsonApi(
     String stationId,
   ) async {
     try {
-      final url = '$baseUrl?STATION_NUMBER=$stationId&limit=1&f=json';
+      final url = '$jsonBaseUrl?STATION_NUMBER=$stationId&limit=1&f=json';
       if (kDebugMode) {
-        print('🌊 Fetching live data for station $stationId');
+        print('🔄 Trying JSON API for station $stationId');
         print('📡 URL: $url');
       }
 
@@ -63,6 +158,9 @@ class LiveWaterDataService {
         final flowData = _parseJsonResponse(jsonData);
 
         if (flowData != null) {
+          print(
+            '🔥 RETURNING JSON DATA: flowRate=${flowData['flowRate']} for station $stationId',
+          );
           if (kDebugMode) {
             print(
               '✅ Live data retrieved: ${flowData['flowRate']}m³/s for $stationId',
@@ -97,72 +195,6 @@ class LiveWaterDataService {
     return null;
   }
 
-  /// Special handling for stations we know should be online
-  static Future<Map<String, dynamic>?> _fetchSpecialStation(
-    String stationId,
-  ) async {
-    // Try the working Government of Canada API
-    final formats = [
-      'https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER=$stationId&limit=1&f=json',
-      // Legacy formats for fallback (these will likely fail)
-      '$legacyUrl?stations[]=$stationId&parameters[]=47',
-    ];
-
-    for (int i = 0; i < formats.length; i++) {
-      try {
-        if (kDebugMode) {
-          print('🧪 Trying format ${i + 1} for $stationId: ${formats[i]}');
-        }
-
-        final response = await http
-            .get(Uri.parse(formats[i]))
-            .timeout(const Duration(seconds: 10));
-
-        if (response.statusCode == 200 && response.body.isNotEmpty) {
-          // Try JSON parsing first (for new API)
-          if (formats[i].contains('api.weather.gc.ca')) {
-            final flowData = _parseJsonResponse(response.body);
-            if (flowData != null && flowData['flowRate'] != null) {
-              if (kDebugMode) {
-                print(
-                  '✅ Success with JSON format ${i + 1}: ${flowData['flowRate']}m³/s',
-                );
-              }
-              return {
-                'flowRate': flowData['flowRate'],
-                'level': flowData['level'],
-                'stationName': flowData['stationName'],
-                'status': 'live',
-                'lastUpdate': DateTime.now().toIso8601String(),
-              };
-            }
-          } else {
-            // Try CSV parsing (for legacy API)
-            final flowRate = _parseLatestFlow(response.body);
-            if (flowRate != null) {
-              if (kDebugMode) {
-                print('✅ Success with CSV format ${i + 1}: ${flowRate}m³/s');
-              }
-              return {
-                'flowRate': flowRate,
-                'status': 'live',
-                'lastUpdate': DateTime.now().toIso8601String(),
-              };
-            }
-          }
-        } else if (kDebugMode) {
-          print('❌ Format ${i + 1} failed: HTTP ${response.statusCode}');
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print('❌ Format ${i + 1} error: $e');
-        }
-      }
-    }
-
-    return null;
-  }
-
   /// Fetch live data for multiple stations
   static Future<Map<String, Map<String, dynamic>>> fetchMultipleStations(
     List<String> stationIds,
@@ -184,45 +216,6 @@ class LiveWaterDataService {
 
     await Future.wait(futures);
     return results;
-  }
-
-  /// Parse the latest flow reading from CSV data
-  static double? _parseLatestFlow(String csvData) {
-    try {
-      final lines = csvData.split('\n');
-      if (kDebugMode) {
-        print('📄 CSV data has ${lines.length} lines');
-      }
-
-      // Skip header and find the most recent data point
-      for (int i = lines.length - 1; i >= 1; i--) {
-        final line = lines[i].trim();
-        if (line.isNotEmpty) {
-          final parts = line.split(',');
-          if (parts.length >= 3) {
-            final flowStr = parts[2].trim().replaceAll('"', '');
-            if (flowStr.isNotEmpty &&
-                flowStr.toLowerCase() != 'no data' &&
-                flowStr != '') {
-              final flowRate = double.tryParse(flowStr);
-              if (flowRate != null && flowRate >= 0) {
-                if (kDebugMode) {
-                  print('✅ Found flow rate: ${flowRate}m³/s');
-                }
-                return flowRate;
-              }
-            }
-          }
-        }
-      }
-
-      if (kDebugMode) {
-        print('⚠️ No valid flow data found in CSV');
-      }
-    } catch (e) {
-      print('❌ Error parsing CSV data: $e');
-    }
-    return null;
   }
 
   /// Parse complete station data from JSON API response

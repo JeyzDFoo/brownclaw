@@ -31,6 +31,10 @@ class FavoriteRiversService {
     if (user == null) return;
 
     try {
+      // Debug: Print the riverData to see what's being passed
+      print('🐛 Adding favorite - stationId: $stationId');
+      print('🐛 riverData: $riverData');
+
       // Add to user's favorites list
       await _firestore.collection('user_favorites').doc(user.uid).set({
         'rivers': FieldValue.arrayUnion([stationId]),
@@ -38,21 +42,44 @@ class FavoriteRiversService {
       }, SetOptions(merge: true));
 
       // Also store the river details for easy access
+      final stationData = {
+        'stationId': stationId,
+        'name': riverData['name'] ?? 'Unknown Station',
+        'section':
+            riverData['section'] ??
+            _extractLocationFromStationId(stationId) ??
+            (riverData['province'] != null && riverData['province'] != 'Unknown'
+                ? riverData['province']
+                : null) ??
+            'Unknown Section',
+        'location':
+            riverData['location'] ??
+            _extractLocationFromStationId(stationId) ??
+            (riverData['province'] != null && riverData['province'] != 'Unknown'
+                ? riverData['province']
+                : null) ??
+            'Unknown Location',
+        'difficulty': riverData['difficulty'] ?? 'Unknown',
+        'minRunnable': riverData['minRunnable'] ?? 0.0,
+        'maxSafe': riverData['maxSafe'] ?? 1000.0,
+        'flow': riverData['flow'] ?? 0.0,
+        'status': riverData['status'] ?? 'Unknown',
+        'province':
+            riverData['province'] ??
+            _extractLocationFromStationId(stationId) ??
+            'Unknown',
+        'addedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Debug: Print the final data being stored
+      print('🐛 Final stationData being stored: $stationData');
+
       await _firestore
           .collection('user_favorites')
           .doc(user.uid)
           .collection('river_details')
           .doc(stationId)
-          .set({
-            'stationId': stationId,
-            'name': riverData['name'],
-            'section': riverData['section'],
-            'location': riverData['location'],
-            'difficulty': riverData['difficulty'],
-            'minRunnable': riverData['minRunnable'],
-            'maxSafe': riverData['maxSafe'],
-            'addedAt': FieldValue.serverTimestamp(),
-          });
+          .set(stationData);
     } catch (e) {
       print('❌ Error adding favorite: $e');
       rethrow;
@@ -97,7 +124,7 @@ class FavoriteRiversService {
 
       if (!doc.exists) return false;
 
-      final data = doc.data() as Map<String, dynamic>?;
+      final data = doc.data();
       final favorites = data?['rivers'] as List?;
       return favorites?.contains(stationId) ?? false;
     } catch (e) {
@@ -124,5 +151,33 @@ class FavoriteRiversService {
             return data;
           }).toList();
         });
+  }
+
+  // Helper method to extract location info from station ID
+  static String? _extractLocationFromStationId(String stationId) {
+    // Canadian station IDs follow patterns like:
+    // 05BH004 (Alberta), 08MF005 (BC), 02KF005 (Ontario/Quebec)
+    if (stationId.length >= 7) {
+      final prefix = stationId.substring(0, 2);
+      switch (prefix) {
+        case '01':
+        case '02':
+          return 'Atlantic Canada';
+        case '03':
+        case '04':
+          return 'Quebec/Ontario';
+        case '05':
+          return 'Alberta';
+        case '06':
+        case '07':
+          return 'Saskatchewan/Manitoba';
+        case '08':
+          return 'British Columbia';
+        case '09':
+        case '10':
+          return 'Yukon/Northwest Territories';
+      }
+    }
+    return null;
   }
 }
