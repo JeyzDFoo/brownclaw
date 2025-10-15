@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/live_water_data_service.dart';
 import '../services/favorite_rivers_service.dart';
 import 'station_search_screen.dart';
@@ -171,6 +173,187 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
         );
       }
     }
+  }
+
+  Future<void> _showLogDescentDialog(Map<String, dynamic> river) async {
+    final riverName = river['riverName'] as String? ?? 'Unknown River';
+    final section = river['section'] as String? ?? '';
+    final difficulty = river['difficulty'] as String? ?? 'Class II';
+    final currentFlowRate = river['flowRate'] as double?;
+
+    final riverNameController = TextEditingController(text: riverName);
+    final sectionController = TextEditingController(text: section);
+    final notesController = TextEditingController();
+    final waterLevelController = TextEditingController(
+      text: currentFlowRate != null
+          ? '${currentFlowRate.toStringAsFixed(1)} m³/s'
+          : '',
+    );
+
+    String selectedDifficulty = difficulty;
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Log River Descent'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: riverNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'River Name',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.water),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: sectionController,
+                  decoration: const InputDecoration(
+                    labelText: 'Section/Run',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.location_on),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                DropdownButtonFormField<String>(
+                  value: selectedDifficulty,
+                  decoration: const InputDecoration(
+                    labelText: 'Difficulty Class',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.trending_up),
+                  ),
+                  items: const [
+                    DropdownMenuItem(
+                      value: 'Class I',
+                      child: Text('Class I - Easy'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Class II',
+                      child: Text('Class II - Novice'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Class III',
+                      child: Text('Class III - Intermediate'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Class IV',
+                      child: Text('Class IV - Advanced'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Class V',
+                      child: Text('Class V - Expert'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'Class VI',
+                      child: Text('Class VI - Extreme'),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    setState(() {
+                      selectedDifficulty = value!;
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: waterLevelController,
+                  decoration: const InputDecoration(
+                    labelText: 'Water Level',
+                    hintText: 'e.g., 2.5 ft, Medium, High',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.height),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: notesController,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes',
+                    hintText: 'How was your run? Any highlights or tips?',
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.notes),
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (riverNameController.text.trim().isEmpty ||
+                    sectionController.text.trim().isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please fill in river name and section'),
+                    ),
+                  );
+                  return;
+                }
+
+                final user = FirebaseAuth.instance.currentUser;
+                if (user == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Please sign in to log descents'),
+                    ),
+                  );
+                  return;
+                }
+
+                try {
+                  await FirebaseFirestore.instance
+                      .collection('river_descents')
+                      .add({
+                        'riverName': riverNameController.text.trim(),
+                        'section': sectionController.text.trim(),
+                        'difficulty': selectedDifficulty,
+                        'waterLevel': waterLevelController.text.trim(),
+                        'notes': notesController.text.trim(),
+                        'userId': user.uid,
+                        'userEmail': user.email,
+                        'userName':
+                            user.displayName ??
+                            user.email?.split('@')[0] ??
+                            'Kayaker',
+                        'timestamp': FieldValue.serverTimestamp(),
+                        'date': DateTime.now().toIso8601String().split('T')[0],
+                      });
+
+                  if (mounted) {
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('River descent logged successfully!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Error logging descent: $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                }
+              },
+              child: const Text('Log Descent'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -402,9 +585,13 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                     ),
                                   );
                                 },
-                                leading: CircleAvatar(
-                                  backgroundColor: statusColor.withOpacity(0.1),
-                                  child: Icon(statusIcon, color: statusColor),
+                                leading: IconButton(
+                                  icon: const Icon(
+                                    Icons.add,
+                                    color: Colors.blue,
+                                  ),
+                                  onPressed: () => _showLogDescentDialog(river),
+                                  tooltip: 'Log Descent',
                                 ),
                                 title: Text(
                                   river['riverName'] as String? ??
@@ -458,9 +645,12 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                     ),
                                   ],
                                 ),
+
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
+                                    // Log descent button
+
                                     // Remove from favorites button
                                     IconButton(
                                       icon: const Icon(
@@ -468,28 +658,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                         color: Colors.red,
                                       ),
                                       onPressed: () => _toggleFavorite(river),
-                                    ),
-                                    // Status badge
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: statusColor.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: statusColor.withOpacity(0.3),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        status.toUpperCase(),
-                                        style: TextStyle(
-                                          color: statusColor,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      ),
+                                      tooltip: 'Remove from favorites',
                                     ),
                                   ],
                                 ),
