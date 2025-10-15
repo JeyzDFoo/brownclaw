@@ -263,7 +263,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                           child: Text(
                             _rivers.first['dataSource'] == 'live'
                                 ? 'Showing live data from Environment Canada'
-                                : 'Demo data shown (live data available on mobile)',
+                                : 'Data temporarily unavailable',
                             style: TextStyle(
                               color: _rivers.first['dataSource'] == 'live'
                                   ? Colors.green[700]
@@ -351,7 +351,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                   Text(
                                     dataSource == 'live'
                                         ? 'Live data'
-                                        : 'Demo data',
+                                        : 'Data unavailable',
                                     style: TextStyle(
                                       fontSize: 12,
                                       color: dataSource == 'live'

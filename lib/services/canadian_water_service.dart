@@ -118,8 +118,8 @@ class CanadianWaterService {
   static Future<List<Map<String, dynamic>>> fetchRiverLevels() async {
     // Check if running on web platform - CORS restrictions prevent direct API access
     if (kIsWeb) {
-      print('🌐 Running on web - using mock data due to CORS restrictions');
-      return _getWebMockData();
+      print('🌐 Running on web - API access restricted due to CORS');
+      return _getNoDataFallback();
     }
 
     List<Map<String, dynamic>> riverData = [];
@@ -194,7 +194,7 @@ class CanadianWaterService {
       }
     }
 
-    // Add mock data for failed stations so they still appear in the list
+    // Add placeholder data for failed stations so they still appear in the list
     for (String failedRiver in failedStations) {
       final riverInfo = canadianRivers[failedRiver]!;
       final mockFlow = (riverInfo['minRunnable'] + riverInfo['maxSafe']) / 2;
@@ -224,10 +224,10 @@ class CanadianWaterService {
       });
     }
 
-    // If no data at all, return full mock data as fallback
+    // If no data at all, return empty state with message
     if (riverData.isEmpty) {
-      print('⚠️ No river data available, using mock data');
-      return _getMockData();
+      print('⚠️ No river data available from API');
+      return _getNoDataFallback();
     }
 
     print(
@@ -290,252 +290,30 @@ class CanadianWaterService {
     }
   }
 
-  // Comprehensive mock data for web platform (due to CORS restrictions)
-  static List<Map<String, dynamic>> _getWebMockData() {
-    final now = DateTime.now();
-    final timeString =
-        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+  // Fallback when no data is available - shows river info without live data
+  static List<Map<String, dynamic>> _getNoDataFallback() {
+    return canadianRivers.entries.map((entry) {
+      final riverName = entry.key;
+      final riverInfo = entry.value;
 
-    return [
-      {
-        'name': 'Ottawa River',
-        'section': 'Champlain Bridge',
-        'location': 'Ontario/Quebec',
-        'currentLevel': '125.5 m³/s',
-        'currentFlowValue': 125.5,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class I-II',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '50.0 m³/s',
-        'maxSafe': '300.0 m³/s',
-        'stationId': '02KF005',
-        'province': 'Ontario/Quebec',
-        'flowRate': 125.5,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Madawaska River',
-        'section': 'Lower Madawaska',
-        'location': 'Ontario',
-        'currentLevel': '45.2 m³/s',
-        'currentFlowValue': 45.2,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-III',
-        'lastUpdated': 'Demo Data',
-        'trend': 'rising',
-        'minRunnable': '15.0 m³/s',
-        'maxSafe': '80.0 m³/s',
-        'stationId': '02KA006',
-        'province': 'Ontario',
-        'flowRate': 45.2,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'French River',
-        'section': 'Big Pine Rapids',
-        'location': 'Ontario',
-        'currentLevel': '65.8 m³/s',
-        'currentFlowValue': 65.8,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-IV',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '20.0 m³/s',
-        'maxSafe': '100.0 m³/s',
-        'stationId': '02ED003',
-        'province': 'Ontario',
-        'flowRate': 65.8,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Bow River',
-        'section': 'Harvey Passage',
-        'location': 'Alberta',
-        'currentLevel': '85.3 m³/s',
-        'currentFlowValue': 85.3,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-III',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '30.0 m³/s',
-        'maxSafe': '150.0 m³/s',
-        'stationId': '05BH004',
-        'province': 'Alberta',
-        'flowRate': 85.3,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Kicking Horse River',
-        'section': 'Lower Canyon',
-        'location': 'British Columbia',
-        'currentLevel': '72.1 m³/s',
-        'currentFlowValue': 72.1,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class III-IV',
-        'lastUpdated': 'Demo Data',
-        'trend': 'falling',
-        'minRunnable': '25.0 m³/s',
-        'maxSafe': '120.0 m³/s',
-        'stationId': '05AD007',
-        'province': 'British Columbia',
-        'flowRate': 72.1,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Elbow River',
-        'section': 'Urban Canyon',
-        'location': 'Alberta',
-        'currentLevel': '18.4 m³/s',
-        'currentFlowValue': 18.4,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '8.0 m³/s',
-        'maxSafe': '40.0 m³/s',
-        'stationId': '05BJ004',
-        'province': 'Alberta',
-        'flowRate': 18.4,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Petawawa River',
-        'section': 'Five Mile Rapids',
-        'location': 'Ontario',
-        'currentLevel': '75.6 m³/s',
-        'currentFlowValue': 75.6,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class III-IV',
-        'lastUpdated': 'Demo Data',
-        'trend': 'rising',
-        'minRunnable': '30.0 m³/s',
-        'maxSafe': '120.0 m³/s',
-        'stationId': '02KB001',
-        'province': 'Ontario',
-        'flowRate': 75.6,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Gatineau River',
-        'section': 'Paugan Falls',
-        'location': 'Quebec',
-        'currentLevel': '42.3 m³/s',
-        'currentFlowValue': 42.3,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class III',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '20.0 m³/s',
-        'maxSafe': '80.0 m³/s',
-        'stationId': '02KD007',
-        'province': 'Quebec',
-        'flowRate': 42.3,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Rouge River',
-        'section': 'Seven Sisters',
-        'location': 'Quebec',
-        'currentLevel': '38.7 m³/s',
-        'currentFlowValue': 38.7,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class IV-V',
-        'lastUpdated': 'Demo Data',
-        'trend': 'falling',
-        'minRunnable': '15.0 m³/s',
-        'maxSafe': '60.0 m³/s',
-        'stationId': '02KB008',
-        'province': 'Quebec',
-        'flowRate': 38.7,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-      {
-        'name': 'Yukon River',
-        'section': 'Whitehorse Rapids',
-        'location': 'Yukon',
-        'currentLevel': '425.8 m³/s',
-        'currentFlowValue': 425.8,
-        'status': 'normal',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-III',
-        'lastUpdated': 'Demo Data',
-        'trend': 'stable',
-        'minRunnable': '150.0 m³/s',
-        'maxSafe': '800.0 m³/s',
-        'stationId': '09AB004',
-        'province': 'Yukon',
-        'flowRate': 425.8,
-        'lastUpdate': 'Demo Data - $timeString',
-      },
-    ];
-  }
-
-  static List<Map<String, dynamic>> _getMockData() {
-    return [
-      {
-        'name': 'Ottawa River',
-        'section': 'Champlain Bridge',
-        'location': 'Ontario/Quebec',
-        'currentLevel': '125.5 m³/s',
-        'currentFlowValue': 125.5,
-        'status': 'Good',
-        'statusColor': Colors.green,
-        'difficulty': 'Class I-II',
-        'lastUpdated': 'Mock Data',
-        'trend': 'stable',
-        'minRunnable': '50.0 m³/s',
-        'maxSafe': '300.0 m³/s',
-        'stationId': '02KF005',
-        'province': 'Ontario/Quebec',
-        'flowRate': 125.5,
-        'lastUpdate': 'Mock Data',
-      },
-      {
-        'name': 'Madawaska River',
-        'section': 'Lower Madawaska',
-        'location': 'Ontario',
-        'currentLevel': '45.2 m³/s',
-        'currentFlowValue': 45.2,
-        'status': 'Good',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-III',
-        'lastUpdated': 'Mock Data',
-        'trend': 'rising',
-        'minRunnable': '15.0 m³/s',
-        'maxSafe': '80.0 m³/s',
-        'stationId': '02KA006',
-        'province': 'Ontario',
-        'flowRate': 45.2,
-        'lastUpdate': 'Mock Data',
-      },
-      {
-        'name': 'Bow River',
-        'section': 'Harvey Passage',
-        'location': 'Alberta',
-        'currentLevel': '85.3 m³/s',
-        'currentFlowValue': 85.3,
-        'status': 'Good',
-        'statusColor': Colors.green,
-        'difficulty': 'Class II-III',
-        'lastUpdated': 'Mock Data',
-        'trend': 'stable',
-        'minRunnable': '30.0 m³/s',
-        'maxSafe': '150.0 m³/s',
-        'stationId': '05BH004',
-        'province': 'Alberta',
-        'flowRate': 85.3,
-        'lastUpdate': 'Mock Data',
-      },
-    ];
+      return {
+        'name': riverName,
+        'section': riverInfo['section'],
+        'location': riverInfo['location'],
+        'currentLevel': 'Data unavailable',
+        'currentFlowValue': 0.0,
+        'status': 'Unknown',
+        'statusColor': Colors.grey,
+        'difficulty': riverInfo['difficulty'],
+        'lastUpdated': 'No data available',
+        'trend': 'unknown',
+        'minRunnable': '${riverInfo['minRunnable']} m³/s',
+        'maxSafe': '${riverInfo['maxSafe']} m³/s',
+        'stationId': riverInfo['stationId'],
+        'province': riverInfo['location'],
+        'flowRate': 0.0,
+        'lastUpdate': 'Unable to fetch live data',
+      };
+    }).toList();
   }
 }

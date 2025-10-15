@@ -91,7 +91,7 @@ class DashboardScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'You\'re successfully signed in to your Firebase app with ${user?.providerData.first.providerId == 'google.com' ? 'Google' : 'Email/Password'} authentication.',
+                      'Welcome to your whitewater kayaking logbook. Track your river descents, check current water levels, and plan your next adventure.',
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ],

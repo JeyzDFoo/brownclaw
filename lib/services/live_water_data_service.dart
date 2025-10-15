@@ -320,22 +320,16 @@ class LiveWaterDataService {
         );
       }
     } else {
-      // Use realistic demo data based on station and season
-      final demoFlow = _generateRealisticFlowData(stationId, stationInfo);
-      enrichedData['flowRate'] = demoFlow;
-      enrichedData['lastUpdate'] =
-          'Simulated data (${_formatTime(DateTime.now())})';
-      enrichedData['dataSource'] = 'demo';
+      // No data available
+      enrichedData['flowRate'] = 0.0;
+      enrichedData['lastUpdate'] = 'Data unavailable';
+      enrichedData['dataSource'] = 'unavailable';
       enrichedData['isLive'] = false;
-
-      final status = determineFlowStatus(demoFlow);
-      enrichedData['status'] = status['label'];
-      enrichedData['statusColor'] = Colors.amber; // Amber for demo data
+      enrichedData['status'] = 'Unknown';
+      enrichedData['statusColor'] = Colors.grey;
 
       if (kDebugMode) {
-        print(
-          '📊 Demo data for $stationId: ${demoFlow}m³/s - ${status['label']}',
-        );
+        print('⚠️ No data available for station $stationId');
       }
     }
     return enrichedData;
@@ -346,83 +340,6 @@ class LiveWaterDataService {
     final hour = time.hour.toString().padLeft(2, '0');
     final minute = time.minute.toString().padLeft(2, '0');
     return '$hour:$minute';
-  }
-
-  /// Generate realistic flow data based on station characteristics and season
-  static double _generateRealisticFlowData(
-    String stationId,
-    Map<String, dynamic> stationInfo,
-  ) {
-    final now = DateTime.now();
-    final province = stationInfo['province'] as String? ?? '';
-    final stationName = (stationInfo['name'] as String? ?? '').toLowerCase();
-
-    // Base flow varies by region and river type
-    double baseFlow = 40.0; // Default base flow
-
-    // Adjust base flow by province and river characteristics
-    if (province == 'BC') {
-      if (stationName.contains('fraser')) {
-        baseFlow = 180.0; // Fraser is a major river
-      } else if (stationName.contains('thompson')) {
-        baseFlow = 120.0;
-      } else if (stationName.contains('chilliwack')) {
-        baseFlow = 45.0;
-      } else if (stationName.contains('spillimacheen')) {
-        baseFlow = 12.0; // Spillimacheen River - smaller BC mountain stream
-      } else {
-        baseFlow = 65.0; // BC mountain rivers
-      }
-    } else if (province == 'AB') {
-      if (stationName.contains('bow')) {
-        baseFlow = 85.0; // Bow River
-      } else if (stationName.contains('athabasca')) {
-        baseFlow = 200.0; // Major river
-      } else if (stationName.contains('red deer')) {
-        baseFlow = 60.0;
-      } else {
-        baseFlow = 50.0; // Alberta prairie/mountain rivers
-      }
-    }
-
-    // Seasonal variation (October is fall runoff season)
-    double seasonalMultiplier = 1.0;
-    final month = now.month;
-
-    if (month >= 4 && month <= 6) {
-      // Spring snowmelt (April-June)
-      seasonalMultiplier = 1.8;
-    } else if (month >= 7 && month <= 9) {
-      // Summer low flows (July-September)
-      seasonalMultiplier = 0.7;
-    } else if (month >= 10 && month <= 11) {
-      // Fall flows (October-November) - current season
-      seasonalMultiplier = 1.2;
-    } else {
-      // Winter low flows (December-March)
-      seasonalMultiplier = 0.5;
-    }
-
-    // Add daily variation (peak in afternoon, low at night)
-    final hour = now.hour;
-    double dailyMultiplier = 1.0;
-    if (hour >= 6 && hour <= 18) {
-      // Daytime higher flows
-      dailyMultiplier = 1.1 + (hour - 12).abs() * 0.02;
-    } else {
-      // Nighttime lower flows
-      dailyMultiplier = 0.9;
-    }
-
-    // Add some randomness for realism
-    final randomVariation =
-        0.8 + (now.millisecond % 400) / 1000.0; // 0.8 to 1.2
-
-    final finalFlow =
-        baseFlow * seasonalMultiplier * dailyMultiplier * randomVariation;
-
-    // Ensure minimum flow
-    return finalFlow < 1.0 ? 1.0 : finalFlow;
   }
 
   /// Get enriched data for multiple stations

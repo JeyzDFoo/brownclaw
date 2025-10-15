@@ -174,7 +174,7 @@ class _StationSearchScreenState extends State<StationSearchScreen> {
                       ),
                       Text('Status: ${stationData['status']}'),
                       Text(
-                        'Data: ${dataSource == 'live' ? 'Live' : 'Demo'}',
+                        'Data: ${dataSource == 'live' ? 'Live' : 'Unavailable'}',
                         style: TextStyle(
                           color: dataSource == 'live'
                               ? Colors.green

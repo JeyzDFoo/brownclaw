@@ -59,7 +59,7 @@ class _FirestoreScreenState extends State<FirestoreScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Firestore Demo'),
+        title: const Text('Database Test'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
