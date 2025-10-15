@@ -29,26 +29,9 @@ class RiverDescent {
 
   // Create from Map (for Firestore data)
   factory RiverDescent.fromMap(Map<String, dynamic> map, {String? docId}) {
-    final sectionData = map['section'];
-    RiverSection section;
-
-    if (sectionData is Map<String, dynamic>) {
-      section = RiverSection.fromMap(sectionData);
-    } else if (sectionData is String) {
-      // Handle legacy string format
-      section = RiverSection.fromString(
-        sectionData,
-        map['difficulty'] as String?,
-      );
-    } else {
-      section = RiverSection.empty();
-    }
-
     return RiverDescent(
       id: docId,
-      riverName: map['riverName'] as String? ?? '',
-      section: section,
-      difficulty: map['difficulty'] as String? ?? 'Unknown',
+      riverRunId: map['riverRunId'] as String? ?? '',
       waterLevel: map['waterLevel'] as String? ?? '',
       notes: map['notes'] as String? ?? '',
       userId: map['userId'] as String? ?? '',
@@ -56,15 +39,15 @@ class RiverDescent {
       userName: map['userName'] as String?,
       timestamp: _timestampToDateTime(map['timestamp']),
       date: map['date'] as String?,
+      rating: _safeToDouble(map['rating']),
+      tags: (map['tags'] as List?)?.cast<String>(),
     );
   }
 
   // Convert to Map (for Firestore storage)
   Map<String, dynamic> toMap() {
     final map = <String, dynamic>{
-      'riverName': riverName,
-      'section': section.toMap(),
-      'difficulty': difficulty,
+      'riverRunId': riverRunId,
       'waterLevel': waterLevel,
       'notes': notes,
       'userId': userId,
@@ -74,11 +57,27 @@ class RiverDescent {
     if (userName != null) map['userName'] = userName;
     if (timestamp != null) map['timestamp'] = Timestamp.fromDate(timestamp!);
     if (date != null) map['date'] = date;
+    if (rating != null) map['rating'] = rating;
+    if (tags != null) map['tags'] = tags;
 
     return map;
   }
 
-  // Helper method to convert timestamp
+  // Helper methods
+  static double? _safeToDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) {
+      try {
+        return double.parse(value);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+
   static DateTime? _timestampToDateTime(dynamic timestamp) {
     if (timestamp == null) return null;
     if (timestamp is Timestamp) return timestamp.toDate();
@@ -102,20 +101,10 @@ class RiverDescent {
     return 'Unknown kayaker';
   }
 
-  // Get full section display
-  String get fullSectionDisplay {
-    if (section.hasName) {
-      return '${section.name} (${section.difficultyClass})';
-    }
-    return section.difficultyClass;
-  }
-
   // Create a copy with modified values
   RiverDescent copyWith({
     String? id,
-    String? riverName,
-    RiverSection? section,
-    String? difficulty,
+    String? riverRunId,
     String? waterLevel,
     String? notes,
     String? userId,
@@ -123,12 +112,12 @@ class RiverDescent {
     String? userName,
     DateTime? timestamp,
     String? date,
+    double? rating,
+    List<String>? tags,
   }) {
     return RiverDescent(
       id: id ?? this.id,
-      riverName: riverName ?? this.riverName,
-      section: section ?? this.section,
-      difficulty: difficulty ?? this.difficulty,
+      riverRunId: riverRunId ?? this.riverRunId,
       waterLevel: waterLevel ?? this.waterLevel,
       notes: notes ?? this.notes,
       userId: userId ?? this.userId,
@@ -136,22 +125,23 @@ class RiverDescent {
       userName: userName ?? this.userName,
       timestamp: timestamp ?? this.timestamp,
       date: date ?? this.date,
+      rating: rating ?? this.rating,
+      tags: tags ?? this.tags,
     );
   }
 
   @override
-  String toString() => '$riverName - ${section.name} on $formattedDate';
+  String toString() => 'Descent on $riverRunId on $formattedDate';
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
     return other is RiverDescent &&
         other.id == id &&
-        other.riverName == riverName &&
-        other.section == section &&
+        other.riverRunId == riverRunId &&
         other.timestamp == timestamp;
   }
 
   @override
-  int get hashCode => Object.hash(id, riverName, section, timestamp);
+  int get hashCode => Object.hash(id, riverRunId, timestamp);
 }

@@ -1,4 +1,9 @@
-// Export all model classes
+// Export all model classes - New Architecture
+export 'river.dart';
+export 'river_run.dart';
+export 'gauge_station.dart';
+export 'river_descent_new.dart';
+
+// Legacy models (deprecated)
 export 'river_section.dart';
 export 'river_station.dart';
-export 'river_descent.dart';
