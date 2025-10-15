@@ -54,18 +54,31 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
 
     try {
-      final stationId = widget.riverData['stationId'] as String;
+      final stationId = widget.riverData['stationId'] as String?;
+
+      if (stationId == null || stationId.isEmpty) {
+        setState(() {
+          _error = 'No station ID available for this river run';
+          _isLoading = false;
+        });
+        return;
+      }
+
       final liveData = await LiveWaterDataService.fetchStationData(stationId);
 
-      setState(() {
-        _liveData = liveData;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _liveData = liveData;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString();
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -76,18 +89,31 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
 
     try {
-      final stationId = widget.riverData['stationId'] as String;
+      final stationId = widget.riverData['stationId'] as String?;
+
+      if (stationId == null || stationId.isEmpty) {
+        setState(() {
+          _chartError = 'No station ID available for historical data';
+          _isLoadingChart = false;
+        });
+        return;
+      }
+
       final historicalData = await _fetchHistoricalData(stationId);
 
-      setState(() {
-        _historicalData = historicalData;
-        _isLoadingChart = false;
-      });
+      if (mounted) {
+        setState(() {
+          _historicalData = historicalData;
+          _isLoadingChart = false;
+        });
+      }
     } catch (e) {
-      setState(() {
-        _chartError = e.toString();
-        _isLoadingChart = false;
-      });
+      if (mounted) {
+        setState(() {
+          _chartError = e.toString();
+          _isLoadingChart = false;
+        });
+      }
     }
   }
 

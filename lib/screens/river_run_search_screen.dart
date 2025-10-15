@@ -310,18 +310,37 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
                           title: Text(
-                            runWithStations.run.displayName,
+                            runWithStations.river?.name ?? 'Unknown River',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (runWithStations.river != null)
-                                Text(
-                                  '${runWithStations.river!.name} • ${runWithStations.river!.region}',
+                              Text(
+                                '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
                                 ),
-                              if (runWithStations.run.description != null)
-                                Text(runWithStations.run.description!),
+                              ),
+                              const SizedBox(height: 4),
+                              if (runWithStations.river?.region != null)
+                                Text(
+                                  runWithStations.river!.region,
+                                  style: const TextStyle(fontSize: 13),
+                                ),
+                              if (runWithStations.run.description != null) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  runWithStations.run.description!,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
                               const SizedBox(height: 4),
                               Row(
                                 children: [

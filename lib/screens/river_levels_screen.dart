@@ -92,9 +92,20 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     RiverRunWithStations runWithStations,
   ) {
     final primaryStation = runWithStations.primaryStation;
+    final stationId = primaryStation?.stationId ?? runWithStations.run.id;
+
+    if (kDebugMode) {
+      print('🔄 Converting run to legacy format:');
+      print('   Run ID: ${runWithStations.run.id}');
+      print('   River Name: ${runWithStations.river?.name}');
+      print('   Run Name: ${runWithStations.run.name}');
+      print('   Primary Station ID: ${primaryStation?.stationId}');
+      print('   Final Station ID: $stationId');
+    }
+
     return {
-      'stationId': primaryStation?.stationId ?? runWithStations.run.id,
-      'riverName': runWithStations.run.name,
+      'stationId': stationId,
+      'riverName': runWithStations.river?.name ?? runWithStations.run.name,
       'section': {
         'name': runWithStations.run.name,
         'difficulty': runWithStations.run.difficultyClass,
@@ -681,7 +692,8 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                   tooltip: 'Log Descent',
                                 ),
                                 title: Text(
-                                  runWithStations.run.displayName,
+                                  runWithStations.river?.name ??
+                                      'Unknown River',
                                   style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -689,15 +701,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                 subtitle: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // Text(
-                                    //   river['stationName'] as String? ??
-                                    //       'Unknown Station',
-                                    //   style: const TextStyle(fontSize: 13),
-                                    // ),
-                                    //   Text('Province: ${river['province']}'),
+                                    Text(
+                                      '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
                                     if (currentDischarge != null)
                                       Text(
                                         'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s',
+                                        style: const TextStyle(fontSize: 13),
                                       ),
                                     //  Text('Status: $status'),
                                     Row(
