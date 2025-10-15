@@ -240,7 +240,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     final stationId = widget.riverData['stationId'] as String? ?? 'Unknown';
     final location =
         widget.riverData['location'] as String? ?? 'Unknown Location';
-    final section = widget.riverData['section'] as String? ?? '';
+
+    // Handle section data (could be Map or String for backward compatibility)
+    final sectionData = widget.riverData['section'];
+    final section = sectionData is Map<String, dynamic>
+        ? (sectionData['name'] as String? ?? '')
+        : (sectionData as String? ?? '');
+    final sectionClass = sectionData is Map<String, dynamic>
+        ? (sectionData['class'] as String? ?? 'Unknown')
+        : (widget.riverData['difficulty'] as String? ?? 'Unknown');
+
     final difficulty = widget.riverData['difficulty'] as String? ?? 'Unknown';
     final status = widget.riverData['status'] as String? ?? 'Unknown';
 
@@ -292,7 +301,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                                 ),
                                 if (section.isNotEmpty)
                                   Text(
-                                    section,
+                                    '$section ($sectionClass)',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(color: Colors.grey[600]),
+                                  ),
+                                if (section.isEmpty &&
+                                    sectionClass != 'Unknown')
+                                  Text(
+                                    sectionClass,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
