@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
+import '../models/models.dart';
 
 class FavoriteRiversService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -43,6 +44,14 @@ class FavoriteRiversService {
       throw ArgumentError('Station ID cannot be empty');
     }
 
+    // Validate station ID format
+    if (stationId.length > 100) {
+      if (kDebugMode) {
+        print('❌ Cannot add favorite: Station ID too long: $stationId');
+      }
+      throw ArgumentError('Station ID is too long (max 100 characters)');
+    }
+
     try {
       // Debug: Print the riverData to see what's being passed
       if (kDebugMode) {
@@ -75,7 +84,18 @@ class FavoriteRiversService {
         'name': (riverData['name'] as String?)?.isNotEmpty == true
             ? riverData['name']
             : 'Station $stationId',
-        'section': riverData['section'] as String? ?? fallbackLocation,
+        'section': {
+          'name': (riverData['section'] is Map)
+              ? (riverData['section'] as Map)['name'] ?? ''
+              : (riverData['section'] as String?)?.isNotEmpty == true
+              ? riverData['section']
+              : '',
+          'class': (riverData['section'] is Map)
+              ? (riverData['section'] as Map)['class'] ??
+                    riverData['difficulty'] ??
+                    'Unknown'
+              : riverData['difficulty'] ?? 'Unknown',
+        },
         'location': riverData['location'] as String? ?? fallbackLocation,
         'difficulty': riverData['difficulty'] as String? ?? 'Unknown',
         'minRunnable': _safeToDouble(riverData['minRunnable']) ?? 0.0,
@@ -92,16 +112,26 @@ class FavoriteRiversService {
         print('🔄 Saving river details...');
       }
 
+      // Sanitize station ID for use as Firestore document ID
+      final sanitizedStationId = _sanitizeDocumentId(stationId);
+
+      if (kDebugMode) {
+        print('🔄 Original station ID: $stationId');
+        print('🔄 Sanitized station ID: $sanitizedStationId');
+      }
+
       // Save the river details
       await _firestore
           .collection('user_favorites')
           .doc(user.uid)
           .collection('river_details')
-          .doc(stationId)
+          .doc(sanitizedStationId)
           .set(stationData);
 
       if (kDebugMode) {
-        print('✅ Successfully added favorite $stationId');
+        print(
+          '✅ Successfully added favorite $stationId (saved as $sanitizedStationId)',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -109,6 +139,42 @@ class FavoriteRiversService {
         print('❌ Error type: ${e.runtimeType}');
         print('❌ Station ID: $stationId');
         print('❌ User ID: ${user.uid}');
+      }
+      rethrow;
+    }
+  }
+
+  // Add a river station to favorites using RiverStation model
+  static Future<void> addFavoriteStation(RiverStation station) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User not authenticated');
+    }
+
+    try {
+      // Add to user's favorites list
+      await _firestore.collection('user_favorites').doc(user.uid).set({
+        'rivers': FieldValue.arrayUnion([station.stationId]),
+        'lastUpdated': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // Sanitize station ID for use as Firestore document ID
+      final sanitizedStationId = _sanitizeDocumentId(station.stationId);
+
+      // Save the river details using the model's toMap method
+      await _firestore
+          .collection('user_favorites')
+          .doc(user.uid)
+          .collection('river_details')
+          .doc(sanitizedStationId)
+          .set(station.toMap());
+
+      if (kDebugMode) {
+        print('✅ Successfully added favorite station: ${station.stationId}');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error adding favorite station: $e');
       }
       rethrow;
     }
@@ -126,12 +192,15 @@ class FavoriteRiversService {
         'lastUpdated': FieldValue.serverTimestamp(),
       });
 
+      // Sanitize station ID for document reference
+      final sanitizedStationId = _sanitizeDocumentId(stationId);
+
       // Remove river details
       await _firestore
           .collection('user_favorites')
           .doc(user.uid)
           .collection('river_details')
-          .doc(stationId)
+          .doc(sanitizedStationId)
           .delete();
     } catch (e) {
       print('❌ Error removing favorite: $e');
@@ -162,7 +231,28 @@ class FavoriteRiversService {
   }
 
   // Get favorite river details
-  static Stream<List<Map<String, dynamic>>> getFavoriteRiversDetails() {
+  static Stream<List<RiverStation>> getFavoriteRiversDetails() {
+    final user = _auth.currentUser;
+    if (user == null) return Stream.value([]);
+
+    return _firestore
+        .collection('user_favorites')
+        .doc(user.uid)
+        .collection('river_details')
+        .orderBy('addedAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return RiverStation.fromMap(data);
+          }).toList();
+        });
+  }
+
+  // Keep the old method for backward compatibility (deprecated)
+  @Deprecated('Use getFavoriteRiversDetails() instead')
+  static Stream<List<Map<String, dynamic>>> getFavoriteRiversDetailsRaw() {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
@@ -222,5 +312,15 @@ class FavoriteRiversService {
       }
     }
     return null;
+  }
+
+  // Helper method to sanitize station ID for use as Firestore document ID
+  static String _sanitizeDocumentId(String stationId) {
+    // Firestore document IDs cannot contain: / \ . # $ [ ]
+    // Replace invalid characters with underscores
+    return stationId
+        .replaceAll(RegExp(r'[/\\\.#\$\[\]]'), '_')
+        .replaceAll(' ', '_')
+        .trim();
   }
 }

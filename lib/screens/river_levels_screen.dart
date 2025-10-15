@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/live_water_data_service.dart';
 import '../services/favorite_rivers_service.dart';
+import '../models/models.dart';
 import 'station_search_screen.dart';
 import 'river_detail_screen.dart';
 
@@ -26,18 +27,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   void _loadFavorites() {
-    FavoriteRiversService.getFavoriteRiversDetails().listen((favoriteDetails) {
+    FavoriteRiversService.getFavoriteRiversDetails().listen((favoriteStations) {
       setState(() {
-        _favoriteStationIds = favoriteDetails
-            .map((r) => r['stationId'] as String)
+        _favoriteStationIds = favoriteStations
+            .map((station) => station.stationId)
             .toList();
       });
       // Reload river data when favorites change with the original names
-      _loadRiverData(favoriteDetails);
+      _loadRiverData(favoriteStations);
     });
   }
 
-  void _loadRiverData([List<Map<String, dynamic>>? favoriteDetails]) async {
+  void _loadRiverData([List<RiverStation>? favoriteStations]) async {
     if (_favoriteStationIds.isEmpty) {
       setState(() {
         _rivers = [];
@@ -55,24 +56,36 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
       final liveDataResults = <Map<String, dynamic>>[];
 
       for (final stationId in _favoriteStationIds) {
-        // Find the original favorite details for this station
-        final originalDetails = favoriteDetails?.firstWhere(
-          (detail) => detail['stationId'] == stationId,
-          orElse: () => <String, dynamic>{},
+        // Find the original favorite station for this station ID
+        final originalStation = favoriteStations?.firstWhere(
+          (station) => station.stationId == stationId,
+          orElse: () => RiverStation(
+            stationId: stationId,
+            name: 'Unknown Station',
+            section: RiverSection.empty(),
+            location: 'Unknown Location',
+            difficulty: 'Unknown',
+            minRunnable: 0.0,
+            maxSafe: 1000.0,
+            flow: 0.0,
+            status: 'Unknown',
+            province: 'Unknown',
+          ),
         );
 
         // Get live data for this station
         final liveData = await LiveWaterDataService.fetchStationData(stationId);
 
-        // Create merged data using original name from favorites
+        // Create merged data using original station data
         final mergedData = <String, dynamic>{
           'stationId': stationId,
-          'riverName': originalDetails?['name'] ?? 'Unknown River',
-          'section': originalDetails?['section'] ?? '',
-          'location': originalDetails?['location'] ?? 'Unknown Location',
-          'difficulty': originalDetails?['difficulty'] ?? 'Unknown',
-          'minRunnable': originalDetails?['minRunnable'],
-          'maxSafe': originalDetails?['maxSafe'],
+          'riverName': originalStation?.name ?? 'Unknown River',
+          'section':
+              originalStation?.section.toMap() ?? RiverSection.empty().toMap(),
+          'location': originalStation?.location ?? 'Unknown Location',
+          'difficulty': originalStation?.difficulty ?? 'Unknown',
+          'minRunnable': originalStation?.minRunnable ?? 0.0,
+          'maxSafe': originalStation?.maxSafe ?? 1000.0,
           // Live data
           'flowRate': liveData?['flowRate'] ?? 0.0,
           'waterLevel': liveData?['waterLevel'] ?? 0.0,
@@ -83,8 +96,8 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
           'isLive': liveData != null,
           'status': _determineStatus(
             liveData?['flowRate'] ?? 0.0,
-            originalDetails?['minRunnable'],
-            originalDetails?['maxSafe'],
+            originalStation?.minRunnable ?? 0.0,
+            originalStation?.maxSafe ?? 1000.0,
           ),
         };
 
@@ -129,10 +142,10 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   Future<void> _refreshData() async {
-    // Get the current favorite details to preserve names
-    final favoriteDetails =
+    // Get the current favorite stations to preserve names
+    final favoriteStations =
         await FavoriteRiversService.getFavoriteRiversDetails().first;
-    _loadRiverData(favoriteDetails);
+    _loadRiverData(favoriteStations);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -177,12 +190,17 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
 
   Future<void> _showLogDescentDialog(Map<String, dynamic> river) async {
     final riverName = river['riverName'] as String? ?? 'Unknown River';
-    final section = river['section'] as String? ?? '';
-    final difficulty = river['difficulty'] as String? ?? 'Class II';
+    final sectionData = river['section'];
+    final sectionName = sectionData is Map
+        ? (sectionData['name'] as String? ?? '')
+        : (sectionData as String? ?? '');
+    final sectionClass = sectionData is Map
+        ? (sectionData['class'] as String? ?? 'Class II')
+        : (river['difficulty'] as String? ?? 'Class II');
     final currentFlowRate = river['flowRate'] as double?;
 
     final riverNameController = TextEditingController(text: riverName);
-    final sectionController = TextEditingController(text: section);
+    final sectionController = TextEditingController(text: sectionName);
     final notesController = TextEditingController();
     final waterLevelController = TextEditingController(
       text: currentFlowRate != null
@@ -190,7 +208,55 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
           : '',
     );
 
-    String selectedDifficulty = difficulty;
+    // Ensure selectedDifficulty is one of the valid dropdown values
+    final validDifficulties = [
+      'Class I',
+      'Class II',
+      'Class III',
+      'Class IV',
+      'Class V',
+      'Class VI',
+    ];
+    String selectedDifficulty = validDifficulties.contains(sectionClass)
+        ? sectionClass
+        : 'Class II';
+
+    List<String> existingSections = [];
+    bool isLoadingSections = true;
+    String? selectedSection;
+
+    // Load existing sections for this river
+    try {
+      final sectionsQuery = await FirebaseFirestore.instance
+          .collection('river_descents')
+          .where('riverName', isEqualTo: riverName)
+          .get();
+
+      final sections = sectionsQuery.docs
+          .map((doc) {
+            final sectionData = doc.data()['section'];
+            if (sectionData is Map) {
+              return sectionData['name'] as String?;
+            } else {
+              return sectionData as String?;
+            }
+          })
+          .where((section) => section != null && section.isNotEmpty)
+          .cast<String>()
+          .toSet()
+          .toList();
+
+      existingSections = sections..sort();
+      isLoadingSections = false;
+
+      // Pre-select section if it exists in the list
+      if (sectionName.isNotEmpty && existingSections.contains(sectionName)) {
+        selectedSection = sectionName;
+        sectionController.text = sectionName;
+      }
+    } catch (e) {
+      isLoadingSections = false;
+    }
 
     await showDialog<void>(
       context: context,
@@ -210,13 +276,82 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                TextField(
-                  controller: sectionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Section/Run',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.location_on),
-                  ),
+                // Section selector with dropdown and custom input
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (isLoadingSections)
+                      const Row(
+                        children: [
+                          SizedBox(
+                            height: 16,
+                            width: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          SizedBox(width: 8),
+                          Text('Loading sections...'),
+                        ],
+                      )
+                    else if (existingSections.isNotEmpty) ...[
+                      DropdownButtonFormField<String?>(
+                        value: selectedSection,
+                        decoration: const InputDecoration(
+                          labelText: 'Select Existing Section',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.list),
+                        ),
+                        items: [
+                          const DropdownMenuItem<String?>(
+                            value: null,
+                            child: Text('Select a section...'),
+                          ),
+                          ...existingSections.map(
+                            (section) => DropdownMenuItem(
+                              value: section,
+                              child: Text(section),
+                            ),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            selectedSection = value;
+                            if (value != null) {
+                              sectionController.text = value;
+                            }
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 8),
+                      const Center(
+                        child: Text(
+                          'OR',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    TextField(
+                      controller: sectionController,
+                      decoration: InputDecoration(
+                        labelText: existingSections.isNotEmpty
+                            ? 'Add New Section/Run'
+                            : 'Section/Run',
+                        hintText:
+                            'e.g., Upper Canyon, Lower Falls, Put-in to Take-out',
+                        border: const OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.location_on),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedSection =
+                              null; // Clear dropdown selection when typing
+                        });
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
@@ -314,7 +449,10 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                       .collection('river_descents')
                       .add({
                         'riverName': riverNameController.text.trim(),
-                        'section': sectionController.text.trim(),
+                        'section': {
+                          'name': sectionController.text.trim(),
+                          'class': selectedDifficulty,
+                        },
                         'difficulty': selectedDifficulty,
                         'waterLevel': waterLevelController.text.trim(),
                         'notes': notesController.text.trim(),
@@ -545,34 +683,8 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                           itemBuilder: (context, index) {
                             final river = _rivers[index];
                             final flowRate = river['flowRate'] as double?;
-                            final status =
-                                river['status'] as String? ?? 'unknown';
                             final dataSource =
                                 river['dataSource'] as String? ?? 'unknown';
-
-                            Color statusColor =
-                                river['statusColor'] as Color? ?? Colors.grey;
-                            IconData statusIcon;
-
-                            switch (status.toLowerCase()) {
-                              case 'too low':
-                                statusIcon = Icons.trending_down;
-                                break;
-                              case 'low':
-                                statusIcon = Icons.trending_down;
-                                break;
-                              case 'good':
-                                statusIcon = Icons.check_circle;
-                                break;
-                              case 'high':
-                                statusIcon = Icons.trending_up;
-                                break;
-                              case 'too high':
-                                statusIcon = Icons.trending_up;
-                                break;
-                              default:
-                                statusIcon = Icons.help_outline;
-                            }
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 12),
