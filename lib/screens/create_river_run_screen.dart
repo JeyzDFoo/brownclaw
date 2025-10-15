@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../services/river_service.dart';
 import '../services/river_run_service.dart';
+import '../services/gauge_station_service.dart';
 import '../models/models.dart';
 
 class CreateRiverRunScreen extends StatefulWidget {
@@ -286,11 +288,43 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
         flowUnit: 'cms',
       );
 
-      await RiverRunService.addRun(newRun);
+      final runId = await RiverRunService.addRun(newRun);
 
-      // If a water station was selected, we could optionally link it to the run
-      // For now, just store it in the run data (already included above)
-      // TODO: Implement linking logic if needed
+      // If a water station was selected, create a gauge station linked to this run
+      if (_selectedWaterStation != null) {
+        try {
+          final stationData = _selectedWaterStation!;
+          final gaugeStation = GaugeStation(
+            stationId: stationData['id'] ?? stationData['stationId'] ?? '',
+            name:
+                stationData['name'] ??
+                stationData['stationName'] ??
+                'Unknown Station',
+            riverRunId: runId, // Link to the created run
+            latitude: (stationData['latitude'] as num?)?.toDouble() ?? 0.0,
+            longitude: (stationData['longitude'] as num?)?.toDouble() ?? 0.0,
+            agency: 'Environment Canada',
+            region: _selectedRegion,
+            country: _selectedCountry,
+            isActive: true,
+            parameters: ['discharge', 'water_level'],
+            dataUrl: stationData['dataUrl'] as String?,
+          );
+
+          await GaugeStationService.addStation(gaugeStation);
+
+          if (kDebugMode) {
+            print(
+              '✅ Successfully linked gauge station ${gaugeStation.stationId} to run $runId',
+            );
+          }
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Error linking gauge station: $e');
+          }
+          // Don't fail the whole operation if station linking fails
+        }
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -638,13 +672,8 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                         hint: const Text('Choose a gauge station (optional)'),
                         items: _availableWaterStations.map((station) {
                           final stationName =
-                              station['name'] ??
-                              station['stationName'] ??
-                              'Unknown Station';
-                          final stationId =
-                              station['id'] ??
-                              station['stationId'] ??
-                              'Unknown ID';
+                              station['name'] ?? 'Unknown Station';
+                          final stationId = station['id'] ?? 'Unknown ID';
                           return DropdownMenuItem(
                             value: station,
                             child: Column(

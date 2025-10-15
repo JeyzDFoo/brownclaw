@@ -99,8 +99,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
       print('   Run ID: ${runWithStations.run.id}');
       print('   River Name: ${runWithStations.river?.name}');
       print('   Run Name: ${runWithStations.run.name}');
+      print('   Number of Stations: ${runWithStations.stations.length}');
+      if (runWithStations.stations.isNotEmpty) {
+        for (int i = 0; i < runWithStations.stations.length; i++) {
+          final station = runWithStations.stations[i];
+          print(
+            '   Station $i: ${station.stationId} (hasLiveData: ${station.hasLiveData})',
+          );
+        }
+      }
       print('   Primary Station ID: ${primaryStation?.stationId}');
       print('   Final Station ID: $stationId');
+      print('   Has Live Data: ${runWithStations.hasLiveData}');
     }
 
     return {
@@ -110,6 +120,8 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
         'name': runWithStations.run.name,
         'difficulty': runWithStations.run.difficultyClass,
       },
+      'hasValidStation':
+          primaryStation != null && primaryStation.stationId.isNotEmpty,
       'location': runWithStations.run.putIn ?? 'Unknown Location',
       'difficulty': runWithStations.run.difficultyClass,
       'minRunnable': runWithStations.run.minRecommendedFlow ?? 0.0,

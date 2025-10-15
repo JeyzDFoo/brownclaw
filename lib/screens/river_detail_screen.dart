@@ -56,12 +56,40 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     try {
       final stationId = widget.riverData['stationId'] as String?;
 
+      if (kDebugMode) {
+        print('🔍 RiverDetailScreen loading data for stationId: $stationId');
+        print('🔍 Full riverData: ${widget.riverData}');
+      }
+
       if (stationId == null || stationId.isEmpty) {
         setState(() {
-          _error = 'No station ID available for this river run';
+          _error = 'No gauge station linked to this river run';
           _isLoading = false;
         });
         return;
+      }
+
+      final hasValidStation =
+          widget.riverData['hasValidStation'] as bool? ?? false;
+
+      // Check if this looks like a valid station ID (should be alphanumeric, usually starts with numbers)
+      if (!hasValidStation ||
+          !RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())) {
+        if (kDebugMode) {
+          print(
+            '⚠️ Station ID "$stationId" doesn\'t look like a valid gauge station ID',
+          );
+        }
+        setState(() {
+          _error =
+              'This river run is not connected to a real-time gauge station.\n\nStation ID: $stationId';
+          _isLoading = false;
+        });
+        return;
+      }
+
+      if (kDebugMode) {
+        print('📡 Attempting to fetch live data for station: $stationId');
       }
 
       final liveData = await LiveWaterDataService.fetchStationData(stationId);
@@ -70,12 +98,18 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         setState(() {
           _liveData = liveData;
           _isLoading = false;
+          if (liveData == null) {
+            _error = 'No real-time data available for station $stationId';
+          }
         });
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading live data: $e');
+      }
       if (mounted) {
         setState(() {
-          _error = e.toString();
+          _error = 'Failed to load real-time data: ${e.toString()}';
           _isLoading = false;
         });
       }
@@ -90,10 +124,21 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
     try {
       final stationId = widget.riverData['stationId'] as String?;
+      final hasValidStation =
+          widget.riverData['hasValidStation'] as bool? ?? false;
 
       if (stationId == null || stationId.isEmpty) {
         setState(() {
           _chartError = 'No station ID available for historical data';
+          _isLoadingChart = false;
+        });
+        return;
+      }
+
+      if (!hasValidStation) {
+        setState(() {
+          _chartError =
+              'No real-time gauge station connected to this river run';
           _isLoadingChart = false;
         });
         return;
@@ -218,7 +263,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       return spots;
     } catch (e) {
       print('💥 Error fetching real historical data: $e');
-      // No fallback - rethrow the error to show proper error message
+
       rethrow;
     }
   }
@@ -440,16 +485,42 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Icon(Icons.water, color: Colors.grey[600], size: 16),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Station ID: $stationId',
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
+                      // Show station ID only if it's a valid gauge station
+                      if (widget.riverData['hasValidStation'] == true)
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.water,
+                              color: Colors.grey[600],
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Station ID: $stationId',
+                              style: TextStyle(color: Colors.grey[600]),
+                            ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.info_outline,
+                              color: Colors.orange[600],
+                              size: 16,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'No real-time gauge station data available',
+                                style: TextStyle(
+                                  color: Colors.orange[600],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       if (difficulty != 'Unknown')
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
@@ -464,6 +535,32 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               Text(
                                 'Difficulty: $difficulty',
                                 style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // Show flow recommendations if available
+                      if (widget.riverData['minRunnable'] != null &&
+                          widget.riverData['maxSafe'] != null &&
+                          widget.riverData['minRunnable'] > 0)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.water_drop,
+                                color: Colors.blue[600],
+                                size: 16,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  'Recommended flow: ${widget.riverData['minRunnable']}-${widget.riverData['maxSafe']} m³/s',
+                                  style: TextStyle(
+                                    color: Colors.blue[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
