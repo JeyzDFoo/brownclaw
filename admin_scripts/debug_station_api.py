@@ -76,7 +76,7 @@ def test_station_metadata_apis():
         print(f"\n🔍 Testing station {station_id}:")
         
         try:
-            url = "https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline"
+            url = "https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={}&limit=1&f=json".format(station_id)
             params = {
                 'stations[]': station_id,
                 'parameters[]': '47',  # Flow parameter

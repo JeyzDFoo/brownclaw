@@ -4,6 +4,7 @@ Try different real-time data endpoints based on Environment Canada patterns
 """
 
 import requests
+import json
 from datetime import datetime, timedelta
 
 def test_comprehensive_api_formats():
@@ -13,34 +14,18 @@ def test_comprehensive_api_formats():
     print(f"🧪 Comprehensive API Testing for {station_id}")
     print("=" * 60)
     
-    # Based on Environment Canada documentation and common patterns
+    # Updated API formats - prioritizing working endpoints
     test_urls = [
-        # Original wateroffice API formats
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline/{station_id}',
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/{station_id}',
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/{station_id}/csv',
-        f'https://wateroffice.ec.gc.ca/services/download_stats.html?station_id={station_id}&format=csv&parameter_type=47',
+        # WORKING: New Government of Canada JSON API (correct parameter name)
+        f'https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}&limit=1&f=json',
         
-        # New datamart structure (after Oct 7 change)
-        f'https://dd.weather.gc.ca/today/hydrometric/csv/{station_id}_hourly.csv',
-        f'https://dd.weather.gc.ca/today/hydrometric/csv/{station_id}_daily.csv',
-        f'https://dd.weather.gc.ca/today/hydrometric/csv/{station_id}.csv',
-        f'https://dd.weather.gc.ca/today/hydrometric/realtime/{station_id}.csv',
+        # For comparison: Legacy formats (these should fail with 422)
+        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}&parameters[]=47',
+        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations={station_id}&parameters=47',
         
-        # Government of Canada open data formats
-        f'https://api.weather.gc.ca/collections/hydrometric-realtime/items?station_number={station_id}',
-        f'https://geo.weather.gc.ca/geomet/features/collections/hydrometric-realtime/items?station_number={station_id}',
-        
-        # Try different parameter formats
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations%5B%5D={station_id}&parameters%5B%5D=47',
-        
-        # Alternative service endpoints
-        f'https://wateroffice.ec.gc.ca/data/real_time/{station_id}.csv',
-        f'https://wateroffice.ec.gc.ca/api/realtime?station={station_id}',
-        
-        # Try the MSC Datamart direct paths
-        f'https://dd.weather.gc.ca/today/hydrometric/bc/{station_id}_RT.csv',
-        f'https://dd.weather.gc.ca/today/hydrometric/BC/{station_id}_hourly.csv',
+        # Alternative Government API formats to test
+        f'https://geo.weather.gc.ca/geomet/features/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}',
+        f'https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}&limit=5&f=json',
     ]
     
     today = datetime.now().strftime('%Y-%m-%d')
@@ -64,39 +49,67 @@ def test_comprehensive_api_formats():
             
             print(f"        Status: {status}, Length: {content_length}")
             
-            if status == 200 and content_length > 100:
+            if status == 200 and content_length > 50:
                 content = response.text
-                lines = content.split('\n')
                 
-                # Check if it looks like CSV data
-                if ',' in content and len(lines) > 1:
-                    print(f"        ✅ CSV-like data found!")
-                    print(f"        📊 {len(lines)} lines")
-                    print(f"        📋 Header: {lines[0]}")
+                # Handle JSON responses (new Government of Canada API)
+                if url.startswith('https://api.weather.gc.ca') or 'json' in response.headers.get('content-type', '').lower():
+                    try:
+                        json_data = json.loads(content)
+                        if 'features' in json_data and json_data['features']:
+                            print(f"        ✅ JSON data found!")
+                            print(f"        📊 {len(json_data['features'])} features")
+                            
+                            # Extract flow data from JSON
+                            for feature in json_data['features']:
+                                properties = feature.get('properties', {})
+                                station_name = properties.get('STATION_NAME', 'Unknown')
+                                discharge = properties.get('DISCHARGE')
+                                level = properties.get('LEVEL')
+                                datetime_str = properties.get('DATETIME_LST', properties.get('DATETIME'))
+                                
+                                print(f"        🏷️  Station: {station_name}")
+                                print(f"        📅 Time: {datetime_str}")
+                                
+                                if discharge is not None:
+                                    print(f"        💧 Discharge: {discharge} m³/s")
+                                    return True, url, content
+                                elif level is not None:
+                                    print(f"        📏 Level: {level} m")
+                                    return True, url, content
+                        else:
+                            print(f"        ⚠️  JSON response with no features")
+                    except json.JSONDecodeError:
+                        print(f"        ⚠️  Invalid JSON response")
+                
+                # Handle CSV responses (legacy APIs)
+                else:
+                    lines = content.split('\n')
                     
-                    if len(lines) > 1:
-                        print(f"        📋 Sample: {lines[1]}")
-                    
-                    # Look for flow data
-                    for line in lines[1:6]:
-                        if line.strip():
-                            parts = line.split(',')
-                            for part in parts:
-                                part = part.strip().strip('"')
-                                if part.replace('.', '').isdigit():
-                                    try:
-                                        value = float(part)
-                                        if 0.1 < value < 1000:  # Reasonable flow range
-                                            print(f"        💧 Potential flow: {value} m³/s")
-                                    except:
-                                        pass
-                    
-                    return True, url, content
-                    
-                elif 'json' in response.headers.get('content-type', '').lower():
-                    print(f"        ✅ JSON data found!")
-                    print(f"        📄 Sample: {content[:200]}...")
-                    return True, url, content
+                    # Check if it looks like CSV data
+                    if ',' in content and len(lines) > 1:
+                        print(f"        ✅ CSV-like data found!")
+                        print(f"        📊 {len(lines)} lines")
+                        print(f"        📋 Header: {lines[0]}")
+                        
+                        if len(lines) > 1:
+                            print(f"        📋 Sample: {lines[1]}")
+                        
+                        # Look for flow data
+                        for line in lines[1:6]:
+                            if line.strip():
+                                parts = line.split(',')
+                                for part in parts:
+                                    part = part.strip().strip('"')
+                                    if part.replace('.', '').replace('-', '').isdigit():
+                                        try:
+                                            value = float(part)
+                                            if 0.1 < value < 10000:  # Reasonable flow range
+                                                print(f"        💧 Potential flow: {value} m³/s")
+                                        except:
+                                            pass
+                        
+                        return True, url, content
                 
             elif status == 404:
                 print(f"        ❌ Not Found")

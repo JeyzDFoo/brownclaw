@@ -201,23 +201,30 @@ class StationDataPuller:
         """Test if a station exists and has recent data."""
         try:
             # Try to get recent data for this station
-            url = f"https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}&parameters[]=47&start_date=2025-10-01&end_date=2025-10-14"
+            url = f"https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}&limit=1&f=json"
             
             response = requests.get(url, timeout=5)
             if response.status_code == 200 and response.text.strip():
-                lines = response.text.strip().split('\n')
-                
-                if len(lines) > 1:  # Has header and data
-                    # Extract station info from the response
-                    return {
-                        'id': station_id,
-                        'name': f"Station {station_id}",  # Will be improved if we get better data
-                        'province': self.get_province_from_station_id(station_id),
-                        'api_available': True,
-                        'has_recent_data': True,
-                        'updated_at': datetime.now(timezone.utc).isoformat(),
-                        'data_source': 'discovered'
-                    }
+                try:
+                    import json
+                    json_data = json.loads(response.text)
+                    if 'features' in json_data and json_data['features']:
+                        # Extract station info from the first feature
+                        feature = json_data['features'][0]
+                        properties = feature.get('properties', {})
+                        station_name = properties.get('STATION_NAME', f'Station {station_id}')
+                        
+                        return {
+                            'id': station_id,
+                            'name': station_name,
+                            'province': self.get_province_from_station_id(station_id),
+                            'api_available': True,
+                            'has_recent_data': True,
+                            'updated_at': datetime.now(timezone.utc).isoformat(),
+                            'data_source': 'discovered'
+                        }
+                except json.JSONDecodeError:
+                    pass  # Fall back to error handling below
             
             return None
             
@@ -227,20 +234,30 @@ class StationDataPuller:
     def fetch_station_info(self, station_id: str) -> Optional[Dict]:
         """Fetch information for a specific station."""
         try:
-            # Try to fetch station metadata from the real-time data service
-            url = f"https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}&parameters[]=47&start_date=2025-10-14&end_date=2025-10-14"
+            # Try to fetch station metadata from the new Government of Canada API
+            url = f"https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}&limit=1&f=json"
             
             response = requests.get(url, timeout=10)
             if response.status_code == 200 and response.text.strip():
-                # Parse the response to extract station info
-                lines = response.text.strip().split('\n')
-                if len(lines) > 1:  # Has header and at least one data line
-                    # Extract basic info and return with fallback data
-                    fallback_data = self.get_fallback_station_data(station_id)
-                    if fallback_data:
-                        fallback_data['api_available'] = True
-                        fallback_data['last_data_check'] = datetime.now(timezone.utc).isoformat()
-                        return fallback_data
+                # Parse the JSON response to extract station info
+                try:
+                    import json
+                    json_data = json.loads(response.text)
+                    if 'features' in json_data and json_data['features']:
+                        # Extract station info from the first feature
+                        feature = json_data['features'][0]
+                        properties = feature.get('properties', {})
+                        station_name = properties.get('STATION_NAME', f'Station {station_id}')
+                        
+                        # Get fallback data and update with real info
+                        fallback_data = self.get_fallback_station_data(station_id)
+                        if fallback_data:
+                            fallback_data['name'] = station_name
+                            fallback_data['api_available'] = True
+                            fallback_data['last_data_check'] = datetime.now(timezone.utc).isoformat()
+                            return fallback_data
+                except json.JSONDecodeError:
+                    pass  # Fall back to the error handling below
             
             # If API call fails, still return fallback data but mark API as unavailable
             fallback_data = self.get_fallback_station_data(station_id)

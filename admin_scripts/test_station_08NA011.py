@@ -46,10 +46,12 @@ def test_specific_station(station_id):
     
     # Test different API formats
     api_formats = [
+        # WORKING: New Government of Canada JSON API
+        f'https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER={station_id}&limit=1&f=json',
+        
+        # Legacy formats (for comparison - should fail)
         f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}&parameters[]=47',
         f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations={station_id}&parameters=47',
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}',
-        f'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]={station_id}&parameters[]=46',  # Water level
     ]
     
     for i, url in enumerate(api_formats, 1):

@@ -23,16 +23,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   void _loadFavorites() {
-    FavoriteRiversService.getUserFavorites().listen((favorites) {
+    FavoriteRiversService.getFavoriteRiversDetails().listen((favoriteDetails) {
       setState(() {
-        _favoriteStationIds = favorites;
+        _favoriteStationIds = favoriteDetails
+            .map((r) => r['stationId'] as String)
+            .toList();
       });
-      // Reload river data when favorites change
-      _loadRiverData();
+      // Reload river data when favorites change with the original names
+      _loadRiverData(favoriteDetails);
     });
   }
 
-  void _loadRiverData() async {
+  void _loadRiverData([List<Map<String, dynamic>>? favoriteDetails]) async {
     if (_favoriteStationIds.isEmpty) {
       setState(() {
         _rivers = [];
@@ -46,13 +48,48 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     });
 
     try {
-      // Load data for favorite stations with live data
-      final enrichedData = await LiveWaterDataService.getEnrichedStationsData(
-        _favoriteStationIds,
-      );
+      // Get live data for all favorite stations
+      final liveDataResults = <Map<String, dynamic>>[];
+
+      for (final stationId in _favoriteStationIds) {
+        // Find the original favorite details for this station
+        final originalDetails = favoriteDetails?.firstWhere(
+          (detail) => detail['stationId'] == stationId,
+          orElse: () => <String, dynamic>{},
+        );
+
+        // Get live data for this station
+        final liveData = await LiveWaterDataService.fetchStationData(stationId);
+
+        // Create merged data using original name from favorites
+        final mergedData = <String, dynamic>{
+          'stationId': stationId,
+          'riverName': originalDetails?['name'] ?? 'Unknown River',
+          'section': originalDetails?['section'] ?? '',
+          'location': originalDetails?['location'] ?? 'Unknown Location',
+          'difficulty': originalDetails?['difficulty'] ?? 'Unknown',
+          'minRunnable': originalDetails?['minRunnable'],
+          'maxSafe': originalDetails?['maxSafe'],
+          // Live data
+          'flowRate': liveData?['flowRate'] ?? 0.0,
+          'waterLevel': liveData?['waterLevel'] ?? 0.0,
+          'temperature': liveData?['temperature'] ?? 0.0,
+          'lastUpdated':
+              liveData?['lastUpdated'] ?? DateTime.now().toIso8601String(),
+          'dataSource': liveData != null ? 'live' : 'unavailable',
+          'isLive': liveData != null,
+          'status': _determineStatus(
+            liveData?['flowRate'] ?? 0.0,
+            originalDetails?['minRunnable'],
+            originalDetails?['maxSafe'],
+          ),
+        };
+
+        liveDataResults.add(mergedData);
+      }
 
       setState(() {
-        _rivers = enrichedData;
+        _rivers = liveDataResults;
         _error = null;
       });
     } catch (e) {
@@ -67,8 +104,32 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     }
   }
 
+  String _determineStatus(
+    double flowRate,
+    dynamic minRunnable,
+    dynamic maxSafe,
+  ) {
+    if (minRunnable == null || maxSafe == null) {
+      return 'Unknown';
+    }
+
+    final min = (minRunnable as num).toDouble();
+    final max = (maxSafe as num).toDouble();
+
+    if (flowRate < min) {
+      return 'Too Low';
+    } else if (flowRate > max) {
+      return 'Too High';
+    } else {
+      return 'Runnable';
+    }
+  }
+
   Future<void> _refreshData() async {
-    _loadRiverData();
+    // Get the current favorite details to preserve names
+    final favoriteDetails =
+        await FavoriteRiversService.getFavoriteRiversDetails().first;
+    _loadRiverData(favoriteDetails);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

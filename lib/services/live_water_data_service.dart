@@ -38,7 +38,7 @@ class LiveWaterDataService {
     String stationId,
   ) async {
     try {
-      final url = '$baseUrl?station_number=$stationId&limit=1';
+      final url = '$baseUrl?STATION_NUMBER=$stationId&limit=1&f=json';
       if (kDebugMode) {
         print('🌊 Fetching live data for station $stationId');
         print('📡 URL: $url');
@@ -59,21 +59,25 @@ class LiveWaterDataService {
       }
 
       if (response.statusCode == 200) {
-        final csvData = response.body;
-        final flowRate = _parseLatestFlow(csvData);
+        final jsonData = response.body;
+        final flowData = _parseJsonResponse(jsonData);
 
-        if (flowRate != null) {
+        if (flowData != null) {
           if (kDebugMode) {
-            print('✅ Live data retrieved: ${flowRate}m³/s for $stationId');
+            print(
+              '✅ Live data retrieved: ${flowData['flowRate']}m³/s for $stationId',
+            );
           }
           return {
-            'flowRate': flowRate,
+            'flowRate': flowData['flowRate'],
+            'level': flowData['level'],
+            'stationName': flowData['stationName'],
             'status': 'live',
             'lastUpdate': DateTime.now().toIso8601String(),
           };
         } else {
           if (kDebugMode) {
-            print('⚠️ No flow data found in CSV response');
+            print('⚠️ No flow data found in JSON response');
           }
         }
       } else {
@@ -97,12 +101,11 @@ class LiveWaterDataService {
   static Future<Map<String, dynamic>?> _fetchSpecialStation(
     String stationId,
   ) async {
-    // Try multiple API formats for known online stations
+    // Try the working Government of Canada API
     final formats = [
-      '$baseUrl?stations[]=$stationId&parameters[]=47',
-      '$baseUrl?stations=$stationId&parameters=47',
-      '$baseUrl?stations[]=$stationId',
-      'https://wateroffice.ec.gc.ca/services/real_time_data/csv/inline?stations[]=$stationId&parameters[]=46', // water level
+      'https://api.weather.gc.ca/collections/hydrometric-realtime/items?STATION_NUMBER=$stationId&limit=1&f=json',
+      // Legacy formats for fallback (these will likely fail)
+      '$legacyUrl?stations[]=$stationId&parameters[]=47',
     ];
 
     for (int i = 0; i < formats.length; i++) {
@@ -116,16 +119,36 @@ class LiveWaterDataService {
             .timeout(const Duration(seconds: 10));
 
         if (response.statusCode == 200 && response.body.isNotEmpty) {
-          final flowRate = _parseLatestFlow(response.body);
-          if (flowRate != null) {
-            if (kDebugMode) {
-              print('✅ Success with format ${i + 1}: ${flowRate}m³/s');
+          // Try JSON parsing first (for new API)
+          if (formats[i].contains('api.weather.gc.ca')) {
+            final flowData = _parseJsonResponse(response.body);
+            if (flowData != null && flowData['flowRate'] != null) {
+              if (kDebugMode) {
+                print(
+                  '✅ Success with JSON format ${i + 1}: ${flowData['flowRate']}m³/s',
+                );
+              }
+              return {
+                'flowRate': flowData['flowRate'],
+                'level': flowData['level'],
+                'stationName': flowData['stationName'],
+                'status': 'live',
+                'lastUpdate': DateTime.now().toIso8601String(),
+              };
             }
-            return {
-              'flowRate': flowRate,
-              'status': 'live',
-              'lastUpdate': DateTime.now().toIso8601String(),
-            };
+          } else {
+            // Try CSV parsing (for legacy API)
+            final flowRate = _parseLatestFlow(response.body);
+            if (flowRate != null) {
+              if (kDebugMode) {
+                print('✅ Success with CSV format ${i + 1}: ${flowRate}m³/s');
+              }
+              return {
+                'flowRate': flowRate,
+                'status': 'live',
+                'lastUpdate': DateTime.now().toIso8601String(),
+              };
+            }
           }
         } else if (kDebugMode) {
           print('❌ Format ${i + 1} failed: HTTP ${response.statusCode}');
@@ -202,39 +225,39 @@ class LiveWaterDataService {
     return null;
   }
 
-  /// Parse flow data from JSON API response
-  static double? _parseJsonFlow(String jsonData) {
+  /// Parse complete station data from JSON API response
+  static Map<String, dynamic>? _parseJsonResponse(String jsonData) {
     try {
       final data = json.decode(jsonData);
 
       if (data['features'] != null && data['features'].isNotEmpty) {
         final features = data['features'] as List;
+        final feature = features[0]; // Get the first (latest) feature
+        final props = feature['properties'];
 
-        // Look through features for discharge data
-        for (final feature in features) {
-          final props = feature['properties'];
-          if (props != null) {
-            final discharge = props['DISCHARGE'];
-            if (discharge != null) {
-              final flowRate = double.tryParse(discharge.toString());
-              if (flowRate != null && flowRate >= 0) {
-                if (kDebugMode) {
-                  print('✅ Found JSON flow rate: ${flowRate}m³/s');
-                }
-                return flowRate;
-              }
-            }
+        if (props != null) {
+          final discharge = props['DISCHARGE'];
+          final level = props['LEVEL'];
+          final stationName = props['STATION_NAME'] ?? 'Unknown Station';
+
+          if (discharge != null || level != null) {
+            return {
+              'flowRate': discharge != null
+                  ? double.tryParse(discharge.toString())
+                  : null,
+              'level': level != null ? double.tryParse(level.toString()) : null,
+              'stationName': stationName,
+            };
           }
         }
       }
 
       if (kDebugMode) {
-        print('⚠️ No valid flow data found in JSON response');
-        print('Response: ${jsonData.substring(0, 200)}...');
+        print('⚠️ No valid station data found in JSON response');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error parsing JSON data: $e');
+        print('❌ Error parsing JSON response: $e');
       }
     }
     return null;
