@@ -260,258 +260,238 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search Water Stations'),
-        backgroundColor: Colors.blueAccent,
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          // Search and filters
-          Container(
-            padding: const EdgeInsets.all(16),
-            color: Colors.grey[100],
-            child: Column(
-              children: [
-                // Search bar
-                TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    hintText:
-                        'Search by river name, station ID, or location...',
-                    prefixIcon: const Icon(Icons.search),
-                    suffixIcon: _isSearching
-                        ? const Padding(
-                            padding: EdgeInsets.all(12),
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        : _searchController.text.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear),
-                            onPressed: () {
-                              _searchController.clear();
-                            },
-                          )
-                        : null,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: Colors.white,
+    return Column(
+      children: [
+        // Search and filters
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.grey[100],
+          child: Column(
+            children: [
+              // Search bar
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search by river name, station ID, or location...',
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: _isSearching
+                      ? const Padding(
+                          padding: EdgeInsets.all(12),
+                          child: SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            _searchController.clear();
+                          },
+                        )
+                      : null,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
+                  filled: true,
+                  fillColor: Colors.white,
                 ),
-                const SizedBox(height: 12),
+              ),
+              const SizedBox(height: 12),
 
-                // Filters row
-                Row(
-                  children: [
-                    // Province dropdown
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedProvince,
-                        decoration: InputDecoration(
-                          labelText: 'Province',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          filled: true,
-                          fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
+              // Filters row
+              Row(
+                children: [
+                  // Province dropdown
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: _selectedProvince,
+                      decoration: InputDecoration(
+                        labelText: 'Province',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        items: _availableProvinces.map((province) {
-                          return DropdownMenuItem(
-                            value: province,
-                            child: Text(
-                              province,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          );
-                        }).toList(),
-                        onChanged: _onProvinceChanged,
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // Whitewater filter
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Checkbox(
-                            value: _showWhitewaterOnly,
-                            onChanged: _onWhitewaterFilterChanged,
-                            materialTapTargetSize:
-                                MaterialTapTargetSize.shrinkWrap,
+                      items: _availableProvinces.map((province) {
+                        return DropdownMenuItem(
+                          value: province,
+                          child: Text(
+                            province,
+                            style: const TextStyle(fontSize: 14),
                           ),
-                          const Text(
-                            'Whitewater',
-                            style: TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
+                        );
+                      }).toList(),
+                      onChanged: _onProvinceChanged,
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+                  ),
+                  const SizedBox(width: 12),
 
-          // Results
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredStations.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                  // Whitewater filter
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          Icons.search_off,
-                          size: 64,
-                          color: Colors.grey[400],
+                        Checkbox(
+                          value: _showWhitewaterOnly,
+                          onChanged: _onWhitewaterFilterChanged,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchController.text.isEmpty
-                              ? 'No stations loaded'
-                              : 'No stations found matching "${_searchController.text}"',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Try searching for a river name, location, or station ID',
-                          style: TextStyle(
-                            color: Colors.grey[500],
-                            fontSize: 14,
-                          ),
-                          textAlign: TextAlign.center,
+                        const Text(
+                          'Whitewater',
+                          style: TextStyle(fontSize: 14),
                         ),
                       ],
                     ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadRiverData,
-                    child: ListView.builder(
-                      itemCount: _filteredStations.length,
-                      itemBuilder: (context, index) {
-                        final station = _filteredStations[index];
-                        final riverData = _riverData[station.id];
-                        final isFavorite = _favoriteStationIds.contains(
-                          station.id,
-                        );
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
 
-                        return Card(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 4,
-                          ),
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              backgroundColor: _getStatusColor(station),
-                              child: Text(
-                                station.id.substring(0, 2),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                            title: Text(
-                              station.name,
+        // Results
+        Expanded(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : _filteredStations.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+                      const SizedBox(height: 16),
+                      Text(
+                        _searchController.text.isEmpty
+                            ? 'No stations loaded'
+                            : 'No stations found matching "${_searchController.text}"',
+                        style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Try searching for a river name, location, or station ID',
+                        style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadRiverData,
+                  child: ListView.builder(
+                    itemCount: _filteredStations.length,
+                    itemBuilder: (context, index) {
+                      final station = _filteredStations[index];
+                      final riverData = _riverData[station.id];
+                      final isFavorite = _favoriteStationIds.contains(
+                        station.id,
+                      );
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: _getStatusColor(station),
+                            child: Text(
+                              station.id.substring(0, 2),
                               style: const TextStyle(
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${station.id} • ${station.province == 'null' ? 'Unknown Province' : station.province}',
-                                ),
-                                if (station.isWhitewater &&
-                                    station.section != null)
-                                  Text(
-                                    '${station.section} • ${station.difficulty}',
-                                    style: TextStyle(
-                                      color: Colors.blue[700],
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      _getStatusText(station),
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: _getStatusColor(station),
-                                      ),
-                                    ),
-                                    if (riverData?['timestamp'] != null)
-                                      Text(
-                                        riverData!['timestamp'],
-                                        style: const TextStyle(
-                                          fontSize: 11,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                IconButton(
-                                  icon: Icon(
-                                    isFavorite ? Icons.star : Icons.star_border,
-                                    color: isFavorite
-                                        ? Colors.amber
-                                        : Colors.grey,
-                                  ),
-                                  onPressed: () => _toggleFavorite(station.id),
-                                ),
-                              ],
-                            ),
-                            onTap: () {
-                              // TODO: Navigate to detailed station view
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text('Selected: ${station.name}'),
-                                  duration: const Duration(seconds: 1),
-                                ),
-                              );
-                            },
                           ),
-                        );
-                      },
-                    ),
+                          title: Text(
+                            station.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${station.id} • ${station.province == 'null' ? 'Unknown Province' : station.province}',
+                              ),
+                              if (station.isWhitewater &&
+                                  station.section != null)
+                                Text(
+                                  '${station.section} • ${station.difficulty}',
+                                  style: TextStyle(
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                            ],
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    _getStatusText(station),
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: _getStatusColor(station),
+                                    ),
+                                  ),
+                                  if (riverData?['timestamp'] != null)
+                                    Text(
+                                      riverData!['timestamp'],
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  isFavorite ? Icons.star : Icons.star_border,
+                                  color: isFavorite
+                                      ? Colors.amber
+                                      : Colors.grey,
+                                ),
+                                onPressed: () => _toggleFavorite(station.id),
+                              ),
+                            ],
+                          ),
+                          onTap: () {
+                            // TODO: Navigate to detailed station view
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Selected: ${station.name}'),
+                                duration: const Duration(seconds: 1),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
                   ),
-          ),
-        ],
-      ),
+                ),
+        ),
+      ],
     );
   }
 }

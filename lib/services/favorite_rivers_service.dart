@@ -16,7 +16,7 @@ class FavoriteRiversService {
         .snapshots()
         .map((doc) {
           if (!doc.exists) return <String>[];
-          final data = doc.data() as Map<String, dynamic>?;
+          final data = doc.data();
           final favorites = data?['rivers'] as List?;
           return favorites?.cast<String>() ?? <String>[];
         });

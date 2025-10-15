@@ -54,8 +54,10 @@ lib/
 ├── firebase_options.dart        # Firebase configuration (auto-generated)
 └── screens/
     ├── auth_screen.dart         # Authentication UI (login/signup)
-    ├── dashboard_screen.dart    # Main dashboard with quick actions
-    └── logbook_screen.dart      # Personal LogBook entries
+    ├── main_screen.dart         # Main app with bottom navigation
+    ├── logbook_screen.dart      # Personal LogBook entries
+    ├── river_levels_screen.dart # Favorite rivers and water levels
+    └── searchable_stations_screen.dart # Water station search
 ```
 
 ## How to Use
@@ -64,10 +66,12 @@ lib/
 2. **Authentication**: Choose from multiple sign-in options:
    - Email/password signup and login
    - **Google Sign-In** - Quick OAuth authentication
-3. **Dashboard**: Once authenticated, you'll see:
-   - Personal welcome message with your details
-   - Quick action cards for easy navigation
-   - Profile management and sign-out options
+3. **Main App**: Once authenticated, you'll see:
+   - Bottom navigation bar with three main sections
+   - **Logbook**: Log your river descents and view your history
+   - **Favourites**: View your favorite rivers and current water levels
+   - **Find Stations**: Search for new water monitoring stations
+   - Profile management and sign-out via the top app bar
 4. **LogBook**: Record your personal entries:
    - Add titled log entries with descriptions
    - View all your entries in chronological order
