@@ -727,36 +727,36 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                         style: const TextStyle(fontSize: 13),
                                       ),
                                     //  Text('Status: $status'),
-                                    Row(
-                                      children: [
-                                        Icon(
-                                          hasLiveData
-                                              ? Icons.live_tv
-                                              : Icons.auto_graph,
-                                          size: 12,
-                                          color: hasLiveData
-                                              ? Colors.green
-                                              : Colors.amber.shade700,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Expanded(
-                                          child: Text(
-                                            runWithStations.lastDataUpdate
-                                                    ?.toIso8601String() ??
-                                                (hasLiveData
-                                                    ? 'Live data'
-                                                    : 'No recent data'),
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: hasLiveData
-                                                  ? Colors.green
-                                                  : Colors.amber.shade700,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    // Row(
+                                    //   children: [
+                                    //     Icon(
+                                    //       hasLiveData
+                                    //           ? Icons.live_tv
+                                    //           : Icons.auto_graph,
+                                    //       size: 12,
+                                    //       color: hasLiveData
+                                    //           ? Colors.green
+                                    //           : Colors.amber.shade700,
+                                    //     ),
+                                    //     const SizedBox(width: 4),
+                                    //     // Expanded(
+                                    //     //   child: Text(
+                                    //     //     runWithStations.lastDataUpdate
+                                    //     //             ?.toIso8601String() ??
+                                    //     //         (hasLiveData
+                                    //     //             ? 'Live data'
+                                    //     //             : 'No recent data'),
+                                    //     //     style: TextStyle(
+                                    //     //       fontSize: 12,
+                                    //     //       color: hasLiveData
+                                    //     //           ? Colors.green
+                                    //     //           : Colors.amber.shade700,
+                                    //     //       fontWeight: FontWeight.bold,
+                                    //     //     ),
+                                    //     //   ),
+                                    //     // ),
+                                    //   ],
+                                    // ),
                                   ],
                                 ),
 
