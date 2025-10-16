@@ -35,6 +35,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RiverRunProvider()),
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => LiveWaterDataProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

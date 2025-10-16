@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -13,56 +14,122 @@ class LiveWaterDataService {
   static const String jsonBaseUrl =
       'https://api.weather.gc.ca/collections/hydrometric-realtime/items';
 
+  // Request deduplication - prevent multiple requests for same station
+  static final Map<String, Future<LiveWaterData?>> _activeRequests = {};
+
+  // Rate limiting - prevent API abuse
+  static final Map<String, DateTime> _lastApiCall = {};
+  static const Duration _minApiInterval = Duration(seconds: 30);
+
   // #todo: Add local caching for live data to reduce API calls
   // static final Map<String, Map<String, dynamic>> _liveDataCache = {};
   // static final Map<String, DateTime> _cacheTimestamps = {};
   // static const Duration _cacheTimeout = Duration(minutes: 5); // Live data changes frequently
 
-  // #todo: Add rate limiting to prevent API abuse
-  // static final Map<String, DateTime> _lastApiCall = {};
-  // static const Duration _minApiInterval = Duration(seconds: 30);
-
   /// Fetch live data for a specific station
   /// Updated to return LiveWaterData for type safety and better data handling
   static Future<LiveWaterData?> fetchStationData(String stationId) async {
-    print('🔥 FETCHSTATIONDATA CALLED FOR: $stationId');
-    print('🔥 NEW CODE IS RUNNING!');
+    // Check if there's already an active request for this station
+    if (_activeRequests.containsKey(stationId)) {
+      if (kDebugMode) {
+        print('DEDUP: Reusing existing request for station $stationId');
+      }
+      return _activeRequests[stationId];
+    }
 
-    // #todo: Check cache first before making API calls
-    // if (_isCacheValid(stationId)) {
-    //   print('🔥 RETURNING CACHED DATA');
-    //   return _liveDataCache[stationId];
-    // }
+    // Check rate limiting
+    final lastCall = _lastApiCall[stationId];
+    if (lastCall != null) {
+      final timeSinceLastCall = DateTime.now().difference(lastCall);
+      if (timeSinceLastCall < _minApiInterval) {
+        if (kDebugMode) {
+          print(
+            'RATE_LIMIT: Request for station $stationId blocked (last call ${timeSinceLastCall.inSeconds}s ago)',
+          );
+        }
+        return null; // Don't spam the API
+      }
+    }
 
-    // #todo: Implement rate limiting to prevent API abuse
-    // if (_shouldRateLimit(stationId)) {
-    //   print('🔥 RATE LIMITED - returning cached data');
-    //   return _liveDataCache[stationId];
-    // }
+    final fetchId = DateTime.now().millisecondsSinceEpoch.toString().substring(
+      8,
+    );
 
-    // Try CSV endpoint first (more reliable)
-    print('🔥 Trying CSV first...');
+    // Create and store the request future
+    final requestFuture = _performStationRequest(stationId, fetchId);
+    _activeRequests[stationId] = requestFuture;
+
+    try {
+      final result = await requestFuture;
+      _lastApiCall[stationId] = DateTime.now();
+      return result;
+    } finally {
+      // Clean up the active request
+      _activeRequests.remove(stationId);
+    }
+  }
+
+  /// Internal method to perform the actual API request
+  static Future<LiveWaterData?> _performStationRequest(
+    String stationId,
+    String fetchId,
+  ) async {
+    if (kDebugMode) {
+      print('🔥 FETCH [$fetchId] STARTED FOR: $stationId');
+    }
+
+    // Try CSV endpoint first (more reliable when data is fresh)
+    if (kDebugMode) {
+      print('🔥 FETCH [$fetchId] Trying CSV first...');
+    }
     final csvData = await _fetchFromCsvDataMart(stationId);
     if (csvData != null) {
-      print('🔥 CSV SUCCESS: ${csvData.formattedFlowRate}');
-      // #todo: Cache the successful result
-      // _liveDataCache[stationId] = csvData;
-      // _cacheTimestamps[stationId] = DateTime.now();
-      return csvData;
+      // Check if CSV data is fresh (less than 6 hours old)
+      final dataAge = DateTime.now().difference(csvData.timestamp);
+      if (dataAge.inHours < 6) {
+        if (kDebugMode) {
+          print(
+            '🔥 FETCH [$fetchId] CSV SUCCESS: ${csvData.formattedFlowRate} (${csvData.dataAge}) - SOURCE: CSV',
+          );
+        }
+        return csvData;
+      } else {
+        if (kDebugMode) {
+          print(
+            '❌ FETCH [$fetchId] CSV data is stale (${csvData.dataAge}), rejecting...',
+          );
+        }
+      }
     }
 
-    // Fallback to JSON API
-    print('🔥 CSV failed, trying JSON...');
+    // Try JSON API for fresh data
+    if (kDebugMode) {
+      print('🔥 FETCH [$fetchId] Trying JSON API...');
+    }
     final jsonData = await _fetchFromJsonApi(stationId);
     if (jsonData != null) {
-      print('🔥 JSON FALLBACK: ${jsonData.formattedFlowRate}');
-      // #todo: Cache the successful result
-      // _liveDataCache[stationId] = jsonData;
-      // _cacheTimestamps[stationId] = DateTime.now();
-      return jsonData;
+      // Check if JSON data is fresh (less than 6 hours old)
+      final dataAge = DateTime.now().difference(jsonData.timestamp);
+      if (dataAge.inHours < 6) {
+        if (kDebugMode) {
+          print(
+            '🔥 FETCH [$fetchId] JSON SUCCESS: ${jsonData.formattedFlowRate} (${jsonData.dataAge}) - SOURCE: JSON',
+          );
+        }
+        return jsonData;
+      } else {
+        if (kDebugMode) {
+          print(
+            '❌ JSON data is also stale (${jsonData.dataAge}), rejecting...',
+          );
+        }
+      }
     }
 
-    print('🔥 NO DATA FOUND');
+    // No fresh data available - return null to show error
+    if (kDebugMode) {
+      print('❌ NO FRESH DATA AVAILABLE - all sources are stale or failed');
+    }
     return null;
   }
 
@@ -104,6 +171,18 @@ class LiveWaterDataService {
       if (response.statusCode == 200) {
         final lines = response.body.split('\n');
 
+        if (kDebugMode) {
+          print('🔍 CSV Response for $stationId:');
+          print('   Total lines: ${lines.length}');
+          print('   Last 5 lines:');
+          for (int i = max(0, lines.length - 6); i < lines.length; i++) {
+            final line = lines[i].trim();
+            if (line.isNotEmpty) {
+              print('   [$i]: $line');
+            }
+          }
+        }
+
         // Find the latest data (last non-empty line)
         for (int i = lines.length - 1; i >= 0; i--) {
           final line = lines[i].trim();
@@ -114,6 +193,14 @@ class LiveWaterDataService {
               final waterLevel = parts[2];
               final discharge = parts[6];
 
+              if (kDebugMode) {
+                print('🔍 Parsing line $i:');
+                print('   Raw parts: $parts');
+                print('   Timestamp: $timestamp');
+                print('   Water Level: $waterLevel');
+                print('   Discharge: $discharge');
+              }
+
               if (discharge.isNotEmpty &&
                   discharge.toLowerCase() != 'no data') {
                 final flowRate = double.tryParse(discharge);
@@ -123,6 +210,7 @@ class LiveWaterDataService {
                   '🔥 RAW CSV DISCHARGE VALUE: "$discharge" for station $stationId',
                 );
                 print('🔥 PARSED FLOW RATE: $flowRate m³/s');
+                print('🔥 TIMESTAMP: $timestamp');
 
                 if (flowRate != null) {
                   if (kDebugMode) {
@@ -206,7 +294,8 @@ class LiveWaterDataService {
             'level': flowData['level'],
             'stationName': flowData['stationName'],
             'status': 'live',
-            'lastUpdate': DateTime.now().toIso8601String(),
+            'lastUpdate':
+                flowData['datetime'], // Use actual data timestamp, not current time!
           };
 
           return LiveWaterData.fromApiResponse(stationId, rawData, 'json');
@@ -271,6 +360,8 @@ class LiveWaterDataService {
           final discharge = props['DISCHARGE'];
           final level = props['LEVEL'];
           final stationName = props['STATION_NAME'] ?? 'Unknown Station';
+          final datetime =
+              props['DATETIME']; // Extract the actual data timestamp
 
           if (discharge != null || level != null) {
             return {
@@ -279,6 +370,7 @@ class LiveWaterDataService {
                   : null,
               'level': level != null ? double.tryParse(level.toString()) : null,
               'stationName': stationName,
+              'datetime': datetime, // Return the actual data timestamp
             };
           }
         }

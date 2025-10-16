@@ -16,15 +16,28 @@ class RiverLevelsScreen extends StatefulWidget {
 }
 
 class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
+  // #todo: MAJOR REFACTOR NEEDED - Move all live data management to LiveWaterDataProvider
+  // Currently this screen is doing too much:
+  // 1. Managing API calls directly (should be in provider)
+  // 2. Caching live data locally (should be in provider)
+  // 3. Rate limiting logic (should be in provider)
+  // 4. Deduplication logic (partially moved to service, should be fully in provider)
+  // 5. Multiple concurrent refresh triggers causing API spam
+  //
+  // SOLUTION: Complete migration to use LiveWaterDataProvider for:
+  // - Centralized caching across app
+  // - Automatic deduplication of requests
+  // - Rate limiting per station
+  // - Reactive UI updates via ChangeNotifier
+  // - Proper error state management
+  //
+  // This will eliminate the repeated API calls and improve performance significantly.
+
   Set<String> _lastFavoriteRunIds = {}; // Track the actual favorite run IDs
   Set<String> _updatingRunIds =
-      {}; // Track which runs are currently updating live data
-
-  // Live data cache: Map<stationId, liveData>
-  // #todo: Move this cache to a dedicated CacheProvider for shared access
-  // #todo: Implement cache expiration and cleanup to prevent memory leaks
-  // Updated to use typed LiveWaterData objects
-  Map<String, LiveWaterData> _liveDataCache = {};
+      {}; // Track which runs are currently updating (remove after refactor)
+  Map<String, LiveWaterData> _liveDataCache =
+      {}; // Temporary until provider migration (remove after refactor)
 
   @override
   void initState() {
@@ -65,6 +78,25 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   void _updateLiveDataInBackground(List<String> favoriteRunIds) async {
     if (favoriteRunIds.isEmpty) return;
 
+    // Wait for the river run provider to have the runs loaded
+    final riverRunProvider = context.read<RiverRunProvider>();
+    if (riverRunProvider.isLoading) {
+      if (kDebugMode) {
+        print('🌊 Waiting for runs to load before fetching live data...');
+      }
+      // Wait a bit and try again
+      await Future.delayed(const Duration(milliseconds: 1000));
+      if (!mounted) return;
+
+      // Check again if still loading
+      if (riverRunProvider.isLoading) {
+        if (kDebugMode) {
+          print('🌊 Still loading runs, skipping live data update');
+        }
+        return;
+      }
+    }
+
     // Mark all runs as updating
     setState(() {
       _updatingRunIds = Set<String>.from(favoriteRunIds);
@@ -74,24 +106,38 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     await Future.delayed(const Duration(milliseconds: 500));
 
     try {
-      final riverRunProvider = context.read<RiverRunProvider>();
-
       // Collect unique station IDs directly from runs' stationId field
       final Set<String> uniqueStationIds = {};
       final currentRuns = riverRunProvider.favoriteRuns;
+
+      if (kDebugMode) {
+        print(
+          '🌊 Extracting station IDs from ${currentRuns.length} loaded runs...',
+        );
+      }
 
       for (final runWithStations in currentRuns) {
         final stationId = runWithStations.run.stationId;
         if (stationId != null && stationId.isNotEmpty) {
           uniqueStationIds.add(stationId);
+          if (kDebugMode) {
+            print(
+              '   Found station ID: $stationId for ${runWithStations.run.displayName}',
+            );
+          }
         }
       }
 
-      if (uniqueStationIds.isEmpty) return;
+      if (uniqueStationIds.isEmpty) {
+        if (kDebugMode) {
+          print('🌊 No station IDs found in loaded runs');
+        }
+        return;
+      }
 
       if (kDebugMode) {
         print(
-          '🌊 Fetching live data for ${uniqueStationIds.length} unique stations directly...',
+          '🌊 Fetching live data for ${uniqueStationIds.length} unique stations: ${uniqueStationIds.join(", ")}',
         );
       }
 
@@ -114,7 +160,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
               _liveDataCache[stationId] = liveData;
               if (kDebugMode) {
                 print(
-                  '✅ Got live data for $stationId: ${liveData.formattedFlowRate}',
+                  '✅ [UI-CACHE] Got live data for $stationId: ${liveData.formattedFlowRate} (${liveData.dataAge}) [${DateTime.now().millisecondsSinceEpoch}]',
                 );
               }
             }
@@ -160,7 +206,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     }
   }
 
-  // Get live data for a station from cache
+  // Get live data for a station from cache (will be moved to provider later)
   // Updated to return LiveWaterData for type safety
   LiveWaterData? _getLiveDataForStation(String? stationId) {
     if (stationId == null || stationId.isEmpty) return null;
@@ -237,6 +283,9 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   }
 
   // Convert new RiverRunWithStations to legacy format for compatibility
+  // #todo: Remove this method by updating RiverDetailScreen to accept RiverRunWithStations directly
+  // This conversion exists only because RiverDetailScreen still expects Map<String, dynamic>
+  // instead of typed models. Eliminating this would improve type safety and reduce mapping bugs.
   Map<String, dynamic> _convertRunToLegacyFormat(
     RiverRunWithStations runWithStations,
   ) {
@@ -663,15 +712,45 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
             !currentFavoriteIds.containsAll(_lastFavoriteRunIds)) {
           _lastFavoriteRunIds = Set<String>.from(currentFavoriteIds);
           // Schedule loading after the current build completes to avoid spinner flash
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
-            _updateLiveDataInBackground(currentFavoriteIds.toList());
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
+            // Only update live data after the runs are loaded
+            if (mounted) {
+              _updateLiveDataInBackground(currentFavoriteIds.toList());
+            }
           });
         }
 
         final favoriteRuns = riverRunProvider.favoriteRuns;
         final isLoading = riverRunProvider.isLoading;
         final error = riverRunProvider.error;
+
+        // Trigger live data fetch when runs finish loading
+        if (!isLoading &&
+            favoriteRuns.isNotEmpty &&
+            currentFavoriteIds.isNotEmpty) {
+          // Check if we need to fetch live data for these runs
+          final needsLiveDataUpdate = favoriteRuns.any((run) {
+            final stationId = run.run.stationId;
+            return stationId != null &&
+                stationId.isNotEmpty &&
+                !_liveDataCache.containsKey(stationId);
+          });
+
+          if (needsLiveDataUpdate) {
+            // Schedule live data update after this build cycle
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
+                if (kDebugMode) {
+                  print(
+                    '🌊 Auto-triggering live data update after runs loaded',
+                  );
+                }
+                _updateLiveDataInBackground(currentFavoriteIds.toList());
+              }
+            });
+          }
+        }
 
         return Scaffold(
           body: Column(
@@ -864,6 +943,50 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                 final currentDischarge = _getCurrentDischarge(
                                   runWithStations,
                                 );
+                                final hasLiveData = _hasLiveData(
+                                  runWithStations,
+                                );
+                                final flowStatus = _getFlowStatus(
+                                  runWithStations,
+                                );
+                                final stationId = runWithStations.run.stationId;
+
+                                if (kDebugMode) {
+                                  print(
+                                    '🎯 Rendering ListTile for ${runWithStations.run.displayName}:',
+                                  );
+                                  print('   Station ID: $stationId');
+                                  print(
+                                    '   Current Discharge: $currentDischarge',
+                                  );
+                                  print('   Has Live Data: $hasLiveData');
+                                  print('   Flow Status: $flowStatus');
+                                  if (stationId != null) {
+                                    final cachedData =
+                                        _liveDataCache[stationId];
+                                    print('   Cached Data: $cachedData');
+                                    if (cachedData != null) {
+                                      print(
+                                        '   Cached Flow Rate: ${cachedData.flowRate}',
+                                      );
+                                      print(
+                                        '   Cached Formatted: ${cachedData.formattedFlowRate}',
+                                      );
+                                      print(
+                                        '   Cached Station Name: ${cachedData.stationName}',
+                                      );
+                                      print(
+                                        '   Cached Data Source: ${cachedData.dataSource}',
+                                      );
+                                      print(
+                                        '   Cached Timestamp: ${cachedData.timestamp}',
+                                      );
+                                    }
+                                  }
+                                  print(
+                                    '   Fallback discharge from model: ${runWithStations.currentDischarge}',
+                                  );
+                                }
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 12),
@@ -917,44 +1040,36 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 4),
-                                        if (currentDischarge != null)
-                                          Text(
-                                            'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s',
-                                            style: const TextStyle(
-                                              fontSize: 13,
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              hasLiveData
+                                                  ? Icons.live_tv
+                                                  : Icons.info_outline,
+                                              size: 14,
+                                              color: hasLiveData
+                                                  ? Colors.green[600]
+                                                  : Colors.orange[600],
                                             ),
-                                          ),
-                                        //  Text('Status: $status'),
-                                        // Row(
-                                        //   children: [
-                                        //     Icon(
-                                        //       hasLiveData
-                                        //           ? Icons.live_tv
-                                        //           : Icons.auto_graph,
-                                        //       size: 12,
-                                        //       color: hasLiveData
-                                        //           ? Colors.green
-                                        //           : Colors.amber.shade700,
-                                        //     ),
-                                        //     const SizedBox(width: 4),
-                                        //     // Expanded(
-                                        //     //   child: Text(
-                                        //     //     runWithStations.lastDataUpdate
-                                        //     //             ?.toIso8601String() ??
-                                        //     //         (hasLiveData
-                                        //     //             ? 'Live data'
-                                        //     //             : 'No recent data'),
-                                        //     //     style: TextStyle(
-                                        //     //       fontSize: 12,
-                                        //     //       color: hasLiveData
-                                        //     //           ? Colors.green
-                                        //     //           : Colors.amber.shade700,
-                                        //     //       fontWeight: FontWeight.bold,
-                                        //     //     ),
-                                        //     //   ),
-                                        //     // ),
-                                        //   ],
-                                        // ),
+                                            const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                currentDischarge != null
+                                                    ? 'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s • $flowStatus'
+                                                    : 'Status: $flowStatus',
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: hasLiveData
+                                                      ? Colors.green[700]
+                                                      : Colors.grey[600],
+                                                  fontWeight: hasLiveData
+                                                      ? FontWeight.w500
+                                                      : FontWeight.normal,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ],
                                     ),
 
@@ -979,6 +1094,58 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                                         Color
                                                       >(Colors.blue),
                                                 ),
+                                          ),
+
+                                        // Manual refresh button for this specific run
+                                        if (stationId != null &&
+                                            stationId.isNotEmpty)
+                                          IconButton(
+                                            icon: const Icon(
+                                              Icons.refresh,
+                                              color: Colors.blue,
+                                              size: 20,
+                                            ),
+                                            onPressed: () async {
+                                              if (kDebugMode) {
+                                                print(
+                                                  '🔄 Manual refresh for station: $stationId',
+                                                );
+                                              }
+                                              setState(() {
+                                                _updatingRunIds.add(
+                                                  runWithStations.run.id,
+                                                );
+                                              });
+
+                                              try {
+                                                final liveData =
+                                                    await LiveWaterDataService.fetchStationData(
+                                                      stationId,
+                                                    );
+                                                if (liveData != null) {
+                                                  _liveDataCache[stationId] =
+                                                      liveData;
+                                                  if (kDebugMode) {
+                                                    print(
+                                                      '✅ Manual refresh success: ${liveData.formattedFlowRate}',
+                                                    );
+                                                  }
+                                                }
+                                              } catch (e) {
+                                                if (kDebugMode) {
+                                                  print(
+                                                    '❌ Manual refresh failed: $e',
+                                                  );
+                                                }
+                                              } finally {
+                                                setState(() {
+                                                  _updatingRunIds.remove(
+                                                    runWithStations.run.id,
+                                                  );
+                                                });
+                                              }
+                                            },
+                                            tooltip: 'Refresh live data',
                                           ),
 
                                         // Remove from favorites button
