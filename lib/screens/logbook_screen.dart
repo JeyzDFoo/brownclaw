@@ -111,7 +111,30 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                       ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                               ),
-                              if (data['userId'] == user.uid)
+                              if (data['userId'] == user.uid) ...[
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.orange,
+                                  ),
+                                  tooltip: 'Edit Entry',
+                                  onPressed: () async {
+                                    final result = await Navigator.of(context)
+                                        .push(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                LogbookEntryScreen(
+                                                  entryId: doc.id,
+                                                  initialData: data,
+                                                ),
+                                          ),
+                                        );
+                                    // Refresh is automatic due to StreamBuilder
+                                    if (result == true && mounted) {
+                                      // Entry was edited successfully
+                                    }
+                                  },
+                                ),
                                 IconButton(
                                   icon: const Icon(
                                     Icons.delete,
@@ -119,6 +142,7 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                   ),
                                   onPressed: () => _deleteLogEntry(doc.id),
                                 ),
+                              ],
                             ],
                           ),
                           const SizedBox(height: 8),
@@ -153,8 +177,7 @@ class _LogBookScreenState extends State<LogBookScreen> {
                               ),
                             ],
                           ),
-                          if (data['waterLevel'] != null ||
-                              data['discharge'] != null) ...[
+                          if (data['discharge'] != null) ...[
                             const SizedBox(height: 4),
                             Row(
                               children: [
@@ -164,27 +187,11 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                   color: Colors.blue[600],
                                 ),
                                 const SizedBox(width: 4),
-                                Expanded(
-                                  child: Wrap(
-                                    spacing: 16,
-                                    children: [
-                                      if (data['waterLevel'] != null)
-                                        Text(
-                                          'Level: ${(data['waterLevel'] as num).toStringAsFixed(2)} m',
-                                          style: TextStyle(
-                                            color: Colors.blue[700],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      if (data['discharge'] != null)
-                                        Text(
-                                          'Flow: ${(data['discharge'] as num).toStringAsFixed(2)} m³/s',
-                                          style: TextStyle(
-                                            color: Colors.blue[700],
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                    ],
+                                Text(
+                                  'Flow: ${(data['discharge'] as num).toStringAsFixed(2)} m³/s',
+                                  style: TextStyle(
+                                    color: Colors.blue[700],
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
                               ],
