@@ -413,6 +413,11 @@ class HistoricalWaterDataService {
 
   // Convenience methods with common time periods
 
+  /// Get last 3 days of data
+  static Future<List<Map<String, dynamic>>> getLast3Days(String stationId) {
+    return fetchHistoricalData(stationId, daysBack: 3);
+  }
+
   /// Get last week's data (7 days)
   static Future<List<Map<String, dynamic>>> getLastWeek(String stationId) {
     return fetchHistoricalData(stationId, daysBack: 7);
@@ -421,11 +426,6 @@ class HistoricalWaterDataService {
   /// Get last month's data (30 days)
   static Future<List<Map<String, dynamic>>> getLastMonth(String stationId) {
     return fetchHistoricalData(stationId, daysBack: 30);
-  }
-
-  /// Get last season's data (90 days)
-  static Future<List<Map<String, dynamic>>> getLastSeason(String stationId) {
-    return fetchHistoricalData(stationId, daysBack: 90);
   }
 
   /// Get last year's data (365 days)
@@ -448,16 +448,16 @@ class HistoricalWaterDataService {
   }
 
   /// Get flow statistics for common time periods
+  static Future<Map<String, dynamic>> get3DayStats(String stationId) {
+    return getFlowStatistics(stationId, daysBack: 3);
+  }
+
   static Future<Map<String, dynamic>> getWeeklyStats(String stationId) {
     return getFlowStatistics(stationId, daysBack: 7);
   }
 
   static Future<Map<String, dynamic>> getMonthlyStats(String stationId) {
     return getFlowStatistics(stationId, daysBack: 30);
-  }
-
-  static Future<Map<String, dynamic>> getSeasonalStats(String stationId) {
-    return getFlowStatistics(stationId, daysBack: 90);
   }
 
   static Future<Map<String, dynamic>> getYearlyStats(String stationId) {
@@ -488,7 +488,7 @@ class HistoricalWaterDataService {
           'https://api.weather.gc.ca/collections/hydrometric-realtime/items?'
           'STATION_NUMBER=$stationId&'
           'limit=${limitDays != null ? limitDays * 288 : 8640}&' // 288 records per day (5-min intervals)
-          'sortby=DATETIME&'
+          'sortby=-DATETIME&' // Sort descending (newest first) to get most recent data
           'f=json';
 
       final response = await http

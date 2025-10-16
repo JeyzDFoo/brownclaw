@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
 import '../services/live_water_data_service.dart';
 import '../services/historical_water_data_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
@@ -24,7 +26,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingStats = true;
   String? _error;
   String? _chartError;
-  int _selectedDays = 365; // Default to 1 year of historical data
+  int _selectedDays = 30; // Default to 30 days of historical data
 
   @override
   void initState() {
@@ -154,30 +156,81 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
     try {
       if (kDebugMode) {
-        print(
-          '🔍 Fetching historical data for station: $stationId, days: $_selectedDays',
+        print('🔍 Fetching data for station: $stationId, days: $_selectedDays');
+      }
+
+      List<Map<String, dynamic>> dataPoints = [];
+
+      // For very short ranges (7 days or less), use high-resolution real-time data
+      if (_selectedDays <= 7) {
+        if (kDebugMode) {
+          print(
+            '📊 Using high-resolution real-time data for $_selectedDays days',
+          );
+        }
+
+        dataPoints = await _fetchHighResolutionData(stationId, _selectedDays);
+      }
+      // For medium ranges (8-30 days), use combined timeline with daily averages
+      else if (_selectedDays <= 30) {
+        if (kDebugMode) {
+          print('📊 Using combined timeline for $_selectedDays days');
+        }
+
+        final combinedResult =
+            await HistoricalWaterDataService.getCombinedTimeline(
+              stationId,
+              includeRealtimeData: true,
+            );
+
+        final combined =
+            combinedResult['combined'] as List<Map<String, dynamic>>;
+
+        // Take only the last N days from the combined data
+        if (combined.isNotEmpty) {
+          // Sort by date (most recent first)
+          combined.sort(
+            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          );
+
+          // Take the requested number of days
+          dataPoints = combined.take(_selectedDays).toList();
+
+          // Reverse back to chronological order for charting
+          dataPoints = dataPoints.reversed.toList();
+        }
+      } else {
+        if (kDebugMode) {
+          print('📊 Using historical data only for $_selectedDays days');
+        }
+
+        // For longer periods, use historical data only (more efficient)
+        dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
+          stationId,
+          daysBack: _selectedDays,
         );
       }
 
-      // Use the new HistoricalWaterDataService for web-compatible data fetching
-      final historicalData =
-          await HistoricalWaterDataService.fetchHistoricalData(
-            stationId,
-            daysBack: _selectedDays,
-          );
-
       if (kDebugMode) {
-        print('📊 Received ${historicalData.length} historical data points');
-        if (historicalData.isNotEmpty) {
-          print('   First data point: ${historicalData.first}');
-          print('   Last data point: ${historicalData.last}');
+        print('📊 Received ${dataPoints.length} data points');
+        if (dataPoints.isNotEmpty) {
+          print('   First data point: ${dataPoints.first}');
+          print('   Last data point: ${dataPoints.last}');
+
+          // Show source information for debugging
+          final sources = dataPoints
+              .map((d) => d['source'] ?? 'historical')
+              .toSet();
+          print('   Data sources: ${sources.join(', ')}');
         }
       }
 
       final spots = <FlSpot>[];
 
-      for (final dataPoint in historicalData) {
-        final dateStr = dataPoint['date'] as String?;
+      for (final dataPoint in dataPoints) {
+        // Handle both high-resolution (datetime) and daily (date) data
+        final dateStr =
+            dataPoint['datetime'] as String? ?? dataPoint['date'] as String?;
         final discharge = dataPoint['discharge'] as double?;
 
         if (dateStr != null && discharge != null) {
@@ -203,6 +256,113 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
   }
 
+  /// Fetch high-resolution real-time data (5-minute intervals) for short time periods
+  Future<List<Map<String, dynamic>>> _fetchHighResolutionData(
+    String stationId,
+    int days,
+  ) async {
+    try {
+      if (kDebugMode) {
+        print('🔍 Fetching high-resolution data for $days days');
+      }
+
+      // Fetch raw real-time data (not daily averages)
+      final url =
+          'https://api.weather.gc.ca/collections/hydrometric-realtime/items?'
+          'STATION_NUMBER=$stationId&'
+          'limit=${days * 288}&' // 288 records per day (5-minute intervals)
+          'sortby=-DATETIME&' // Sort descending (newest first) to get most recent data
+          'f=json';
+
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final features = data['features'] as List? ?? [];
+
+        final highResData = <Map<String, dynamic>>[];
+
+        for (final feature in features) {
+          final props = feature['properties'];
+          if (props != null) {
+            final datetime = props['DATETIME'] as String?;
+            final discharge = props['DISCHARGE'];
+            final level = props['LEVEL'];
+
+            if (datetime != null && discharge != null) {
+              highResData.add({
+                'datetime': datetime,
+                'discharge': discharge is num
+                    ? discharge.toDouble()
+                    : double.tryParse(discharge.toString()),
+                'level': level is num
+                    ? level.toDouble()
+                    : (level != null
+                          ? double.tryParse(level.toString())
+                          : null),
+                'stationId': stationId,
+                'source': 'realtime-highres',
+              });
+            }
+          }
+        }
+
+        // Filter to exactly the requested number of days from most recent
+        if (highResData.isNotEmpty) {
+          // Sort by datetime (most recent first)
+          highResData.sort(
+            (a, b) =>
+                (b['datetime'] as String).compareTo(a['datetime'] as String),
+          );
+
+          // Calculate cutoff datetime for requested days
+          final mostRecent = DateTime.parse(
+            highResData.first['datetime'] as String,
+          );
+          final cutoffTime = mostRecent.subtract(Duration(days: days));
+
+          // Filter to only include data within the requested time window
+          final filteredData = highResData.where((d) {
+            final dt = DateTime.parse(d['datetime'] as String);
+            return dt.isAfter(cutoffTime);
+          }).toList();
+
+          // Reverse to chronological order for charting
+          filteredData.sort(
+            (a, b) =>
+                (a['datetime'] as String).compareTo(b['datetime'] as String),
+          );
+
+          if (kDebugMode) {
+            print('✅ Got ${filteredData.length} high-resolution data points');
+            if (filteredData.isNotEmpty) {
+              print(
+                '   Time range: ${filteredData.first['datetime']} to ${filteredData.last['datetime']}',
+              );
+            }
+          }
+
+          return filteredData;
+        }
+      }
+
+      if (kDebugMode) {
+        print(
+          '⚠️ No high-resolution data available, falling back to daily averages',
+        );
+      }
+
+      return [];
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error fetching high-resolution data: $e');
+      }
+      return [];
+    }
+  }
+
   Future<void> _loadStatisticsData() async {
     setState(() {
       _isLoadingStats = true;
@@ -219,19 +379,76 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       final stationId = widget.riverData['stationId'] as String;
 
-      // Load flow statistics and recent trend in parallel
-      final futures = await Future.wait([
-        HistoricalWaterDataService.getFlowStatistics(
+      // Use different data resolution based on time range
+      Map<String, dynamic> flowStats;
+
+      if (_selectedDays <= 7) {
+        // For very short ranges, use high-resolution data for better statistics
+        final highResData = await _fetchHighResolutionData(
+          stationId,
+          _selectedDays,
+        );
+
+        if (highResData.isNotEmpty) {
+          flowStats = _calculateStatsFromData(highResData);
+        } else {
+          // Fallback to combined timeline if high-res fails
+          final combinedResult =
+              await HistoricalWaterDataService.getCombinedTimeline(
+                stationId,
+                includeRealtimeData: true,
+              );
+          final combined =
+              combinedResult['combined'] as List<Map<String, dynamic>>;
+
+          if (combined.isNotEmpty) {
+            combined.sort(
+              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+            );
+            final recentData = combined.take(_selectedDays).toList();
+            flowStats = _calculateStatsFromData(recentData);
+          } else {
+            flowStats = {'error': 'No data available', 'count': 0};
+          }
+        }
+      } else if (_selectedDays <= 30) {
+        // For medium ranges, use combined timeline with daily averages
+        final combinedResult =
+            await HistoricalWaterDataService.getCombinedTimeline(
+              stationId,
+              includeRealtimeData: true,
+            );
+        final combined =
+            combinedResult['combined'] as List<Map<String, dynamic>>;
+
+        if (combined.isNotEmpty) {
+          // Take last N days and calculate statistics
+          combined.sort(
+            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          );
+          final recentData = combined.take(_selectedDays).toList();
+
+          flowStats = _calculateStatsFromData(recentData);
+        } else {
+          flowStats = {'error': 'No data available', 'count': 0};
+        }
+      } else {
+        // Use historical statistics for longer periods (more efficient)
+        flowStats = await HistoricalWaterDataService.getFlowStatistics(
           stationId,
           daysBack: _selectedDays,
-        ),
-        HistoricalWaterDataService.getRecentTrend(stationId),
-      ]);
+        );
+      }
+
+      // Load recent trend (always use historical service for this)
+      final recentTrend = await HistoricalWaterDataService.getRecentTrend(
+        stationId,
+      );
 
       if (mounted) {
         setState(() {
-          _flowStatistics = futures[0];
-          _recentTrend = futures[1];
+          _flowStatistics = flowStats;
+          _recentTrend = recentTrend;
           _isLoadingStats = false;
         });
       }
@@ -560,11 +777,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   ),
                 ),
               ),
-
-              const SizedBox(height: 16),
-
-              // Data Availability Info Card
-              _buildDataAvailabilityCard(),
 
               const SizedBox(height: 16),
 
@@ -1008,10 +1220,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
             const SizedBox(height: 12),
             Wrap(
               spacing: 8.0,
-              children: [7, 14, 30, 60, 90].map((days) {
+              children: [3, 7, 30, 365].map((days) {
                 final isSelected = days == _selectedDays;
+                final label = days == 365 ? '2024' : '${days}d';
                 return FilterChip(
-                  label: Text('${days}d'),
+                  label: Text(label),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
@@ -1060,7 +1273,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Flow Statistics (Last $_selectedDays days)',
+              'Flow Statistics (Last ${_selectedDays == 365 ? '2024' : '$_selectedDays days'})',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),
@@ -1167,155 +1380,50 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
   }
 
-  /// Build data availability information card
-  Widget _buildDataAvailabilityCard() {
-    final availabilityInfo =
-        HistoricalWaterDataService.getDataAvailabilityInfo();
-    final currentGap =
-        availabilityInfo['currentYearGap'] as Map<String, dynamic>;
-    final historical =
-        availabilityInfo['historicalData'] as Map<String, dynamic>;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.info_outline, color: Colors.blue[600], size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  'Data Availability',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue[600],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-
-            // Historical Data Info
-            _buildDataSourceRow(
-              Icons.history,
-              'Historical Data',
-              '${historical['startDate']} to ${historical['endDate']}',
-              Colors.green,
-              'Complete daily records for long-term analysis',
-            ),
-            const SizedBox(height: 8),
-
-            // Current Year Gap Info
-            _buildDataSourceRow(
-              Icons.warning_amber_outlined,
-              'Current Year Gap',
-              '${currentGap['startDate']} to ${currentGap['endDate']} (${currentGap['gapDays']} days)',
-              Colors.orange,
-              'Government processing delay - no daily data available',
-            ),
-            const SizedBox(height: 8),
-
-            // Real-time Data Info
-            _buildDataSourceRow(
-              Icons.access_time,
-              'Real-time Data',
-              'Last 30 days (5-minute intervals)',
-              Colors.teal,
-              'Current conditions for immediate planning',
-            ),
-            const SizedBox(height: 12),
-
-            // Recommendations
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withOpacity(0.2)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.lightbulb_outline,
-                        size: 16,
-                        color: Colors.blue[700],
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Tip:',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.blue[700],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Use historical trends to estimate likely conditions during the current year gap. '
-                    'Check real-time data for the most recent 30 days.',
-                    style: TextStyle(fontSize: 13, color: Colors.blue[700]),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// Build a row showing data source information
-  Widget _buildDataSourceRow(
-    IconData icon,
-    String title,
-    String period,
-    Color color,
-    String description,
+  /// Calculate flow statistics from combined data (historical + real-time)
+  Map<String, dynamic> _calculateStatsFromData(
+    List<Map<String, dynamic>> data,
   ) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(4),
-          ),
-          child: Icon(icon, size: 16, color: color),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
-              ),
-              Text(
-                period,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              Text(
-                description,
-                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
+    if (data.isEmpty) {
+      return {'error': 'No data available', 'count': 0};
+    }
+
+    final dischargeValues = data
+        .where((d) => d['discharge'] != null)
+        .map<double>((d) => d['discharge'] as double)
+        .toList();
+
+    if (dischargeValues.isEmpty) {
+      return {'error': 'No discharge data available', 'count': 0};
+    }
+
+    dischargeValues.sort();
+
+    final count = dischargeValues.length;
+    final sum = dischargeValues.reduce((a, b) => a + b);
+    final average = sum / count;
+    final minimum = dischargeValues.first;
+    final maximum = dischargeValues.last;
+
+    // Calculate percentiles
+    final p25Index = (count * 0.25).floor();
+    final p50Index = (count * 0.50).floor();
+    final p75Index = (count * 0.75).floor();
+
+    return {
+      'count': count,
+      'average': double.parse(average.toStringAsFixed(2)),
+      'minimum': minimum,
+      'maximum': maximum,
+      'percentile25': dischargeValues[p25Index],
+      'median': dischargeValues[p50Index],
+      'percentile75': dischargeValues[p75Index],
+      'dateRange': {
+        'start':
+            data.last['datetime'] ??
+            data.last['date'], // data is reversed (newest first)
+        'end': data.first['datetime'] ?? data.first['date'],
+      },
+    };
   }
 }
