@@ -21,20 +21,41 @@ class LiveWaterDataService {
   static final Map<String, DateTime> _lastApiCall = {};
   static const Duration _minApiInterval = Duration(seconds: 30);
 
-  // #todo: Add local caching for live data to reduce API calls
-  // static final Map<String, Map<String, dynamic>> _liveDataCache = {};
-  // static final Map<String, DateTime> _cacheTimestamps = {};
-  // static const Duration _cacheTimeout = Duration(minutes: 5); // Live data changes frequently
+  // Basic caching for live data to reduce API calls and provide fallback when rate limited
+  static final Map<String, LiveWaterData> _liveDataCache = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheTimeout = Duration(
+    minutes: 15,
+  ); // Cache for 15 minutes
 
   /// Fetch live data for a specific station
   /// Updated to return LiveWaterData for type safety and better data handling
   static Future<LiveWaterData?> fetchStationData(String stationId) async {
-    // Check if there's already an active request for this station
-    if (_activeRequests.containsKey(stationId)) {
-      if (kDebugMode) {
-        print('DEDUP: Reusing existing request for station $stationId');
+    // Check for valid cached data first
+    final cachedData = _liveDataCache[stationId];
+    final cacheTime = _cacheTimestamps[stationId];
+
+    if (cachedData != null && cacheTime != null) {
+      final cacheAge = DateTime.now().difference(cacheTime);
+      if (cacheAge < _cacheTimeout) {
+        if (kDebugMode) {
+          print(
+            'CACHE_HIT: Returning cached data for $stationId (age: ${cacheAge.inMinutes}m)',
+          );
+        }
+        return cachedData;
       }
-      return _activeRequests[stationId];
+    }
+
+    // Check if there's already an active request for this station
+    final activeRequest = _activeRequests[stationId];
+    if (activeRequest != null) {
+      if (kDebugMode) {
+        print(
+          'DEDUP: Request for station $stationId already in progress, waiting...',
+        );
+      }
+      return await activeRequest;
     }
 
     // Check rate limiting
@@ -47,7 +68,14 @@ class LiveWaterDataService {
             'RATE_LIMIT: Request for station $stationId blocked (last call ${timeSinceLastCall.inSeconds}s ago)',
           );
         }
-        return null; // Don't spam the API
+        // Return cached data if available when rate limited
+        if (cachedData != null) {
+          if (kDebugMode) {
+            print('RATE_LIMIT_FALLBACK: Returning cached data for $stationId');
+          }
+          return cachedData;
+        }
+        return null; // No cached data available
       }
     }
 
@@ -62,6 +90,16 @@ class LiveWaterDataService {
     try {
       final result = await requestFuture;
       _lastApiCall[stationId] = DateTime.now();
+
+      // Cache successful results
+      if (result != null) {
+        _liveDataCache[stationId] = result;
+        _cacheTimestamps[stationId] = DateTime.now();
+        if (kDebugMode) {
+          print('CACHE_STORE: Cached fresh data for $stationId');
+        }
+      }
+
       return result;
     } finally {
       // Clean up the active request
@@ -75,12 +113,12 @@ class LiveWaterDataService {
     String fetchId,
   ) async {
     if (kDebugMode) {
-      print('🔥 FETCH [$fetchId] STARTED FOR: $stationId');
+      print('FETCH [$fetchId] STARTED FOR: $stationId');
     }
 
     // Try CSV endpoint first (more reliable when data is fresh)
     if (kDebugMode) {
-      print('🔥 FETCH [$fetchId] Trying CSV first...');
+      print('FETCH [$fetchId] Trying CSV first...');
     }
     final csvData = await _fetchFromCsvDataMart(stationId);
     if (csvData != null) {
@@ -104,7 +142,7 @@ class LiveWaterDataService {
 
     // Try JSON API for fresh data
     if (kDebugMode) {
-      print('🔥 FETCH [$fetchId] Trying JSON API...');
+      print('FETCH [$fetchId] Trying JSON API...');
     }
     final jsonData = await _fetchFromJsonApi(stationId);
     if (jsonData != null) {

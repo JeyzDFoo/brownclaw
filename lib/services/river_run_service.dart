@@ -456,7 +456,9 @@ class RiverRunService {
       // Get the parent river information
       River? river;
       if (run.riverId.isNotEmpty) {
-        print('🐛 getRunWithStations - Fetching river for ID: ${run.riverId}');
+        if (kDebugMode) {
+          print('getRunWithStations - Fetching river for ID: ${run.riverId}');
+        }
         river = await RiverService.getRiverById(run.riverId);
         print(
           '🐛 getRunWithStations - River fetched: ${river?.name ?? 'null'}',

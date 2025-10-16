@@ -29,6 +29,24 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     _loadHistoricalData();
   }
 
+  /// Validates if the river has a valid station ID for data fetching
+  String? _validateStationData() {
+    final stationId = widget.riverData['stationId'] as String?;
+    final hasValidStation =
+        widget.riverData['hasValidStation'] as bool? ?? false;
+
+    if (stationId == null || stationId.isEmpty) {
+      return 'No gauge station linked to this river run';
+    }
+
+    if (!hasValidStation ||
+        !RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())) {
+      return 'This river run is not connected to a real-time gauge station.\n\nStation ID: $stationId';
+    }
+
+    return null; // Valid station
+  }
+
   @override
   void didUpdateWidget(RiverDetailScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -55,52 +73,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
 
     try {
-      final stationId = widget.riverData['stationId'] as String?;
-
-      if (kDebugMode) {
-        print('🔍 RiverDetailScreen loading data for stationId: $stationId');
-        print('🔍 Full riverData: ${widget.riverData}');
-        print('🔍 hasValidStation: ${widget.riverData['hasValidStation']}');
-      }
-
-      if (stationId == null || stationId.isEmpty) {
+      final validationError = _validateStationData();
+      if (validationError != null) {
         setState(() {
-          _error = 'No gauge station linked to this river run';
+          _error = validationError;
           _isLoading = false;
         });
         return;
       }
 
-      final hasValidStation =
-          widget.riverData['hasValidStation'] as bool? ?? false;
-
-      if (kDebugMode) {
-        print('🔍 hasValidStation value: $hasValidStation');
-        print(
-          '🔍 Station ID validation: ${RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())}',
-        );
-      }
-
-      // Check if this looks like a valid station ID (should be alphanumeric, usually starts with numbers)
-      if (!hasValidStation ||
-          !RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())) {
-        if (kDebugMode) {
-          print(
-            '⚠️ Station ID "$stationId" failed validation - hasValidStation: $hasValidStation',
-          );
-        }
-        setState(() {
-          _error =
-              'This river run is not connected to a real-time gauge station.\n\nStation ID: $stationId';
-          _isLoading = false;
-        });
-        return;
-      }
-
-      if (kDebugMode) {
-        print('📡 Attempting to fetch live data for station: $stationId');
-      }
-
+      final stationId = widget.riverData['stationId'] as String;
       final liveData = await LiveWaterDataService.fetchStationData(stationId);
 
       if (mounted) {
@@ -114,7 +96,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading live data: $e');
+        print('Error loading live data: $e');
       }
       if (mounted) {
         setState(() {
@@ -132,27 +114,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
 
     try {
-      final stationId = widget.riverData['stationId'] as String?;
-      final hasValidStation =
-          widget.riverData['hasValidStation'] as bool? ?? false;
-
-      if (stationId == null || stationId.isEmpty) {
+      final validationError = _validateStationData();
+      if (validationError != null) {
         setState(() {
-          _chartError = 'No station ID available for historical data';
+          _chartError = validationError;
           _isLoadingChart = false;
         });
         return;
       }
 
-      if (!hasValidStation) {
-        setState(() {
-          _chartError =
-              'No real-time gauge station connected to this river run';
-          _isLoadingChart = false;
-        });
-        return;
-      }
-
+      final stationId = widget.riverData['stationId'] as String;
       final historicalData = await _fetchHistoricalData(stationId);
 
       if (mounted) {
@@ -172,12 +143,8 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
-    print('🔍 Fetching real-time data for station: $stationId');
-
     try {
       final spots = <FlSpot>[];
-
-      print('📅 Fetching all available real-time data');
 
       // Determine province from station ID (same logic as live data service)
       String province = 'BC'; // Default to BC
@@ -197,9 +164,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Use CORS proxy for web platform (same as live data service)
       final url = kIsWeb ? 'https://corsproxy.io/?$csvUrl' : csvUrl;
 
-      print('🌐 Fetching hourly real-time data');
-      print('🌐 Attempting to fetch from: $url');
-
       final response = await http
           .get(
             Uri.parse(url),
@@ -208,8 +172,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode != 200) {
-        print('❌ HTTP Error ${response.statusCode} for station $stationId');
-        print('🔗 URL attempted: $url');
         throw Exception(
           'Failed to fetch historical data: ${response.statusCode} - Station file may not exist',
         );
@@ -217,7 +179,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       // Parse CSV data
       final lines = response.body.split('\n');
-      print('📄 Received ${lines.length} lines of CSV data');
 
       // Skip header and process data lines
       for (int i = 1; i < lines.length; i++) {
@@ -256,23 +217,25 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Sort by timestamp
       spots.sort((a, b) => a.x.compareTo(b.x));
 
-      print(
-        '✅ Successfully parsed ${spots.length} real historical data points',
-      );
-
-      if (spots.isNotEmpty) {
+      if (kDebugMode) {
         print(
-          '📊 Data range: ${spots.first.y.toStringAsFixed(1)} to ${spots.last.y.toStringAsFixed(1)} cms',
+          'Successfully parsed ${spots.length} real historical data points',
         );
-        print(
-          '📅 Time range: ${DateTime.fromMillisecondsSinceEpoch(spots.first.x.toInt())} to ${DateTime.fromMillisecondsSinceEpoch(spots.last.x.toInt())}',
-        );
+        if (spots.isNotEmpty) {
+          print(
+            'Data range: ${spots.first.y.toStringAsFixed(1)} to ${spots.last.y.toStringAsFixed(1)} cms',
+          );
+          print(
+            'Time range: ${DateTime.fromMillisecondsSinceEpoch(spots.first.x.toInt())} to ${DateTime.fromMillisecondsSinceEpoch(spots.last.x.toInt())}',
+          );
+        }
       }
 
       return spots;
     } catch (e) {
-      print('💥 Error fetching real historical data: $e');
-
+      if (kDebugMode) {
+        print('Error fetching real historical data: $e');
+      }
       rethrow;
     }
   }
@@ -315,11 +278,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Add debugging for riverData
-    if (kDebugMode) {
-      print('🐛 RiverDetailScreen received riverData: ${widget.riverData}');
-    }
-
     // Safely extract data with null checks and error handling
     String riverName;
     String stationId;
@@ -340,7 +298,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           ? (sectionData['name'] as String? ?? '')
           : (sectionData as String? ?? '');
       sectionClass = sectionData is Map<String, dynamic>
-          ? (sectionData['class'] as String? ?? 'Unknown')
+          ? (sectionData['difficulty'] as String? ?? 'Unknown')
           : (widget.riverData['difficulty'] as String? ?? 'Unknown');
 
       difficulty = widget.riverData['difficulty'] as String? ?? 'Unknown';
@@ -348,13 +306,13 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       if (kDebugMode) {
         print(
-          '✅ Successfully parsed river data: riverName=$riverName, stationId=$stationId',
+          'Successfully parsed river data: riverName=$riverName, stationId=$stationId',
         );
       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
-        print('❌ Error parsing river data: $e');
-        print('📊 Stack trace: $stackTrace');
+        print('Error parsing river data: $e');
+        print('Stack trace: $stackTrace');
       }
 
       // Return an error screen if data parsing fails
@@ -459,10 +417,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: _getStatusColor(status).withOpacity(0.1),
+                              color: _getStatusColor(
+                                status,
+                              ).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(16),
                               border: Border.all(
-                                color: _getStatusColor(status).withOpacity(0.3),
+                                color: _getStatusColor(
+                                  status,
+                                ).withValues(alpha: 0.3),
                               ),
                             ),
                             child: Text(
@@ -641,14 +603,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               color: Colors.blue,
                             ),
                             const SizedBox(height: 12),
-                            _buildDataRow(
-                              icon: Icons.thermostat,
-                              label: 'Temperature',
-                              value:
-                                  '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
-                              color: Colors.orange,
-                            ),
-                            const SizedBox(height: 12),
+                            // _buildDataRow(
+                            //   icon: Icons.thermostat,
+                            //   label: 'Temperature',
+                            //   value:
+                            //       '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
+                            //   color: Colors.orange,
+                            // ),
+                            // const SizedBox(height: 12),
                             _buildDataRow(
                               icon: Icons.schedule,
                               label: 'Last Updated',
