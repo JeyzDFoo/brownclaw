@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:http/http.dart' as http;
 import '../services/live_water_data_service.dart';
+import '../services/historical_water_data_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 
 class RiverDetailScreen extends StatefulWidget {
@@ -17,16 +17,21 @@ class RiverDetailScreen extends StatefulWidget {
 class _RiverDetailScreenState extends State<RiverDetailScreen> {
   LiveWaterData? _liveData;
   List<FlSpot> _historicalData = [];
+  Map<String, dynamic>? _flowStatistics;
+  Map<String, dynamic>? _recentTrend;
   bool _isLoading = true;
   bool _isLoadingChart = true;
+  bool _isLoadingStats = true;
   String? _error;
   String? _chartError;
+  int _selectedDays = 30; // Default to 30 days
 
   @override
   void initState() {
     super.initState();
     _loadLiveData();
     _loadHistoricalData();
+    _loadStatisticsData();
   }
 
   /// Validates if the river has a valid station ID for data fetching
@@ -56,13 +61,17 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       setState(() {
         _liveData = null;
         _historicalData = [];
+        _flowStatistics = null;
+        _recentTrend = null;
         _isLoading = true;
         _isLoadingChart = true;
+        _isLoadingStats = true;
         _error = null;
         _chartError = null;
       });
       _loadLiveData();
       _loadHistoricalData();
+      _loadStatisticsData();
     }
   }
 
@@ -144,104 +153,97 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
     try {
+      // Use the new HistoricalWaterDataService for web-compatible data fetching
+      final historicalData =
+          await HistoricalWaterDataService.fetchHistoricalData(
+            stationId,
+            daysBack: _selectedDays,
+          );
+
       final spots = <FlSpot>[];
 
-      // Determine province from station ID (same logic as live data service)
-      String province = 'BC'; // Default to BC
-      if (stationId.startsWith('02')) {
-        province = 'ON'; // Ontario/Quebec
-      } else if (stationId.startsWith('05')) {
-        province = 'AB'; // Alberta
-      } else if (stationId.startsWith('08') || stationId.startsWith('09')) {
-        province = 'BC'; // British Columbia
-      }
+      for (final dataPoint in historicalData) {
+        final dateStr = dataPoint['date'] as String?;
+        final discharge = dataPoint['discharge'] as double?;
 
-      // Environment Canada Real-time Data API
-      // Use hourly data for detailed recent history
-      final csvUrl =
-          'https://dd.weather.gc.ca/hydrometric/csv/$province/hourly/${province}_${stationId}_hourly_hydrometric.csv';
-
-      // Use CORS proxy for web platform (same as live data service)
-      final url = kIsWeb ? 'https://corsproxy.io/?$csvUrl' : csvUrl;
-
-      final response = await http
-          .get(
-            Uri.parse(url),
-            headers: kIsWeb ? {'X-Requested-With': 'XMLHttpRequest'} : null,
-          )
-          .timeout(const Duration(seconds: 15));
-
-      if (response.statusCode != 200) {
-        throw Exception(
-          'Failed to fetch historical data: ${response.statusCode} - Station file may not exist',
-        );
-      }
-
-      // Parse CSV data
-      final lines = response.body.split('\n');
-
-      // Skip header and process data lines
-      for (int i = 1; i < lines.length; i++) {
-        final line = lines[i].trim();
-        if (line.isEmpty) continue;
-
-        final columns = line.split(',');
-        if (columns.length < 5) continue;
-
-        try {
-          // CSV format: ID,Date,Water Level,Grade,Symbol,QA/QC,Discharge,Grade,Symbol,QA/QC
-          if (columns.length < 7) continue;
-
-          final dateTimeStr =
-              columns[1]; // ISO format: 2025-10-13T00:00:00-08:00
-          final dischargeStr = columns[6]; // Discharge column
-
-          if (dischargeStr.isEmpty ||
-              dischargeStr == 'null' ||
-              dischargeStr.trim().isEmpty)
-            continue;
-
-          // Parse ISO 8601 date format
-          final dataDate = DateTime.parse(dateTimeStr);
-
-          final discharge = double.parse(dischargeStr.trim());
-          final timestamp = dataDate.millisecondsSinceEpoch.toDouble();
-
+        if (dateStr != null && discharge != null) {
+          final date = DateTime.parse(dateStr);
+          final timestamp = date.millisecondsSinceEpoch.toDouble();
           spots.add(FlSpot(timestamp, discharge));
-        } catch (e) {
-          // Skip invalid lines
-          continue;
         }
       }
 
       // Sort by timestamp
       spots.sort((a, b) => a.x.compareTo(b.x));
 
-      if (kDebugMode) {
-        print(
-          'Successfully parsed ${spots.length} real historical data points',
-        );
-        if (spots.isNotEmpty) {
-          print(
-            'Data range: ${spots.first.y.toStringAsFixed(1)} to ${spots.last.y.toStringAsFixed(1)} cms',
-          );
-          print(
-            'Time range: ${DateTime.fromMillisecondsSinceEpoch(spots.first.x.toInt())} to ${DateTime.fromMillisecondsSinceEpoch(spots.last.x.toInt())}',
-          );
-        }
-      }
-
       return spots;
     } catch (e) {
       if (kDebugMode) {
-        print('Error fetching real historical data: $e');
+        print('Error fetching historical data: $e');
       }
       rethrow;
     }
   }
 
+  Future<void> _loadStatisticsData() async {
+    setState(() {
+      _isLoadingStats = true;
+    });
+
+    try {
+      final validationError = _validateStationData();
+      if (validationError != null) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+        return;
+      }
+
+      final stationId = widget.riverData['stationId'] as String;
+
+      // Load flow statistics and recent trend in parallel
+      final futures = await Future.wait([
+        HistoricalWaterDataService.getFlowStatistics(
+          stationId,
+          daysBack: _selectedDays,
+        ),
+        HistoricalWaterDataService.getRecentTrend(stationId),
+      ]);
+
+      if (mounted) {
+        setState(() {
+          _flowStatistics = futures[0];
+          _recentTrend = futures[1];
+          _isLoadingStats = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingStats = false;
+        });
+      }
+    }
+  }
+
   Future<void> _refreshAllData() async {
-    await Future.wait([_loadLiveData(), _loadHistoricalData()]);
+    await Future.wait([
+      _loadLiveData(),
+      _loadHistoricalData(),
+      _loadStatisticsData(),
+    ]);
+  }
+
+  Future<void> _changeDaysRange(int newDays) async {
+    if (newDays == _selectedDays) return;
+
+    setState(() {
+      _selectedDays = newDays;
+      _isLoadingChart = true;
+      _isLoadingStats = true;
+    });
+
+    await Future.wait([_loadHistoricalData(), _loadStatisticsData()]);
   }
 
   Color _getStatusColor(String status) {
@@ -903,6 +905,18 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                             ],
                           ),
                         ),
+
+                      // Day range selector
+                      const SizedBox(height: 16),
+                      _buildDayRangeSelector(),
+
+                      // Flow statistics section
+                      const SizedBox(height: 16),
+                      _buildFlowStatistics(),
+
+                      // Recent trend section
+                      const SizedBox(height: 16),
+                      _buildRecentTrend(),
                     ],
                   ),
                 ),
@@ -954,6 +968,179 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       }
     } catch (e) {
       return dateTimeString;
+    }
+  }
+
+  Widget _buildDayRangeSelector() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Historical Data Range',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8.0,
+              children: [7, 14, 30, 60, 90].map((days) {
+                final isSelected = days == _selectedDays;
+                return FilterChip(
+                  label: Text('${days}d'),
+                  selected: isSelected,
+                  onSelected: (selected) {
+                    if (selected) {
+                      _changeDaysRange(days);
+                    }
+                  },
+                  selectedColor: Colors.teal.withOpacity(0.3),
+                  backgroundColor: Colors.grey.withOpacity(0.1),
+                );
+              }).toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFlowStatistics() {
+    if (_isLoadingStats) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Center(child: CircularProgressIndicator(color: Colors.teal)),
+        ),
+      );
+    }
+
+    if (_flowStatistics == null || _flowStatistics!.containsKey('error')) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Flow statistics unavailable',
+            style: TextStyle(color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    final stats = _flowStatistics!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Flow Statistics (Last $_selectedDays days)',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            _buildStatRow('Average:', '${stats['average']} m³/s'),
+            _buildStatRow('Minimum:', '${stats['minimum']} m³/s'),
+            _buildStatRow('Maximum:', '${stats['maximum']} m³/s'),
+            _buildStatRow('Median:', '${stats['median']} m³/s'),
+            _buildStatRow('Data Points:', '${stats['count']}'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRecentTrend() {
+    if (_isLoadingStats) {
+      return const SizedBox.shrink();
+    }
+
+    if (_recentTrend == null || _recentTrend!.containsKey('error')) {
+      return Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            'Trend analysis unavailable',
+            style: TextStyle(color: Colors.grey[600]),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      );
+    }
+
+    final trend = _recentTrend!;
+    final trendColor = trend['trendColor'] as Color;
+    final percentChange = trend['percentChange'] as double;
+    final trendText = trend['trend'] as String;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Recent Trend',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(_getTrendIcon(trendText), color: trendColor, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  trendText,
+                  style: TextStyle(
+                    color: trendColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${percentChange >= 0 ? '+' : ''}${percentChange.toStringAsFixed(1)}%',
+                  style: TextStyle(
+                    color: trendColor,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Last ${trend['recentDays']} days vs ${trend['historicalDays']} day average',
+              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  IconData _getTrendIcon(String trend) {
+    switch (trend.toLowerCase()) {
+      case 'rising':
+        return Icons.trending_up;
+      case 'falling':
+        return Icons.trending_down;
+      case 'stable':
+      default:
+        return Icons.trending_flat;
     }
   }
 }
