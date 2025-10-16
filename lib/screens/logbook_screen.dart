@@ -153,20 +153,39 @@ class _LogBookScreenState extends State<LogBookScreen> {
                               ),
                             ],
                           ),
-                          if (data['waterLevel']?.toString().isNotEmpty ==
-                              true) ...[
+                          if (data['waterLevel'] != null ||
+                              data['discharge'] != null) ...[
                             const SizedBox(height: 4),
                             Row(
                               children: [
                                 Icon(
-                                  Icons.height,
+                                  Icons.water_drop,
                                   size: 16,
-                                  color: Colors.grey[600],
+                                  color: Colors.blue[600],
                                 ),
                                 const SizedBox(width: 4),
-                                Text(
-                                  'Water Level: ${data['waterLevel']}',
-                                  style: TextStyle(color: Colors.grey[600]),
+                                Expanded(
+                                  child: Wrap(
+                                    spacing: 16,
+                                    children: [
+                                      if (data['waterLevel'] != null)
+                                        Text(
+                                          'Level: ${(data['waterLevel'] as num).toStringAsFixed(2)} m',
+                                          style: TextStyle(
+                                            color: Colors.blue[700],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      if (data['discharge'] != null)
+                                        Text(
+                                          'Flow: ${(data['discharge'] as num).toStringAsFixed(2)} m³/s',
+                                          style: TextStyle(
+                                            color: Colors.blue[700],
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ],
                             ),

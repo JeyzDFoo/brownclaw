@@ -5,6 +5,7 @@ import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/river_service.dart';
 import '../services/river_run_service.dart';
+import '../services/historical_water_data_service.dart';
 
 class LogbookEntryScreen extends StatefulWidget {
   const LogbookEntryScreen({super.key});
@@ -24,9 +25,15 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   RiverRun? _selectedRun;
   DateTime _selectedDate = DateTime.now();
 
+  // Water level data
+  double? _waterLevel;
+  double? _discharge;
+  bool _isLoadingWaterData = false;
+
   // Search results
   List<River> _riverSearchResults = [];
   List<RiverRun> _runSearchResults = [];
+  List<RiverRun> _allRunsForSelectedRiver = []; // Store all runs for filtering
   bool _isSearchingRivers = false;
   bool _isSearchingRuns = false;
   bool _isSubmitting = false;
@@ -66,7 +73,7 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   }
 
   void _searchRuns(String query) async {
-    if (query.isEmpty || _selectedRiver == null) {
+    if (_selectedRiver == null) {
       setState(() {
         _runSearchResults = [];
         _isSearchingRuns = false;
@@ -74,29 +81,27 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
       return;
     }
 
-    setState(() {
-      _isSearchingRuns = true;
-    });
-
-    try {
-      final results = await RiverRunService.getRunsForRiver(
-        _selectedRiver!.id,
-      ).first;
-      final filteredResults = results
-          .where((run) => run.name.toLowerCase().contains(query.toLowerCase()))
-          .toList();
+    // If query is empty, show all runs for the river
+    if (query.isEmpty) {
       setState(() {
-        _runSearchResults = filteredResults;
+        _runSearchResults = _allRunsForSelectedRiver;
         _isSearchingRuns = false;
       });
-    } catch (e) {
-      setState(() {
-        _isSearchingRuns = false;
-      });
+      return;
     }
+
+    // Filter the already-loaded runs
+    final filteredResults = _allRunsForSelectedRiver
+        .where((run) => run.name.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+
+    setState(() {
+      _runSearchResults = filteredResults;
+      _isSearchingRuns = false;
+    });
   }
 
-  void _selectRiver(River river) {
+  void _selectRiver(River river) async {
     setState(() {
       _selectedRiver = river;
       _riverSearchController.text = river.name;
@@ -105,7 +110,28 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
       _selectedRun = null;
       _runSearchController.clear();
       _runSearchResults = [];
+      _allRunsForSelectedRiver = [];
+      _isSearchingRuns = true; // Show loading state
     });
+
+    // Automatically fetch all runs for the selected river
+    try {
+      final runs = await RiverRunService.getRunsForRiver(river.id).first;
+      setState(() {
+        _allRunsForSelectedRiver = runs;
+        _runSearchResults = runs; // Show all runs initially
+        _isSearchingRuns = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isSearchingRuns = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading runs: $e')));
+      }
+    }
   }
 
   void _selectRun(RiverRun run) {
@@ -114,6 +140,85 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
       _runSearchController.text = run.name;
       _runSearchResults = [];
     });
+
+    // Fetch water level data for the selected run and date
+    _fetchWaterLevelForDate();
+  }
+
+  Future<void> _fetchWaterLevelForDate() async {
+    if (_selectedRun?.stationId == null) {
+      // No station ID available for this run
+      setState(() {
+        _waterLevel = null;
+        _discharge = null;
+        _isLoadingWaterData = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoadingWaterData = true;
+    });
+
+    try {
+      final now = DateTime.now();
+      final daysDifference = now.difference(_selectedDate).inDays;
+
+      List<Map<String, dynamic>> data;
+
+      if (daysDifference <= 30) {
+        // Use realtime API for recent data (last 30 days)
+        data = await HistoricalWaterDataService.fetchRealtimeAsHistorical(
+          _selectedRun!.stationId!,
+          limitDays:
+              35, // Get a bit more data to ensure we have the target date
+        );
+
+        // Filter to find data for the specific date
+        final targetDateStr = _selectedDate.toIso8601String().substring(
+          0,
+          10,
+        ); // YYYY-MM-DD format
+        data = data.where((entry) {
+          final entryDate = entry['date'];
+          if (entryDate != null) {
+            final entryDateStr = entryDate.toString().substring(0, 10);
+            return entryDateStr == targetDateStr;
+          }
+          return false;
+        }).toList();
+      } else {
+        // Use historical API for older data (more than 30 days)
+        data = await HistoricalWaterDataService.fetchHistoricalData(
+          _selectedRun!.stationId!,
+          startDate: _selectedDate,
+          endDate: _selectedDate,
+        );
+      }
+
+      if (data.isNotEmpty) {
+        final dayData = data.first;
+        setState(() {
+          _waterLevel = dayData['level']?.toDouble();
+          _discharge = dayData['discharge']?.toDouble();
+        });
+      } else {
+        setState(() {
+          _waterLevel = null;
+          _discharge = null;
+        });
+      }
+    } catch (e) {
+      print('Error fetching water level data: $e');
+      setState(() {
+        _waterLevel = null;
+        _discharge = null;
+      });
+    } finally {
+      setState(() {
+        _isLoadingWaterData = false;
+      });
+    }
   }
 
   Future<void> _submitLogEntry() async {
@@ -144,6 +249,10 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
         'timestamp': FieldValue.serverTimestamp(),
         'date': _selectedDate.toIso8601String().split('T')[0],
         'runDate': _selectedDate.toIso8601String().split('T')[0],
+        // Water level data
+        'waterLevel': _waterLevel,
+        'discharge': _discharge,
+        'stationId': _selectedRun!.stationId,
       });
 
       if (mounted) {
@@ -206,6 +315,8 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
                   setState(() {
                     _selectedDate = date;
                   });
+                  // Fetch water level data for the new date
+                  _fetchWaterLevelForDate();
                 }
               },
               child: InputDecorator(
@@ -281,7 +392,9 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
                   decoration: InputDecoration(
                     labelText: 'Section/Run',
                     hintText: _selectedRiver != null
-                        ? 'Search for a run on ${_selectedRiver!.name}...'
+                        ? _runSearchResults.isNotEmpty
+                              ? 'Select a run or search to filter...'
+                              : 'Loading runs for ${_selectedRiver!.name}...'
                         : 'Select a river first',
                     border: const OutlineInputBorder(),
                     prefixIcon: const Icon(Icons.location_on),
@@ -331,9 +444,9 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
+                  color: Colors.blue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                  border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,6 +461,40 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
                       Text(
                         'Run: ${_selectedRun!.name} (${_selectedRun!.difficultyClass})',
                       ),
+                    if (_selectedRun?.stationId != null) ...[
+                      const SizedBox(height: 8),
+                      if (_isLoadingWaterData)
+                        const Row(
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                            SizedBox(width: 8),
+                            Text('Loading water data...'),
+                          ],
+                        )
+                      else if (_discharge != null || _waterLevel != null) ...[
+                        Text(
+                          'Water Conditions (${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}):',
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                        if (_discharge != null)
+                          Text(
+                            '  Discharge: ${_discharge!.toStringAsFixed(2)} m³/s',
+                          ),
+                        if (_waterLevel != null)
+                          Text('  Level: ${_waterLevel!.toStringAsFixed(2)} m'),
+                      ] else
+                        Text(
+                          'No water data available for ${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                    ],
                   ],
                 ),
               ),
@@ -393,9 +540,9 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [

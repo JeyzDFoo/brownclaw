@@ -41,18 +41,13 @@ class RiverService {
   static Stream<List<River>> searchRivers(String query) {
     if (query.isEmpty) return getAllRivers();
 
-    return _riversCollection
-        .where('name', isGreaterThanOrEqualTo: query)
-        .where('name', isLessThanOrEqualTo: '$query\uf8ff')
-        .snapshots()
-        .map((snapshot) {
-          return snapshot.docs.map((doc) {
-            return River.fromMap(
-              doc.data() as Map<String, dynamic>,
-              docId: doc.id,
-            );
-          }).toList();
-        });
+    // Get all rivers and filter client-side for case-insensitive search
+    return getAllRivers().map((rivers) {
+      final lowerQuery = query.toLowerCase();
+      return rivers.where((river) {
+        return river.name.toLowerCase().contains(lowerQuery);
+      }).toList();
+    });
   }
 
   // Add a new river
