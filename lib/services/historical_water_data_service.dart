@@ -8,13 +8,20 @@ import 'package:http/http.dart' as http;
 /// hydrometric API for web deployment only. The app is designed exclusively
 /// for web platforms and does not support mobile or desktop platforms.
 ///
+/// DATA AVAILABILITY NOTICE:
+/// - Historical daily data: Available through December 31, 2024
+/// - Current year gap: January 1, 2025 to September 15, 2025 (no data available)
+/// - Real-time data: Available for last 30 days only (via separate service)
+/// - This service focuses on historical analysis and trends using complete data
+///
 /// Features:
 /// - Direct API calls to Government of Canada JSON endpoint for historical data
 /// - Date range queries for flow and water level data
 /// - Aggregated data processing (daily, weekly, monthly averages)
 /// - Web-optimized with CORS-friendly endpoints
+/// - Clear gap handling with user-friendly messaging
 class HistoricalWaterDataService {
-  // Government of Canada JSON API for historical data
+  // Government of Canada JSON API for historical daily mean data
   static const String jsonBaseUrl =
       'https://api.weather.gc.ca/collections/hydrometric-daily-mean/items';
 
@@ -36,25 +43,77 @@ class HistoricalWaterDataService {
     }
   }
 
+  /// Get information about data availability and gaps
+  /// Returns comprehensive information about what data is available and what gaps exist
+  static Map<String, dynamic> getDataAvailabilityInfo() {
+    final now = DateTime.now();
+    final historicalEnd = DateTime(2024, 12, 31);
+    final realtimeStart = now.subtract(const Duration(days: 30));
+    final gapStart = DateTime(2025, 1, 1);
+    final gapEnd = realtimeStart.subtract(const Duration(days: 1));
+
+    final gapDays = gapEnd.difference(gapStart).inDays + 1;
+
+    return {
+      'historicalData': {
+        'available': true,
+        'startDate':
+            '1912-01-01', // Historical data goes back to early 1900s for most stations
+        'endDate': historicalEnd.toIso8601String().split('T')[0],
+        'description':
+            'Complete historical daily mean data from Government of Canada',
+        'source': 'hydrometric-daily-mean API',
+      },
+      'currentYearGap': {
+        'hasGap': true,
+        'startDate': gapStart.toIso8601String().split('T')[0],
+        'endDate': gapEnd.toIso8601String().split('T')[0],
+        'gapDays': gapDays,
+        'description': 'No daily mean data available for this period',
+        'reason': 'Government daily-mean API has processing lag',
+      },
+      'realtimeData': {
+        'available': true,
+        'startDate': realtimeStart.toIso8601String().split('T')[0],
+        'endDate': now.toIso8601String().split('T')[0],
+        'description': 'Real-time data (5-minute intervals) for last 30 days',
+        'source': 'hydrometric-realtime API (use LiveWaterDataService)',
+      },
+      'recommendations': [
+        'Use historical data for long-term trends and seasonal analysis',
+        'Use real-time data for current conditions (last 30 days)',
+        'Consider historical patterns to estimate conditions during gap period',
+        'Gap period represents normal government data processing delays',
+      ],
+    };
+  }
+
   /// Fetch historical data for a specific station and date range (web-only)
-  /// Returns daily mean discharge and water level data
+  /// Returns daily mean discharge and water level data from Government of Canada HYDAT database
+  ///
+  /// IMPORTANT: Historical daily data ends at December 31, 2024. For current conditions,
+  /// use the LiveWaterDataService which provides real-time data for the last 30 days.
+  /// There is a data gap from January 1, 2025 to mid-September 2025.
   ///
   /// Parameters:
   /// - [stationId]: The station ID to fetch data for
   /// - [startDate]: Start date for data range (optional)
-  /// - [endDate]: End date for data range (defaults to now)
-  /// - [daysBack]: Number of days back from endDate (defaults to 30 if no startDate provided)
+  /// - [endDate]: End date for data range (defaults to December 31, 2024)
+  /// - [daysBack]: Number of days back from endDate (defaults to 365)
   static Future<List<Map<String, dynamic>>> fetchHistoricalData(
     String stationId, {
     DateTime? startDate,
     DateTime? endDate,
     int? daysBack,
   }) async {
-    // Set default date range if not provided
-    endDate ??= DateTime.now();
+    // Default to December 31, 2024 - the last date with available historical data
+    // Note: Current year data (2025) is not available through this historical API
+    final historicalDataEnd = DateTime(2024, 12, 31);
+
+    endDate ??= historicalDataEnd;
     startDate ??= daysBack != null
         ? endDate.subtract(Duration(days: daysBack))
-        : endDate.subtract(const Duration(days: 30)); // Default to 30 days
+        : DateTime(endDate.year, 1, 1); // Default to full year
 
     final cacheKey =
         '${stationId}_${startDate.millisecondsSinceEpoch}_${endDate.millisecondsSinceEpoch}';
@@ -411,5 +470,248 @@ class HistoricalWaterDataService {
     int days,
   ) {
     return getFlowStatistics(stationId, daysBack: days);
+  }
+
+  // REAL-TIME DATA INTEGRATION
+  // These methods fetch real-time data and convert it to the same format as historical data
+
+  /// Fetch real-time data and convert to historical data format
+  /// This allows seamless integration of the last 30 days of real-time data
+  /// with historical data for a complete timeline (where available)
+  static Future<List<Map<String, dynamic>>> fetchRealtimeAsHistorical(
+    String stationId, {
+    int? limitDays,
+  }) async {
+    try {
+      // Real-time API endpoint (same as LiveWaterDataService but we parse it differently)
+      final url =
+          'https://api.weather.gc.ca/collections/hydrometric-realtime/items?'
+          'STATION_NUMBER=$stationId&'
+          'limit=${limitDays != null ? limitDays * 288 : 8640}&' // 288 records per day (5-min intervals)
+          'sortby=DATETIME&'
+          'f=json';
+
+      final response = await http
+          .get(Uri.parse(url))
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        return _parseRealtimeResponse(response.body, stationId);
+      }
+    } catch (e) {
+      // Silent error handling for production
+    }
+    return [];
+  }
+
+  /// Parse real-time API response into historical data format
+  /// Converts 5-minute interval data to daily averages to match historical format
+  static List<Map<String, dynamic>> _parseRealtimeResponse(
+    String jsonData,
+    String stationId,
+  ) {
+    try {
+      final data = json.decode(jsonData);
+      final features = data['features'] as List? ?? [];
+
+      if (features.isEmpty) return [];
+
+      // Group by date and calculate daily averages
+      final dailyData = <String, List<Map<String, dynamic>>>{};
+
+      for (final feature in features) {
+        final props = feature['properties'];
+        if (props != null) {
+          final datetime = props['DATETIME'] as String?;
+          final discharge = props['DISCHARGE'];
+          final level = props['LEVEL'];
+
+          if (datetime != null) {
+            // Extract date (YYYY-MM-DD) from datetime
+            final date = datetime.split('T')[0];
+
+            if (!dailyData.containsKey(date)) {
+              dailyData[date] = [];
+            }
+
+            // Store individual measurements for daily averaging
+            dailyData[date]!.add({
+              'discharge': discharge != null
+                  ? double.tryParse(discharge.toString())
+                  : null,
+              'level': level != null ? double.tryParse(level.toString()) : null,
+            });
+          }
+        }
+      }
+
+      // Convert to daily averages in historical format
+      final historicalFormat = <Map<String, dynamic>>[];
+
+      for (final date in dailyData.keys) {
+        final dayMeasurements = dailyData[date]!;
+
+        // Calculate daily average discharge
+        final dischargeValues = dayMeasurements
+            .where((m) => m['discharge'] != null)
+            .map<double>((m) => m['discharge'] as double)
+            .toList();
+
+        // Calculate daily average level
+        final levelValues = dayMeasurements
+            .where((m) => m['level'] != null)
+            .map<double>((m) => m['level'] as double)
+            .toList();
+
+        final dailyAvgDischarge = dischargeValues.isNotEmpty
+            ? dischargeValues.reduce((a, b) => a + b) / dischargeValues.length
+            : null;
+
+        final dailyAvgLevel = levelValues.isNotEmpty
+            ? levelValues.reduce((a, b) => a + b) / levelValues.length
+            : null;
+
+        // Only include days with at least one valid measurement
+        if (dailyAvgDischarge != null || dailyAvgLevel != null) {
+          historicalFormat.add({
+            'date': date,
+            'discharge': dailyAvgDischarge,
+            'level': dailyAvgLevel,
+            'stationId': stationId,
+            'source': 'realtime', // Mark as real-time sourced
+            'measurementCount':
+                dayMeasurements.length, // How many measurements averaged
+          });
+        }
+      }
+
+      // Sort by date (oldest first to match historical data)
+      historicalFormat.sort(
+        (a, b) => (a['date'] as String).compareTo(b['date'] as String),
+      );
+
+      return historicalFormat;
+    } catch (e) {
+      // Silent error handling for production
+    }
+    return [];
+  }
+
+  /// Get combined historical and real-time data with gap information
+  /// This method provides a complete timeline where possible, clearly marking data sources
+  static Future<Map<String, dynamic>> getCombinedTimeline(
+    String stationId, {
+    DateTime? startDate,
+    DateTime? endDate,
+    bool includeRealtimeData = true,
+  }) async {
+    final results = <String, dynamic>{
+      'historical': <Map<String, dynamic>>[],
+      'realtime': <Map<String, dynamic>>[],
+      'gap': <String, dynamic>{},
+      'combined': <Map<String, dynamic>>[],
+      'availability': getDataAvailabilityInfo(),
+    };
+
+    // Get historical data (up to 2024-12-31)
+    final historicalData = await fetchHistoricalData(
+      stationId,
+      startDate: startDate,
+      endDate: endDate,
+    );
+    results['historical'] = historicalData;
+
+    // Get real-time data (last 30 days) if requested
+    if (includeRealtimeData) {
+      final realtimeData = await fetchRealtimeAsHistorical(stationId);
+      results['realtime'] = realtimeData;
+
+      // Create combined timeline
+      final combined = <Map<String, dynamic>>[];
+      combined.addAll(historicalData);
+      combined.addAll(realtimeData);
+
+      // Sort combined data by date
+      combined.sort(
+        (a, b) => (a['date'] as String).compareTo(b['date'] as String),
+      );
+
+      results['combined'] = combined;
+    } else {
+      results['combined'] = historicalData;
+    }
+
+    // Calculate gap information
+    if (historicalData.isNotEmpty) {
+      final lastHistorical = historicalData.last['date'] as String;
+      final firstRealtime = results['realtime'].isNotEmpty
+          ? (results['realtime'] as List).first['date'] as String
+          : null;
+
+      if (firstRealtime != null) {
+        final lastHistoricalDate = DateTime.parse(lastHistorical);
+        final firstRealtimeDate = DateTime.parse(firstRealtime);
+        final gapDays =
+            firstRealtimeDate.difference(lastHistoricalDate).inDays - 1;
+
+        if (gapDays > 0) {
+          results['gap'] = {
+            'exists': true,
+            'startDate': DateTime(
+              lastHistoricalDate.year,
+              lastHistoricalDate.month,
+              lastHistoricalDate.day + 1,
+            ).toIso8601String().split('T')[0],
+            'endDate': DateTime(
+              firstRealtimeDate.year,
+              firstRealtimeDate.month,
+              firstRealtimeDate.day - 1,
+            ).toIso8601String().split('T')[0],
+            'days': gapDays,
+            'description':
+                'Government data processing gap - no daily mean data available',
+          };
+        } else {
+          results['gap'] = {'exists': false};
+        }
+      } else {
+        // No real-time data available
+        final now = DateTime.now();
+        final lastHistoricalDate = DateTime.parse(lastHistorical);
+        final gapDays = now.difference(lastHistoricalDate).inDays;
+
+        results['gap'] = {
+          'exists': true,
+          'startDate': DateTime(
+            lastHistoricalDate.year,
+            lastHistoricalDate.month,
+            lastHistoricalDate.day + 1,
+          ).toIso8601String().split('T')[0],
+          'endDate': now.toIso8601String().split('T')[0],
+          'days': gapDays,
+          'description':
+              'Government data processing gap - no current data available',
+        };
+      }
+    }
+
+    return results;
+  }
+
+  /// Get recent real-time data as daily averages (convenience method)
+  static Future<List<Map<String, dynamic>>> getRecentRealtime(
+    String stationId, {
+    int days = 30,
+  }) {
+    return fetchRealtimeAsHistorical(stationId, limitDays: days);
+  }
+
+  /// Check if real-time data is available for a station
+  static Future<bool> hasRealtimeData(String stationId) async {
+    final realtimeData = await fetchRealtimeAsHistorical(
+      stationId,
+      limitDays: 1,
+    );
+    return realtimeData.isNotEmpty;
   }
 }

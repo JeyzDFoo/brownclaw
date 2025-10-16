@@ -24,7 +24,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingStats = true;
   String? _error;
   String? _chartError;
-  int _selectedDays = 30; // Default to 30 days
+  int _selectedDays = 365; // Default to 1 year of historical data
 
   @override
   void initState() {
@@ -153,12 +153,26 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
     try {
+      if (kDebugMode) {
+        print(
+          '🔍 Fetching historical data for station: $stationId, days: $_selectedDays',
+        );
+      }
+
       // Use the new HistoricalWaterDataService for web-compatible data fetching
       final historicalData =
           await HistoricalWaterDataService.fetchHistoricalData(
             stationId,
             daysBack: _selectedDays,
           );
+
+      if (kDebugMode) {
+        print('📊 Received ${historicalData.length} historical data points');
+        if (historicalData.isNotEmpty) {
+          print('   First data point: ${historicalData.first}');
+          print('   Last data point: ${historicalData.last}');
+        }
+      }
 
       final spots = <FlSpot>[];
 
@@ -176,10 +190,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Sort by timestamp
       spots.sort((a, b) => a.x.compareTo(b.x));
 
+      if (kDebugMode) {
+        print('✅ Created ${spots.length} chart data points');
+      }
+
       return spots;
     } catch (e) {
       if (kDebugMode) {
-        print('Error fetching historical data: $e');
+        print('❌ Error fetching historical data: $e');
       }
       rethrow;
     }
@@ -542,6 +560,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 16),
+
+              // Data Availability Info Card
+              _buildDataAvailabilityCard(),
 
               const SizedBox(height: 16),
 
@@ -1142,5 +1165,157 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       default:
         return Icons.trending_flat;
     }
+  }
+
+  /// Build data availability information card
+  Widget _buildDataAvailabilityCard() {
+    final availabilityInfo =
+        HistoricalWaterDataService.getDataAvailabilityInfo();
+    final currentGap =
+        availabilityInfo['currentYearGap'] as Map<String, dynamic>;
+    final historical =
+        availabilityInfo['historicalData'] as Map<String, dynamic>;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.blue[600], size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'Data Availability',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue[600],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Historical Data Info
+            _buildDataSourceRow(
+              Icons.history,
+              'Historical Data',
+              '${historical['startDate']} to ${historical['endDate']}',
+              Colors.green,
+              'Complete daily records for long-term analysis',
+            ),
+            const SizedBox(height: 8),
+
+            // Current Year Gap Info
+            _buildDataSourceRow(
+              Icons.warning_amber_outlined,
+              'Current Year Gap',
+              '${currentGap['startDate']} to ${currentGap['endDate']} (${currentGap['gapDays']} days)',
+              Colors.orange,
+              'Government processing delay - no daily data available',
+            ),
+            const SizedBox(height: 8),
+
+            // Real-time Data Info
+            _buildDataSourceRow(
+              Icons.access_time,
+              'Real-time Data',
+              'Last 30 days (5-minute intervals)',
+              Colors.teal,
+              'Current conditions for immediate planning',
+            ),
+            const SizedBox(height: 12),
+
+            // Recommendations
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.lightbulb_outline,
+                        size: 16,
+                        color: Colors.blue[700],
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        'Tip:',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Use historical trends to estimate likely conditions during the current year gap. '
+                    'Check real-time data for the most recent 30 days.',
+                    style: TextStyle(fontSize: 13, color: Colors.blue[700]),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Build a row showing data source information
+  Widget _buildDataSourceRow(
+    IconData icon,
+    String title,
+    String period,
+    Color color,
+    String description,
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(icon, size: 16, color: color),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                period,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey[600],
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                description,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 }
