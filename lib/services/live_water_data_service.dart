@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'water_station_service.dart';
+import '../models/models.dart'; // Import LiveWaterData model
 
 class LiveWaterDataService {
   // Government of Canada Data Mart (reliable CSV source)
@@ -12,18 +13,41 @@ class LiveWaterDataService {
   static const String jsonBaseUrl =
       'https://api.weather.gc.ca/collections/hydrometric-realtime/items';
 
+  // #todo: Add local caching for live data to reduce API calls
+  // static final Map<String, Map<String, dynamic>> _liveDataCache = {};
+  // static final Map<String, DateTime> _cacheTimestamps = {};
+  // static const Duration _cacheTimeout = Duration(minutes: 5); // Live data changes frequently
+
+  // #todo: Add rate limiting to prevent API abuse
+  // static final Map<String, DateTime> _lastApiCall = {};
+  // static const Duration _minApiInterval = Duration(seconds: 30);
+
   /// Fetch live data for a specific station
-  static Future<Map<String, dynamic>?> fetchStationData(
-    String stationId,
-  ) async {
+  /// Updated to return LiveWaterData for type safety and better data handling
+  static Future<LiveWaterData?> fetchStationData(String stationId) async {
     print('🔥 FETCHSTATIONDATA CALLED FOR: $stationId');
     print('🔥 NEW CODE IS RUNNING!');
+
+    // #todo: Check cache first before making API calls
+    // if (_isCacheValid(stationId)) {
+    //   print('🔥 RETURNING CACHED DATA');
+    //   return _liveDataCache[stationId];
+    // }
+
+    // #todo: Implement rate limiting to prevent API abuse
+    // if (_shouldRateLimit(stationId)) {
+    //   print('🔥 RATE LIMITED - returning cached data');
+    //   return _liveDataCache[stationId];
+    // }
 
     // Try CSV endpoint first (more reliable)
     print('🔥 Trying CSV first...');
     final csvData = await _fetchFromCsvDataMart(stationId);
     if (csvData != null) {
-      print('🔥 CSV SUCCESS: ${csvData['flowRate']} m³/s');
+      print('🔥 CSV SUCCESS: ${csvData.formattedFlowRate}');
+      // #todo: Cache the successful result
+      // _liveDataCache[stationId] = csvData;
+      // _cacheTimestamps[stationId] = DateTime.now();
       return csvData;
     }
 
@@ -31,7 +55,10 @@ class LiveWaterDataService {
     print('🔥 CSV failed, trying JSON...');
     final jsonData = await _fetchFromJsonApi(stationId);
     if (jsonData != null) {
-      print('🔥 JSON FALLBACK: ${jsonData['flowRate']} m³/s');
+      print('🔥 JSON FALLBACK: ${jsonData.formattedFlowRate}');
+      // #todo: Cache the successful result
+      // _liveDataCache[stationId] = jsonData;
+      // _cacheTimestamps[stationId] = DateTime.now();
       return jsonData;
     }
 
@@ -40,9 +67,8 @@ class LiveWaterDataService {
   }
 
   /// Fetch data from CSV Data Mart (most reliable)
-  static Future<Map<String, dynamic>?> _fetchFromCsvDataMart(
-    String stationId,
-  ) async {
+  /// Updated to return LiveWaterData for type safety
+  static Future<LiveWaterData?> _fetchFromCsvDataMart(String stationId) async {
     try {
       print('🔥 _fetchFromCsvDataMart called for station: $stationId');
 
@@ -106,13 +132,21 @@ class LiveWaterDataService {
                   print(
                     '🔥 RETURNING CSV DATA: flowRate=$flowRate, timestamp=$timestamp',
                   );
-                  return {
+
+                  // Create LiveWaterData object from CSV response
+                  final rawData = {
                     'flowRate': flowRate,
                     'level': level,
                     'stationName': 'Station $stationId',
                     'status': 'live',
                     'lastUpdate': timestamp,
                   };
+
+                  return LiveWaterData.fromApiResponse(
+                    stationId,
+                    rawData,
+                    'csv',
+                  );
                 }
               }
             }
@@ -129,9 +163,8 @@ class LiveWaterDataService {
   }
 
   /// Fetch data from JSON API (fallback)
-  static Future<Map<String, dynamic>?> _fetchFromJsonApi(
-    String stationId,
-  ) async {
+  /// Updated to return LiveWaterData for type safety
+  static Future<LiveWaterData?> _fetchFromJsonApi(String stationId) async {
     try {
       final url = '$jsonBaseUrl?STATION_NUMBER=$stationId&limit=1&f=json';
       if (kDebugMode) {
@@ -166,13 +199,18 @@ class LiveWaterDataService {
               '✅ Live data retrieved: ${flowData['flowRate']}m³/s for $stationId',
             );
           }
-          return {
+
+          // Create raw data map for LiveWaterData conversion
+          final rawData = {
             'flowRate': flowData['flowRate'],
             'level': flowData['level'],
             'stationName': flowData['stationName'],
             'status': 'live',
             'lastUpdate': DateTime.now().toIso8601String(),
           };
+
+          return LiveWaterData.fromApiResponse(stationId, rawData, 'json');
+          // #todo: Replace with LiveWaterData.fromApiResponse(stationId, flowData, 'json')
         } else {
           if (kDebugMode) {
             print('⚠️ No flow data found in JSON response');
@@ -196,10 +234,10 @@ class LiveWaterDataService {
   }
 
   /// Fetch live data for multiple stations
-  static Future<Map<String, Map<String, dynamic>>> fetchMultipleStations(
+  static Future<Map<String, LiveWaterData>> fetchMultipleStations(
     List<String> stationIds,
   ) async {
-    final results = <String, Map<String, dynamic>>{};
+    final results = <String, LiveWaterData>{};
 
     // For web, return empty results
     if (kIsWeb) {
@@ -219,6 +257,7 @@ class LiveWaterDataService {
   }
 
   /// Parse complete station data from JSON API response
+  /// #todo: Update to return LiveWaterData instead of raw Map
   static Map<String, dynamic>? _parseJsonResponse(String jsonData) {
     try {
       final data = json.decode(jsonData);
@@ -319,21 +358,23 @@ class LiveWaterDataService {
     final enrichedData = Map<String, dynamic>.from(stationInfo);
 
     if (liveData != null) {
-      // We have live data
-      enrichedData['flowRate'] = liveData['flowRate'];
+      // We have live data - use typed properties
+      enrichedData['flowRate'] = liveData.flowRate;
       final now = DateTime.now();
       enrichedData['lastUpdate'] = 'Updated ${_formatTime(now)}';
-      enrichedData['dataSource'] = 'live';
-      enrichedData['isLive'] = true;
+      enrichedData['dataSource'] = liveData.dataSource;
+      enrichedData['isLive'] = liveData.status == LiveDataStatus.live;
 
-      final status = determineFlowStatus(liveData['flowRate'] as double);
-      enrichedData['status'] = status['label'];
-      enrichedData['statusColor'] = status['color'];
+      if (liveData.flowRate != null) {
+        final status = determineFlowStatus(liveData.flowRate!);
+        enrichedData['status'] = status['label'];
+        enrichedData['statusColor'] = status['color'];
 
-      if (kDebugMode) {
-        print(
-          '✅ Live data for $stationId: ${liveData['flowRate']}m³/s - ${status['label']}',
-        );
+        if (kDebugMode) {
+          print(
+            '✅ Live data for $stationId: ${liveData.formattedFlowRate} - ${status['label']}',
+          );
+        }
       }
     } else {
       // No data available

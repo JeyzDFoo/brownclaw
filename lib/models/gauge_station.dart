@@ -4,7 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class GaugeStation {
   final String stationId; // e.g., "08MF005" (Environment Canada ID)
   final String name; // Official station name
-  final String? riverRunId; // Optional reference to RiverRun if associated
+  final String?
+  riverRunId; // Optional reference to RiverRun if associated (legacy)
+  final List<String>? associatedRiverRunIds; // List of associated river run IDs
   final double latitude;
   final double longitude;
   final String? agency; // e.g., "Environment Canada", "USGS"
@@ -28,6 +30,7 @@ class GaugeStation {
     required this.stationId,
     required this.name,
     this.riverRunId,
+    this.associatedRiverRunIds,
     required this.latitude,
     required this.longitude,
     this.agency,
@@ -51,6 +54,8 @@ class GaugeStation {
       stationId: docId ?? map['stationId'] as String,
       name: map['name'] as String? ?? 'Unknown Station',
       riverRunId: map['riverRunId'] as String?,
+      associatedRiverRunIds: (map['associatedRiverRunIds'] as List?)
+          ?.cast<String>(),
       latitude: _safeToDouble(map['latitude']) ?? 0.0,
       longitude: _safeToDouble(map['longitude']) ?? 0.0,
       agency: map['agency'] as String?,
@@ -81,6 +86,9 @@ class GaugeStation {
     };
 
     if (riverRunId != null) map['riverRunId'] = riverRunId;
+    if (associatedRiverRunIds != null && associatedRiverRunIds!.isNotEmpty) {
+      map['associatedRiverRunIds'] = associatedRiverRunIds;
+    }
     if (agency != null) map['agency'] = agency;
     if (region != null) map['region'] = region;
     if (country != null) map['country'] = country;

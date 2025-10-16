@@ -10,6 +10,15 @@ class UserFavoritesService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // #todo: Add local caching to reduce Firestore reads for favorites
+  // static Map<String, List<String>>? _cachedFavoriteRunIds;
+  // static String? _cachedUserId;
+  // static DateTime? _lastCacheUpdate;
+  // static const Duration _cacheTimeout = Duration(minutes: 10);
+
+  // #todo: Add offline support for favorites
+  // static bool _isOffline = false;
+
   // Collection reference
   static CollectionReference get _favoritesCollection =>
       _firestore.collection('user_favorites');
@@ -19,11 +28,41 @@ class UserFavoritesService {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
+    // #todo: Check cache first to reduce Firestore reads
+    // if (_cachedUserId == user.uid && _isCacheValid()) {
+    //   return Stream.value(_cachedFavoriteRunIds![user.uid] ?? []);
+    // }
+
     return _favoritesCollection.doc(user.uid).snapshots().map((doc) {
       if (!doc.exists) return <String>[];
       final data = doc.data() as Map<String, dynamic>?;
       final favoriteRuns = data?['riverRuns'] as List?;
-      return favoriteRuns?.cast<String>() ?? <String>[];
+      final result = favoriteRuns?.cast<String>() ?? <String>[];
+
+      // #todo: Cache the result for future use
+      // _cachedFavoriteRunIds = {user.uid: result};
+      // _cachedUserId = user.uid;
+      // _lastCacheUpdate = DateTime.now();
+
+      return result;
+    });
+  }
+
+  // Get user's favorite station IDs (extracted from runs that have stationId)
+  static Stream<List<String>> getUserFavoriteStationIds() {
+    return getUserFavoriteRunIds().asyncMap((runIds) async {
+      if (runIds.isEmpty) return <String>[];
+
+      // #todo: This makes individual Firestore calls for each run
+      // Consider batching these reads or caching run data
+      final stationIds = <String>[];
+      for (final runId in runIds) {
+        final run = await RiverRunService.getRunById(runId);
+        if (run?.stationId != null) {
+          stationIds.add(run!.stationId!);
+        }
+      }
+      return stationIds;
     });
   }
 
@@ -70,10 +109,16 @@ class UserFavoritesService {
     }
 
     try {
+      // #todo: Implement optimistic updates - update cache immediately
+      // then sync to Firestore, rollback on failure
+
       await _favoritesCollection.doc(user.uid).set({
         'riverRuns': FieldValue.arrayUnion([runId]),
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
+
+      // #todo: Update cache after successful Firestore write
+      // _updateCacheAfterAdd(user.uid, runId);
 
       if (kDebugMode) {
         print('✅ Successfully added run $runId to favorites');
@@ -89,10 +134,24 @@ class UserFavoritesService {
   // Remove a river run from favorites
   static Future<void> removeFavoriteRun(String runId) async {
     final user = _auth.currentUser;
-    if (user == null) return;
+    if (user == null) {
+      throw Exception('User must be authenticated to manage favorites');
+    }
 
     try {
-      await _favoritesCollection.doc(user.uid).update({
+      // Check if document exists first
+      final docRef = _favoritesCollection.doc(user.uid);
+      final doc = await docRef.get();
+
+      if (!doc.exists) {
+        // Document doesn't exist, nothing to remove
+        if (kDebugMode) {
+          print('ℹ️ No favorites document exists for user, nothing to remove');
+        }
+        return;
+      }
+
+      await docRef.update({
         'riverRuns': FieldValue.arrayRemove([runId]),
         'lastUpdated': FieldValue.serverTimestamp(),
       });
@@ -103,6 +162,35 @@ class UserFavoritesService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error removing favorite run: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Remove a river run from favorites by station ID
+  static Future<void> removeFavoriteByStationId(String stationId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User must be authenticated to manage favorites');
+    }
+
+    try {
+      // Find the run ID that corresponds to this station ID
+      final runId = await RiverRunService.getRunIdByStationId(stationId);
+
+      if (runId != null) {
+        await removeFavoriteRun(runId);
+        if (kDebugMode) {
+          print('✅ Removed favorite run $runId for station $stationId');
+        }
+      } else {
+        if (kDebugMode) {
+          print('ℹ️ No run found for station $stationId, nothing to remove');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error removing favorite by station ID: $e');
       }
       rethrow;
     }

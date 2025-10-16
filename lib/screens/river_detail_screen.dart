@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
 import '../services/live_water_data_service.dart';
+import '../models/models.dart'; // Import LiveWaterData model
 
 class RiverDetailScreen extends StatefulWidget {
   final Map<String, dynamic> riverData;
@@ -14,7 +15,7 @@ class RiverDetailScreen extends StatefulWidget {
 }
 
 class _RiverDetailScreenState extends State<RiverDetailScreen> {
-  Map<String, dynamic>? _liveData;
+  LiveWaterData? _liveData;
   List<FlSpot> _historicalData = [];
   bool _isLoading = true;
   bool _isLoadingChart = true;
@@ -59,6 +60,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       if (kDebugMode) {
         print('🔍 RiverDetailScreen loading data for stationId: $stationId');
         print('🔍 Full riverData: ${widget.riverData}');
+        print('🔍 hasValidStation: ${widget.riverData['hasValidStation']}');
       }
 
       if (stationId == null || stationId.isEmpty) {
@@ -72,12 +74,19 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       final hasValidStation =
           widget.riverData['hasValidStation'] as bool? ?? false;
 
+      if (kDebugMode) {
+        print('🔍 hasValidStation value: $hasValidStation');
+        print(
+          '🔍 Station ID validation: ${RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())}',
+        );
+      }
+
       // Check if this looks like a valid station ID (should be alphanumeric, usually starts with numbers)
       if (!hasValidStation ||
           !RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())) {
         if (kDebugMode) {
           print(
-            '⚠️ Station ID "$stationId" doesn\'t look like a valid gauge station ID',
+            '⚠️ Station ID "$stationId" failed validation - hasValidStation: $hasValidStation',
           );
         }
         setState(() {
@@ -628,8 +637,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                             _buildDataRow(
                               icon: Icons.water_drop,
                               label: 'Flow Rate',
-                              value:
-                                  '${(_liveData!['flowRate'] as double?)?.toStringAsFixed(2) ?? 'N/A'} cms',
+                              value: _liveData!.formattedFlowRate,
                               color: Colors.blue,
                             ),
                             const SizedBox(height: 12),
@@ -637,7 +645,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               icon: Icons.thermostat,
                               label: 'Temperature',
                               value:
-                                  '${(_liveData!['temperature'] as double?)?.toStringAsFixed(1) ?? 'N/A'}°C',
+                                  '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
                               color: Colors.orange,
                             ),
                             const SizedBox(height: 12),
@@ -645,7 +653,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               icon: Icons.schedule,
                               label: 'Last Updated',
                               value: _formatDateTime(
-                                _liveData!['lastUpdated'] as String?,
+                                _liveData!.timestamp.toIso8601String(),
                               ),
                               color: Colors.grey,
                             ),

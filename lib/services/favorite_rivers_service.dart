@@ -79,17 +79,31 @@ class FavoriteRiversService {
           ? province
           : extractedLocation ?? 'Unknown';
 
+      // Parse station name to extract river name and section
+      final stationName = (riverData['name'] as String?)?.isNotEmpty == true
+          ? riverData['name'] as String
+          : 'Station $stationId';
+
+      // Extract river name from station name (e.g., "Bow River at Calgary" -> "Bow River")
+      final riverName = _extractRiverNameFromStation(stationName);
+      final sectionName = _extractSectionNameFromStation(stationName);
+
+      if (kDebugMode) {
+        print(
+          '🐛 Station: "$stationName" -> River: "$riverName", Section: "$sectionName"',
+        );
+      }
+
       final stationData = <String, dynamic>{
         'stationId': stationId,
-        'name': (riverData['name'] as String?)?.isNotEmpty == true
-            ? riverData['name']
-            : 'Station $stationId',
+        'name': sectionName, // Use section name, not full station name
+        'riverName': riverName, // Store river name separately
         'section': {
           'name': (riverData['section'] is Map)
-              ? (riverData['section'] as Map)['name'] ?? ''
+              ? (riverData['section'] as Map)['name'] ?? sectionName
               : (riverData['section'] as String?)?.isNotEmpty == true
               ? riverData['section']
-              : '',
+              : sectionName,
           'class': (riverData['section'] is Map)
               ? (riverData['section'] as Map)['class'] ??
                     riverData['difficulty'] ??
@@ -322,5 +336,79 @@ class FavoriteRiversService {
         .replaceAll(RegExp(r'[/\\\.#\$\[\]]'), '_')
         .replaceAll(' ', '_')
         .trim();
+  }
+
+  // Extract river name from station name
+  static String _extractRiverNameFromStation(String stationName) {
+    // Common patterns:
+    // "Bow River at Calgary" -> "Bow River"
+    // "Fraser River near Hope" -> "Fraser River"
+    // "Athabasca River below Fort McMurray" -> "Athabasca River"
+    // "Red Deer River at Red Deer" -> "Red Deer River"
+
+    // Remove common location prepositions and everything after
+    final prepositions = [
+      'at',
+      'near',
+      'above',
+      'below',
+      'upstream',
+      'downstream',
+    ];
+    String riverName = stationName;
+
+    for (final prep in prepositions) {
+      final pattern = ' $prep ';
+      final index = riverName.toLowerCase().indexOf(pattern);
+      if (index != -1) {
+        riverName = riverName.substring(0, index).trim();
+        break;
+      }
+    }
+
+    // If no preposition found, check for common suffixes to remove
+    if (riverName == stationName) {
+      // Remove common suffixes like "Station", "Gauge", etc.
+      final suffixes = [' Station', ' Gauge', ' WSC'];
+      for (final suffix in suffixes) {
+        if (riverName.toLowerCase().endsWith(suffix.toLowerCase())) {
+          riverName = riverName
+              .substring(0, riverName.length - suffix.length)
+              .trim();
+          break;
+        }
+      }
+    }
+
+    return riverName.isNotEmpty ? riverName : stationName;
+  }
+
+  // Extract section name from station name
+  static String _extractSectionNameFromStation(String stationName) {
+    // Common patterns:
+    // "Bow River at Calgary" -> "Calgary"
+    // "Fraser River near Hope" -> "Hope"
+    // "Athabasca River below Fort McMurray" -> "Fort McMurray"
+
+    final prepositions = [
+      'at',
+      'near',
+      'above',
+      'below',
+      'upstream',
+      'downstream',
+    ];
+
+    for (final prep in prepositions) {
+      final pattern = ' $prep ';
+      final index = stationName.toLowerCase().indexOf(pattern);
+      if (index != -1) {
+        final section = stationName.substring(index + pattern.length).trim();
+        return section.isNotEmpty ? section : 'Unknown Section';
+      }
+    }
+
+    // If no clear section found, return "Main" as default
+    return 'Main';
   }
 }

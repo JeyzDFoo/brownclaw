@@ -16,11 +16,19 @@ dependencies:
   google_sign_in: ^6.2.1
   http: ^1.1.0
   fl_chart: ^0.69.0
+  provider: ^6.1.2
+  # #todo: Add these packages for optimization
+  # shared_preferences: ^2.2.2  # For local caching
+  # connectivity_plus: ^6.0.3   # For network monitoring
+  # hive: ^2.2.3                # For fast local storage
+  # hive_flutter: ^1.1.0        # Hive Flutter integration
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
+  mockito: ^5.4.4
+  build_runner: ^2.4.7
 
 flutter:
   uses-material-design: true

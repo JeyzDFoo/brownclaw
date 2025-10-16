@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_station_service.dart';
-
-import '../services/favorite_rivers_service.dart';
+import '../services/user_favorites_service.dart';
+import '../services/river_run_service.dart';
 
 class StationSearchScreen extends StatefulWidget {
   const StationSearchScreen({super.key});
@@ -73,9 +73,11 @@ class _StationSearchScreenState extends State<StationSearchScreen> {
   }
 
   void _loadFavorites() {
-    FavoriteRiversService.getUserFavorites().listen((favorites) {
+    UserFavoritesService.getUserFavoriteStationIds().listen((
+      favoriteStationIds,
+    ) {
       setState(() {
-        _favoriteStationIds = favorites.toSet();
+        _favoriteStationIds = favoriteStationIds.toSet();
       });
     });
   }
@@ -114,20 +116,18 @@ class _StationSearchScreenState extends State<StationSearchScreen> {
 
   Future<void> _toggleFavorite(String stationId) async {
     final station = _filteredStations.firstWhere((s) => s.id == stationId);
-    final riverData = _riverData[stationId] ?? {};
 
     try {
       if (_favoriteStationIds.contains(stationId)) {
-        await FavoriteRiversService.removeFavorite(stationId);
+        await UserFavoritesService.removeFavoriteByStationId(stationId);
         // setState will be updated by the stream listener
       } else {
-        await FavoriteRiversService.addFavorite(stationId, {
-          'name': station.name,
-          'province': station.province,
-          'flow': riverData['flow'] ?? 0.0,
-          'status': riverData['status'] ?? 'Unknown',
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        // Create a river run from station data and add to favorites
+        final runId = await RiverRunService.createRunFromStationData(
+          stationId,
+          station.name,
+        );
+        await UserFavoritesService.addFavoriteRun(runId);
         // setState will be updated by the stream listener
       }
     } catch (e) {

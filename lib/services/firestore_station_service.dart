@@ -39,6 +39,12 @@ class StationModel {
   factory StationModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
+    if (kDebugMode) {
+      print(
+        '🐛 StationModel.fromFirestore - doc.id: ${doc.id}, data[\'id\']: ${data['id']}',
+      );
+    }
+
     return StationModel(
       id: data['id'] ?? doc.id,
       name: data['name'] ?? 'Unknown Station',
@@ -89,6 +95,15 @@ class FirestoreStationService {
 
   // Singleton pattern to prevent multiple instances
   static FirestoreStationService? _instance;
+
+  // #todo: Add static caching for station data to reduce Firestore reads
+  // static final Map<String, List<StationModel>> _provinceCache = {};
+  // static final Map<String, StationModel> _stationCache = {};
+  // static DateTime? _lastCacheUpdate;
+  // static const Duration _cacheTimeout = Duration(hours: 1); // Stations don't change often
+
+  // #todo: Add pagination support for large station lists
+  // static const int _defaultPageSize = 50;
 
   FirestoreStationService._internal();
 
@@ -155,6 +170,12 @@ class FirestoreStationService {
   /// Get all stations (AB and BC only, with optional limit)
   Future<List<StationModel>> getAllStations({int? limit}) async {
     try {
+      // #todo: Check cache first to avoid redundant Firestore reads
+      // if (_isCacheValid() && _provinceCache.containsKey('ALL')) {
+      //   var cached = _provinceCache['ALL']!;
+      //   return limit != null ? cached.take(limit).toList() : cached;
+      // }
+
       if (kDebugMode) {
         print('Getting all stations for AB and BC provinces');
       }
@@ -181,6 +202,10 @@ class FirestoreStationService {
 
       // Combine stations
       final allStations = [...albertaStations, ...bcStations];
+
+      // #todo: Cache the combined results for future use
+      // _provinceCache['ALL'] = allStations;
+      // _lastCacheUpdate = DateTime.now();
 
       if (kDebugMode) {
         print(

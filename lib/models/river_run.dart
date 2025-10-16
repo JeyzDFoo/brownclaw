@@ -19,6 +19,7 @@ class RiverRun {
   final double? optimalFlowMin; // Optimal flow range minimum
   final double? optimalFlowMax; // Optimal flow range maximum
   final String? flowUnit; // 'cms', 'cfs', etc.
+  final String? stationId; // Associated gauge station ID (if any)
   final String? createdBy; // User who created this section
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -41,6 +42,7 @@ class RiverRun {
     this.optimalFlowMin,
     this.optimalFlowMax,
     this.flowUnit,
+    this.stationId,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -66,6 +68,7 @@ class RiverRun {
       optimalFlowMin: _safeToDouble(map['optimalFlowMin']),
       optimalFlowMax: _safeToDouble(map['optimalFlowMax']),
       flowUnit: map['flowUnit'] as String?,
+      stationId: map['stationId'] as String?,
       createdBy: map['createdBy'] as String?,
       createdAt: _timestampToDateTime(map['createdAt']),
       updatedAt: _timestampToDateTime(map['updatedAt']),
@@ -97,6 +100,7 @@ class RiverRun {
     if (optimalFlowMin != null) map['optimalFlowMin'] = optimalFlowMin;
     if (optimalFlowMax != null) map['optimalFlowMax'] = optimalFlowMax;
     if (flowUnit != null) map['flowUnit'] = flowUnit;
+    if (stationId != null) map['stationId'] = stationId;
     if (createdBy != null) map['createdBy'] = createdBy;
     if (createdAt != null) map['createdAt'] = Timestamp.fromDate(createdAt!);
     if (updatedAt != null) map['updatedAt'] = Timestamp.fromDate(updatedAt!);

@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
+import 'providers/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔇 QUICK FIX: Disable noisy debug prints for cleaner testing
+  // Comment out the next 3 lines to re-enable debug output
+  // debugPrint = (String? message, {int? wrapWidth}) {
+  //   // Silent - no more spam! 😄
+  // };
+
+  // #todo: Add Firebase performance monitoring and analytics for production
+  // #todo: Implement error reporting (Crashlytics) for production monitoring
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MainApp());
 }
@@ -16,21 +27,35 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Brown Claw - Whitewater Logbook',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
-        useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        // #todo: Add caching provider for shared data management
+        // #todo: Consider adding StationProvider for centralized station data
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => RiverRunProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Brown Claw - Whitewater Logbook',
+            theme: themeProvider.lightTheme,
+            darkTheme: themeProvider.darkTheme,
+            themeMode: themeProvider.themeMode,
+            // #todo: Remove artificial width constraint for mobile-first design
+            builder: (context, child) {
+              return Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 600),
+                  child: child!,
+                ),
+              );
+            },
+            home: const HomePage(),
+          );
+        },
       ),
-      builder: (context, child) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 600),
-            child: child!,
-          ),
-        );
-      },
-      home: const HomePage(),
     );
   }
 }

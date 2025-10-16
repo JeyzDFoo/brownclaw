@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../services/river_service.dart';
-import '../services/river_run_service.dart';
 import '../services/gauge_station_service.dart';
+import '../providers/providers.dart';
 import '../models/models.dart';
 
 class CreateRiverRunScreen extends StatefulWidget {
@@ -37,8 +38,8 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
   bool _isLoading = false;
 
   // Water station selection (gauge stations)
-  Map<String, dynamic>? _selectedWaterStation;
-  List<Map<String, dynamic>> _availableWaterStations = [];
+  WaterStation? _selectedWaterStation;
+  List<WaterStation> _availableWaterStations = [];
   bool _loadingStations = false;
 
   // Available options
@@ -129,20 +130,21 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
       // Process the station data
       // Debug info removed for performance
 
-      final stations = <Map<String, dynamic>>[];
+      final stations = <WaterStation>[];
 
       for (final doc in snapshot.docs) {
         final data = doc.data();
-        data['id'] = doc.id; // Add document ID
+
+        // Create WaterStation object
+        final station = WaterStation.fromMap(data, doc.id);
 
         // Filter by river name if provided
         if (filterRiver.isNotEmpty) {
           // Check ALL possible river name fields
           final possibleFields = [
-            data['riverName'],
-            data['name'],
-            data['stationName'],
-            data['official_name'],
+            station.riverName,
+            station.stationName,
+            station.officialName,
           ];
 
           // Check field values for debugging (removed print statements)
@@ -153,7 +155,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
 
           for (final fieldValue in possibleFields) {
             if (fieldValue != null) {
-              final fieldLower = fieldValue.toString().toLowerCase();
+              final fieldLower = fieldValue.toLowerCase();
               if (fieldLower.contains(riverNameLower)) {
                 matches = true;
                 break;
@@ -162,11 +164,11 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
           }
 
           if (matches) {
-            stations.add(data);
+            stations.add(station);
           }
         } else {
           // No filter, add all stations
-          stations.add(data);
+          stations.add(station);
         }
       }
 
@@ -180,7 +182,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
           // Clear selection if current selection is not in the new filtered list
           if (_selectedWaterStation != null &&
               !limitedStations.any(
-                (s) => s['id'] == _selectedWaterStation!['id'],
+                (s) => s.documentId == _selectedWaterStation!.documentId,
               )) {
             _selectedWaterStation = null;
           }
@@ -286,43 +288,73 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
             ? double.tryParse(_maxFlowController.text.trim())
             : null,
         flowUnit: 'cms',
+        stationId: _selectedWaterStation?.stationId,
       );
 
-      final runId = await RiverRunService.addRun(newRun);
+      final runId = await context.read<RiverRunProvider>().addRiverRun(newRun);
 
-      // If a water station was selected, create a gauge station linked to this run
+      // If a water station was selected, create a proper gauge station record
       if (_selectedWaterStation != null) {
         try {
           final stationData = _selectedWaterStation!;
-          final gaugeStation = GaugeStation(
-            stationId: stationData['id'] ?? stationData['stationId'] ?? '',
-            name:
-                stationData['name'] ??
-                stationData['stationName'] ??
-                'Unknown Station',
-            riverRunId: runId, // Link to the created run
-            latitude: (stationData['latitude'] as num?)?.toDouble() ?? 0.0,
-            longitude: (stationData['longitude'] as num?)?.toDouble() ?? 0.0,
-            agency: 'Environment Canada',
-            region: _selectedRegion,
-            country: _selectedCountry,
-            isActive: true,
-            parameters: ['discharge', 'water_level'],
-            dataUrl: stationData['dataUrl'] as String?,
-          );
+          final stationId = stationData.stationId;
 
-          await GaugeStationService.addStation(gaugeStation);
-
-          if (kDebugMode) {
-            print(
-              '✅ Successfully linked gauge station ${gaugeStation.stationId} to run $runId',
+          if (stationId.isNotEmpty) {
+            // Check if gauge station already exists
+            final existingStation = await GaugeStationService.getStationById(
+              stationId,
             );
+
+            if (existingStation == null) {
+              // Create new gauge station record
+              final gaugeStation = GaugeStation(
+                stationId: stationId,
+                name: stationData.stationName,
+                riverRunId: runId, // Link to the created run (legacy field)
+                associatedRiverRunIds: [runId], // New field for multiple runs
+                latitude: stationData.latitude ?? 0.0,
+                longitude: stationData.longitude ?? 0.0,
+                agency: 'Environment Canada',
+                region: _selectedRegion,
+                country: _selectedCountry,
+                isActive: true,
+                parameters: ['discharge', 'water_level'],
+                dataUrl: null, // No dataUrl in WaterStation model
+              );
+
+              await GaugeStationService.addStation(gaugeStation);
+
+              if (kDebugMode) {
+                print('✅ Created new gauge station $stationId for run $runId');
+              }
+            } else {
+              // Update existing station to include this run
+              await GaugeStationService.addRunToStation(stationId, runId);
+
+              if (kDebugMode) {
+                print(
+                  '✅ Added run $runId to existing gauge station $stationId',
+                );
+              }
+            }
+
+            // Trigger initial live data update for this station
+            try {
+              await GaugeStationService.updateStationLiveData(stationId);
+              if (kDebugMode) {
+                print('✅ Triggered live data update for station $stationId');
+              }
+            } catch (e) {
+              if (kDebugMode) {
+                print('⚠️ Could not fetch initial live data: $e');
+              }
+            }
           }
         } catch (e) {
           if (kDebugMode) {
-            print('⚠️ Error linking gauge station: $e');
+            print('⚠️ Error setting up gauge station: $e');
           }
-          // Don't fail the whole operation if station linking fails
+          // Don't fail the whole operation if station setup fails
         }
       }
 
@@ -662,7 +694,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                         ),
                       )
                     else
-                      DropdownButtonFormField<Map<String, dynamic>>(
+                      DropdownButtonFormField<WaterStation>(
                         value: _selectedWaterStation,
                         decoration: const InputDecoration(
                           labelText: 'Select Gauge Station',
@@ -671,9 +703,6 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                         ),
                         hint: const Text('Choose a gauge station (optional)'),
                         items: _availableWaterStations.map((station) {
-                          final stationName =
-                              station['name'] ?? 'Unknown Station';
-                          final stationId = station['id'] ?? 'Unknown ID';
                           return DropdownMenuItem(
                             value: station,
                             child: Column(
@@ -681,7 +710,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Text(
-                                  stationName,
+                                  station.stationName,
                                   style: const TextStyle(
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -689,7 +718,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                                   maxLines: 1,
                                 ),
                                 Text(
-                                  stationId,
+                                  station.stationId,
                                   style: TextStyle(
                                     fontSize: 12,
                                     color: Colors.grey[600],
@@ -728,7 +757,7 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Selected: ${_selectedWaterStation!['name'] ?? _selectedWaterStation!['stationName'] ?? 'Unknown'} (${_selectedWaterStation!['id'] ?? _selectedWaterStation!['stationId'] ?? 'Unknown ID'})',
+                                'Selected: ${_selectedWaterStation!.displayName}',
                                 style: TextStyle(
                                   color: Colors.green[700],
                                   fontSize: 12,

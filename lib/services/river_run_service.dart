@@ -9,6 +9,14 @@ class RiverRunService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // #todo: Add static caching to reduce redundant Firestore reads
+  // static final Map<String, RiverRunWithStations> _runCache = {};
+  // static DateTime? _lastCacheUpdate;
+  // static const Duration _cacheTimeout = Duration(minutes: 10);
+
+  // #todo: Add connection state monitoring for offline support
+  // static bool _isOffline = false;
+
   // Collection reference
   static CollectionReference get _runsCollection =>
       _firestore.collection('river_runs');
@@ -32,6 +40,11 @@ class RiverRunService {
   // Get run by ID
   static Future<RiverRun?> getRunById(String runId) async {
     try {
+      // #todo: Check cache first before making Firestore call
+      // if (_runCache.containsKey(runId) && _isCacheValid()) {
+      //   return _runCache[runId]?.run;
+      // }
+
       final doc = await _runsCollection.doc(runId).get();
       if (doc.exists) {
         return RiverRun.fromMap(
@@ -257,6 +270,172 @@ class RiverRunService {
     }
   }
 
+  // Create or get a river run from station data for favorites
+  static Future<String> createRunFromStationData(
+    String stationId,
+    String stationName,
+  ) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User must be authenticated to create river runs');
+    }
+
+    try {
+      // Check if a run with this station ID already exists
+      final existingRunQuery = await _runsCollection
+          .where('stationId', isEqualTo: stationId)
+          .limit(1)
+          .get();
+
+      if (existingRunQuery.docs.isNotEmpty) {
+        // Return existing run ID
+        return existingRunQuery.docs.first.id;
+      }
+
+      // Parse station name to extract river and section info
+      final riverName = _extractRiverNameFromStation(stationName);
+      final sectionName = _extractSectionNameFromStation(stationName);
+
+      // Create or get the river record
+      String riverId = await _createOrGetRiver(riverName);
+
+      // Create the river run
+      final runData = <String, dynamic>{
+        'riverId': riverId,
+        'name': sectionName,
+        'difficultyClass': 'Unknown', // Default, can be updated later
+        'description': 'Created from gauge station: $stationName',
+        'stationId': stationId, // Link back to original station
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'createdBy': user.uid,
+      };
+
+      final docRef = await _runsCollection.add(runData);
+
+      if (kDebugMode) {
+        print('✅ Created river run from station: $stationName -> ${docRef.id}');
+      }
+
+      return docRef.id;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error creating run from station data: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Get run ID by station ID
+  static Future<String?> getRunIdByStationId(String stationId) async {
+    try {
+      final query = await _runsCollection
+          .where('stationId', isEqualTo: stationId)
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        return query.docs.first.id;
+      }
+
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error finding run by station ID: $e');
+      }
+      return null;
+    }
+  }
+
+  // Helper method to create or get a river record
+  static Future<String> _createOrGetRiver(String riverName) async {
+    // Check if river already exists
+    final existingRiverQuery = await _firestore
+        .collection('rivers')
+        .where('name', isEqualTo: riverName)
+        .limit(1)
+        .get();
+
+    if (existingRiverQuery.docs.isNotEmpty) {
+      return existingRiverQuery.docs.first.id;
+    }
+
+    // Create new river
+    final riverData = <String, dynamic>{
+      'name': riverName,
+      'region': 'Unknown', // Can be updated later
+      'country': 'Canada', // Default assumption for now
+      'createdAt': FieldValue.serverTimestamp(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    };
+
+    final docRef = await _firestore.collection('rivers').add(riverData);
+
+    if (kDebugMode) {
+      print('✅ Created river: $riverName -> ${docRef.id}');
+    }
+
+    return docRef.id;
+  }
+
+  // Helper methods to extract river and section names (copied from FavoriteRiversService)
+  static String _extractRiverNameFromStation(String stationName) {
+    final prepositions = [
+      'at',
+      'near',
+      'above',
+      'below',
+      'upstream',
+      'downstream',
+    ];
+    String riverName = stationName;
+
+    for (final prep in prepositions) {
+      final pattern = ' $prep ';
+      final index = riverName.toLowerCase().indexOf(pattern);
+      if (index != -1) {
+        riverName = riverName.substring(0, index).trim();
+        break;
+      }
+    }
+
+    if (riverName == stationName) {
+      final suffixes = [' Station', ' Gauge', ' WSC'];
+      for (final suffix in suffixes) {
+        if (riverName.toLowerCase().endsWith(suffix.toLowerCase())) {
+          riverName = riverName
+              .substring(0, riverName.length - suffix.length)
+              .trim();
+          break;
+        }
+      }
+    }
+
+    return riverName.isNotEmpty ? riverName : stationName;
+  }
+
+  static String _extractSectionNameFromStation(String stationName) {
+    final prepositions = [
+      'at',
+      'near',
+      'above',
+      'below',
+      'upstream',
+      'downstream',
+    ];
+
+    for (final prep in prepositions) {
+      final pattern = ' $prep ';
+      final index = stationName.toLowerCase().indexOf(pattern);
+      if (index != -1) {
+        final section = stationName.substring(index + pattern.length).trim();
+        return section.isNotEmpty ? section : 'Unknown Section';
+      }
+    }
+
+    return 'Main';
+  }
+
   // Get run with its associated gauge stations (single result)
   static Future<RiverRunWithStations?> getRunWithStations(String runId) async {
     try {
@@ -277,9 +456,18 @@ class RiverRunService {
       // Get the parent river information
       River? river;
       if (run.riverId.isNotEmpty) {
+        print('🐛 getRunWithStations - Fetching river for ID: ${run.riverId}');
         river = await RiverService.getRiverById(run.riverId);
+        print(
+          '🐛 getRunWithStations - River fetched: ${river?.name ?? 'null'}',
+        );
+      } else {
+        print('🐛 getRunWithStations - No riverId, river will be null');
       }
 
+      print(
+        '🐛 getRunWithStations - Creating RiverRunWithStations with run: ${run.name}, river: ${river?.name ?? 'null'}',
+      );
       return RiverRunWithStations(run: run, stations: stations, river: river);
     } catch (e) {
       if (kDebugMode) {
@@ -343,11 +531,17 @@ class RiverRunService {
 
   // Get all runs with stations (stream)
   static Stream<List<RiverRunWithStations>> getAllRunsWithStations() {
+    // #todo: This method loads ALL runs and their stations - very expensive!
+    // Implement pagination and lazy loading for better performance
+    // Consider loading only basic run info first, then stations on demand
     return _runsCollection.snapshots().asyncMap((snapshot) async {
       final runIds = snapshot.docs.map((doc) => doc.id).toList();
 
       if (runIds.isEmpty) return <RiverRunWithStations>[];
 
+      // #todo: Replace individual calls with batch operations
+      // This currently makes 1 Firestore read per run + 1 per station
+      // Could be optimized to batch read all runs and all stations separately
       final runWithStationsFutures = runIds.map((runId) async {
         return getRunWithStations(runId);
       });

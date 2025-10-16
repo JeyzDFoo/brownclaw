@@ -21,14 +21,44 @@ class RiverRunWithStations {
 
   // Enhanced display name that includes river name when available
   String get displayName {
-    if (river != null) {
+    if (river != null && river!.name != 'Unknown River') {
+      print(
+        '✅ RiverRunWithStations displayName - Using river: ${river!.name} (${run.name}) - ${run.difficultyClass}',
+      );
       return '${river!.name} (${run.name}) - ${run.difficultyClass}';
     }
-    return run.displayName; // Fallback to original format
-  }
 
-  // Flow status based on first station with current data
+    // If no valid river or river name is "Unknown River", try to extract from run name
+    print(
+      '⚠️  RiverRunWithStations displayName - No valid river (${river?.name}), checking run name: "${run.name}"',
+    );
+
+    if (run.name != 'Unknown Section' && run.name.contains(' at ')) {
+      // If run name contains location info, it might be the full station name
+      // Try to extract meaningful parts
+      final parts = run.name.split(' at ');
+      if (parts.length >= 2) {
+        final riverPart = parts[0].trim();
+        final locationPart = parts[1].trim();
+        print(
+          '✅ RiverRunWithStations displayName - Extracted from run name: $riverPart ($locationPart) - ${run.difficultyClass}',
+        );
+        return '$riverPart ($locationPart) - ${run.difficultyClass}';
+      }
+    }
+
+    print(
+      '❌ RiverRunWithStations displayName - Using fallback: ${run.displayName}',
+    );
+    return run.displayName; // Fallback to original format
+  } // Flow status based on first station with current data
+
   String get flowStatus {
+    // If we have a direct stationId, we need to fetch live data
+    if (run.stationId != null && run.stationId!.isNotEmpty) {
+      return 'Fetching...'; // Will be updated by live data service
+    }
+
     if (stations.isEmpty) return 'No Data';
 
     final stationWithData = stations.firstWhere(
@@ -56,14 +86,45 @@ class RiverRunWithStations {
     return stations.first;
   }
 
-  // Get current discharge from primary station
-  double? get currentDischarge => primaryStation?.currentDischarge;
+  // Get current discharge - prefer from run's stationId if available
+  double? get currentDischarge {
+    // If the run has a stationId, we should fetch live data directly
+    if (run.stationId != null && run.stationId!.isNotEmpty) {
+      // Return null for now - live data will be fetched separately
+      // This allows the UI to trigger live data fetching
+      return null;
+    }
+    return primaryStation?.currentDischarge;
+  }
 
-  // Get current water level from primary station
-  double? get currentWaterLevel => primaryStation?.currentWaterLevel;
+  // Get current water level - prefer from run's stationId if available
+  double? get currentWaterLevel {
+    // If the run has a stationId, we should fetch live data directly
+    if (run.stationId != null && run.stationId!.isNotEmpty) {
+      // Return null for now - live data will be fetched separately
+      return null;
+    }
+    return primaryStation?.currentWaterLevel;
+  }
 
-  // Check if we have live data
-  bool get hasLiveData => stations.any((station) => station.hasLiveData);
+  // Check if we have live data capability
+  bool get hasLiveData {
+    // If run has stationId, it can potentially have live data
+    if (run.stationId != null && run.stationId!.isNotEmpty) {
+      return true; // Assume capability exists
+    }
+    return stations.any((station) => station.hasLiveData);
+  }
+
+  // Get the station ID for live data fetching
+  String? get liveDataStationId {
+    // Prefer the run's direct stationId
+    if (run.stationId != null && run.stationId!.isNotEmpty) {
+      return run.stationId;
+    }
+    // Fallback to primary station
+    return primaryStation?.stationId;
+  }
 
   // Get the most recent data update time
   DateTime? get lastDataUpdate {

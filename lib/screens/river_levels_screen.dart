@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import '../services/river_run_service.dart';
-import '../services/gauge_station_service.dart';
-import '../services/user_favorites_service.dart';
+import 'package:provider/provider.dart';
+import '../services/live_water_data_service.dart';
+import '../providers/providers.dart';
 import '../models/models.dart';
 import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
@@ -17,74 +16,224 @@ class RiverLevelsScreen extends StatefulWidget {
 }
 
 class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
-  List<RiverRunWithStations> _favoriteRuns = [];
-  List<String> _favoriteRunIds = [];
-  String? _error;
-  bool _isLoading = false;
+  Set<String> _lastFavoriteRunIds = {}; // Track the actual favorite run IDs
+  Set<String> _updatingRunIds =
+      {}; // Track which runs are currently updating live data
+
+  // Live data cache: Map<stationId, liveData>
+  // #todo: Move this cache to a dedicated CacheProvider for shared access
+  // #todo: Implement cache expiration and cleanup to prevent memory leaks
+  // Updated to use typed LiveWaterData objects
+  Map<String, LiveWaterData> _liveDataCache = {};
 
   @override
   void initState() {
     super.initState();
-    _loadFavorites();
-  }
+    // Initialize _lastFavoriteRunIds to prevent duplicate loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final favoritesProvider = context.read<FavoritesProvider>();
+      _lastFavoriteRunIds = Set<String>.from(favoritesProvider.favoriteRunIds);
 
-  void _loadFavorites() {
-    UserFavoritesService.getUserFavoriteRunIds().listen((favoriteRunIds) {
-      setState(() {
-        _favoriteRunIds = favoriteRunIds;
-      });
-      _loadFavoriteRunsData();
+      // Quick test of live data service in debug mode
+      if (kDebugMode) {
+        _testLiveDataService();
+      }
     });
   }
 
-  void _loadFavoriteRunsData() async {
-    if (_favoriteRunIds.isEmpty) {
-      setState(() {
-        _favoriteRuns = [];
-        _isLoading = false;
-      });
-      return;
+  /// Quick test to verify LiveWaterDataService is working
+  Future<void> _testLiveDataService() async {
+    if (kDebugMode) {
+      print('🧪 Testing LiveWaterDataService...');
+      try {
+        final testResult = await LiveWaterDataService.fetchStationData(
+          '08MF005',
+        );
+        print('🧪 Test result for 08MF005: $testResult');
+        if (testResult != null) {
+          print('🧪 Service is working! Flow: ${testResult.formattedFlowRate}');
+        } else {
+          print('🧪 Service returned null - might be network or API issue');
+        }
+      } catch (e) {
+        print('🧪 Service test failed: $e');
+      }
     }
+  }
 
+  // Update live data in background with smart rate limiting
+  void _updateLiveDataInBackground(List<String> favoriteRunIds) async {
+    if (favoriteRunIds.isEmpty) return;
+
+    // Mark all runs as updating
     setState(() {
-      _isLoading = true;
+      _updatingRunIds = Set<String>.from(favoriteRunIds);
     });
+
+    // Add delay to let UI settle first
+    await Future.delayed(const Duration(milliseconds: 500));
 
     try {
-      final favoriteRunsWithStations = <RiverRunWithStations>[];
+      final riverRunProvider = context.read<RiverRunProvider>();
 
-      for (final runId in _favoriteRunIds) {
-        final runWithStations = await RiverRunService.getRunWithStations(runId);
-        if (runWithStations != null) {
-          // Update live data for all stations in this run
-          for (final station in runWithStations.stations) {
-            await GaugeStationService.updateStationLiveData(station.stationId);
-          }
-          // Get updated run with fresh live data
-          final updatedRunWithStations =
-              await RiverRunService.getRunWithStations(runId);
-          if (updatedRunWithStations != null) {
-            favoriteRunsWithStations.add(updatedRunWithStations);
-          }
+      // Collect unique station IDs directly from runs' stationId field
+      final Set<String> uniqueStationIds = {};
+      final currentRuns = riverRunProvider.favoriteRuns;
+
+      for (final runWithStations in currentRuns) {
+        final stationId = runWithStations.run.stationId;
+        if (stationId != null && stationId.isNotEmpty) {
+          uniqueStationIds.add(stationId);
         }
       }
 
-      setState(() {
-        _favoriteRuns = favoriteRunsWithStations;
-        _error = null;
-      });
+      if (uniqueStationIds.isEmpty) return;
+
+      if (kDebugMode) {
+        print(
+          '🌊 Fetching live data for ${uniqueStationIds.length} unique stations directly...',
+        );
+      }
+
+      // #todo: Optimize batch processing with proper error handling per station
+      // #todo: Implement retry logic for failed API calls
+      // #todo: Add connection state monitoring to skip updates when offline
+      // Fetch live data directly using the service
+      final stationList = uniqueStationIds.toList();
+      const batchSize = 3; // Process max 3 stations at a time
+
+      for (int i = 0; i < stationList.length; i += batchSize) {
+        final batch = stationList.skip(i).take(batchSize);
+        final batchFutures = batch.map((stationId) async {
+          try {
+            final liveData = await LiveWaterDataService.fetchStationData(
+              stationId,
+            );
+            if (liveData != null) {
+              // Store live data in cache
+              _liveDataCache[stationId] = liveData;
+              if (kDebugMode) {
+                print(
+                  '✅ Got live data for $stationId: ${liveData.formattedFlowRate}',
+                );
+              }
+            }
+            return liveData;
+          } catch (e) {
+            if (kDebugMode) {
+              print('❌ Failed to fetch live data for $stationId: $e');
+            }
+            return null;
+          }
+        });
+
+        // Process batch and wait before next batch
+        await Future.wait(batchFutures);
+
+        // Small delay between batches to be API-friendly
+        if (i + batchSize < stationList.length) {
+          await Future.delayed(const Duration(milliseconds: 200));
+        }
+      }
+
+      // After all updates, trigger UI refresh by calling setState
+      if (mounted) {
+        setState(() {
+          // This will rebuild the UI with the new live data cache
+        });
+
+        if (kDebugMode) {
+          print('✅ Live data updated in background');
+        }
+      }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ Error loading favorite runs data: $e');
+        print('❌ Background live data update error: $e');
       }
-      setState(() {
-        _error = e.toString();
-      });
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      // Clear the updating state
+      if (mounted) {
+        setState(() {
+          _updatingRunIds.clear();
+        });
+      }
     }
+  }
+
+  // Get live data for a station from cache
+  // Updated to return LiveWaterData for type safety
+  LiveWaterData? _getLiveDataForStation(String? stationId) {
+    if (stationId == null || stationId.isEmpty) return null;
+    return _liveDataCache[stationId];
+  }
+
+  // Get current discharge from cache or RiverRunWithStations
+  double? _getCurrentDischarge(RiverRunWithStations runWithStations) {
+    // If run has stationId, check cache first
+    final stationId = runWithStations.run.stationId;
+    if (stationId != null && stationId.isNotEmpty) {
+      final liveData = _getLiveDataForStation(stationId);
+      if (liveData != null && liveData.flowRate != null) {
+        return liveData.flowRate;
+      }
+    }
+    // Fallback to original logic
+    return runWithStations.currentDischarge;
+  }
+
+  // Get current water level from cache or RiverRunWithStations
+  double? _getCurrentWaterLevel(RiverRunWithStations runWithStations) {
+    // If run has stationId, check cache first
+    final stationId = runWithStations.run.stationId;
+    if (stationId != null && stationId.isNotEmpty) {
+      final liveData = _getLiveDataForStation(stationId);
+      if (liveData != null && liveData.waterLevel != null) {
+        return liveData.waterLevel;
+      }
+    }
+    // Fallback to original logic
+    return runWithStations.currentWaterLevel;
+  }
+
+  // Check if run has live data (from cache or original logic)
+  bool _hasLiveData(RiverRunWithStations runWithStations) {
+    // If run has stationId, check if we have cached data
+    final stationId = runWithStations.run.stationId;
+    if (stationId != null && stationId.isNotEmpty) {
+      final liveData = _getLiveDataForStation(stationId);
+      return liveData != null;
+    }
+    // Fallback to original logic
+    return runWithStations.hasLiveData;
+  }
+
+  // Get flow status
+  String _getFlowStatus(RiverRunWithStations runWithStations) {
+    final discharge = _getCurrentDischarge(runWithStations);
+    final hasData = _hasLiveData(runWithStations);
+
+    if (!hasData || discharge == null) {
+      final stationId = runWithStations.run.stationId;
+      if (stationId != null && stationId.isNotEmpty) {
+        return 'Fetching...';
+      }
+      return 'No data';
+    }
+
+    final minFlow = runWithStations.run.minRecommendedFlow;
+    final maxFlow = runWithStations.run.maxRecommendedFlow;
+
+    if (minFlow != null && maxFlow != null) {
+      if (discharge < minFlow) {
+        return 'Too Low';
+      } else if (discharge > maxFlow) {
+        return 'Too High';
+      } else {
+        return 'Runnable';
+      }
+    }
+
+    return 'Live';
   }
 
   // Convert new RiverRunWithStations to legacy format for compatibility
@@ -92,13 +241,15 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
     RiverRunWithStations runWithStations,
   ) {
     final primaryStation = runWithStations.primaryStation;
-    final stationId = primaryStation?.stationId ?? runWithStations.run.id;
+    final stationId =
+        primaryStation?.stationId ?? runWithStations.run.stationId;
 
     if (kDebugMode) {
       print('🔄 Converting run to legacy format:');
       print('   Run ID: ${runWithStations.run.id}');
       print('   River Name: ${runWithStations.river?.name}');
       print('   Run Name: ${runWithStations.run.name}');
+      print('   Run Station ID: ${runWithStations.run.stationId}');
       print('   Number of Stations: ${runWithStations.stations.length}');
       if (runWithStations.stations.isNotEmpty) {
         for (int i = 0; i < runWithStations.stations.length; i++) {
@@ -108,9 +259,18 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
           );
         }
       }
+      print('   Primary Station: $primaryStation');
       print('   Primary Station ID: ${primaryStation?.stationId}');
       print('   Final Station ID: $stationId');
       print('   Has Live Data: ${runWithStations.hasLiveData}');
+
+      final hasValidStation =
+          stationId != null &&
+          stationId.isNotEmpty &&
+          RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase());
+      print(
+        '   Will set hasValidStation to: $hasValidStation (based on stationId validation)',
+      );
     }
 
     return {
@@ -121,25 +281,34 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
         'difficulty': runWithStations.run.difficultyClass,
       },
       'hasValidStation':
-          primaryStation != null && primaryStation.stationId.isNotEmpty,
+          stationId != null &&
+          stationId.isNotEmpty &&
+          RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase()),
       'location': runWithStations.run.putIn ?? 'Unknown Location',
       'difficulty': runWithStations.run.difficultyClass,
       'minRunnable': runWithStations.run.minRecommendedFlow ?? 0.0,
       'maxSafe': runWithStations.run.maxRecommendedFlow ?? 1000.0,
-      'flowRate': runWithStations.currentDischarge ?? 0.0,
-      'waterLevel': runWithStations.currentWaterLevel ?? 0.0,
+      'flowRate': _getCurrentDischarge(runWithStations) ?? 0.0,
+      'waterLevel': _getCurrentWaterLevel(runWithStations) ?? 0.0,
       'temperature': primaryStation?.currentTemperature ?? 0.0,
       'lastUpdated':
           runWithStations.lastDataUpdate?.toIso8601String() ??
           DateTime.now().toIso8601String(),
-      'dataSource': runWithStations.hasLiveData ? 'live' : 'unavailable',
-      'isLive': runWithStations.hasLiveData,
-      'status': runWithStations.flowStatus,
+      'dataSource': _hasLiveData(runWithStations) ? 'live' : 'unavailable',
+      'isLive': _hasLiveData(runWithStations),
+      'status': _getFlowStatus(runWithStations),
     };
   }
 
   Future<void> _refreshData() async {
-    _loadFavoriteRunsData();
+    final favoritesProvider = context.read<FavoritesProvider>();
+    final riverRunProvider = context.read<RiverRunProvider>();
+
+    // Force reload the favorite runs
+    await riverRunProvider.loadFavoriteRuns(favoritesProvider.favoriteRunIds);
+
+    // Update live data
+    _updateLiveDataInBackground(favoritesProvider.favoriteRunIds.toList());
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -153,7 +322,9 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
 
   Future<void> _toggleFavorite(RiverRunWithStations runWithStations) async {
     try {
-      await UserFavoritesService.removeFavoriteRun(runWithStations.run.id);
+      await context.read<FavoritesProvider>().toggleFavorite(
+        runWithStations.run.id,
+      );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -422,7 +593,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                   return;
                 }
 
-                final user = FirebaseAuth.instance.currentUser;
+                final user = context.read<UserProvider>().user;
                 if (user == null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -484,309 +655,356 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          // Action buttons row
-          Container(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const RiverRunSearchScreen(),
+    return Consumer2<FavoritesProvider, RiverRunProvider>(
+      builder: (context, favoritesProvider, riverRunProvider, child) {
+        // Load favorites data when needed - provider handles smart caching
+        final currentFavoriteIds = favoritesProvider.favoriteRunIds;
+        if (!_lastFavoriteRunIds.containsAll(currentFavoriteIds) ||
+            !currentFavoriteIds.containsAll(_lastFavoriteRunIds)) {
+          _lastFavoriteRunIds = Set<String>.from(currentFavoriteIds);
+          // Schedule loading after the current build completes to avoid spinner flash
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
+            _updateLiveDataInBackground(currentFavoriteIds.toList());
+          });
+        }
+
+        final favoriteRuns = riverRunProvider.favoriteRuns;
+        final isLoading = riverRunProvider.isLoading;
+        final error = riverRunProvider.error;
+
+        return Scaffold(
+          body: Column(
+            children: [
+              // Action buttons row
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const RiverRunSearchScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text('Add River Runs'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.add_circle_outline),
-                  label: const Text('Add River Runs'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: _refreshData,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Refresh'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    foregroundColor: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(color: Colors.teal),
-                  )
-                : _error != null
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.error_outline,
-                          size: 64,
-                          color: Colors.red[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Error loading data',
-                          style: Theme.of(context).textTheme.headlineSmall,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          _error!,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: Colors.grey[600]),
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton.icon(
-                          onPressed: _refreshData,
-                          icon: const Icon(Icons.refresh),
-                          label: const Text('Retry'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
                     ),
-                  )
-                : _favoriteRuns.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.favorite_border,
-                          size: 64,
-                          color: Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No Favorite River Runs Yet',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Add favorite river runs to see live flow data here',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 24),
-                        ElevatedButton.icon(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const RiverRunSearchScreen(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(Icons.search),
-                          label: const Text('Find River Runs'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.teal,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 24,
-                              vertical: 12,
-                            ),
-                          ),
-                        ),
-                      ],
+                    ElevatedButton.icon(
+                      onPressed: _refreshData,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Refresh'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.teal,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
-                  )
-                : Column(
-                    children: [
-                      // Data source info banner
-                      if (_favoriteRuns.isNotEmpty)
-                        Container(
-                          width: double.infinity,
-                          margin: const EdgeInsets.all(16),
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color:
-                                (_favoriteRuns.first.hasLiveData
-                                        ? Colors.green
-                                        : Colors.orange)
-                                    .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color:
-                                  (_favoriteRuns.first.hasLiveData
-                                          ? Colors.green
-                                          : Colors.orange)
-                                      .withOpacity(0.3),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(color: Colors.teal),
+                      )
+                    : error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red[300],
                             ),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _favoriteRuns.first.hasLiveData
-                                    ? Icons.live_tv
-                                    : Icons.info_outline,
-                                color: _favoriteRuns.first.hasLiveData
-                                    ? Colors.green[700]
-                                    : Colors.orange[700],
-                                size: 20,
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error loading data',
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.grey[600]),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: _refreshData,
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Retry'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                foregroundColor: Colors.white,
                               ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  _favoriteRuns.first.hasLiveData
-                                      ? 'Showing live data from Environment Canada'
-                                      : 'Data temporarily unavailable - please try again later',
-                                  style: TextStyle(
-                                    color: _favoriteRuns.first.hasLiveData
-                                        ? Colors.green[700]
-                                        : Colors.grey[600],
-                                    fontSize: 13,
+                            ),
+                          ],
+                        ),
+                      )
+                    : favoriteRuns.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.favorite_border,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'No Favorite River Runs Yet',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Add favorite river runs to see live flow data here',
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 24),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const RiverRunSearchScreen(),
                                   ),
+                                );
+                              },
+                              icon: const Icon(Icons.search),
+                              label: const Text('Find River Runs'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 12,
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                      // Rivers list
-                      Expanded(
-                        child: ListView.builder(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          itemCount: _favoriteRuns.length,
-                          itemBuilder: (context, index) {
-                            final runWithStations = _favoriteRuns[index];
-                            final currentDischarge =
-                                runWithStations.currentDischarge;
-                            final hasLiveData = runWithStations.hasLiveData;
+                      )
+                    : Column(
+                        children: [
+                          // Data source info banner
+                          if (favoriteRuns.isNotEmpty)
+                            Container(
+                              width: double.infinity,
+                              margin: const EdgeInsets.all(16),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color:
+                                    (favoriteRuns.first.hasLiveData
+                                            ? Colors.green
+                                            : Colors.orange)
+                                        .withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color:
+                                      (favoriteRuns.first.hasLiveData
+                                              ? Colors.green
+                                              : Colors.orange)
+                                          .withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    favoriteRuns.first.hasLiveData
+                                        ? Icons.live_tv
+                                        : Icons.info_outline,
+                                    color: favoriteRuns.first.hasLiveData
+                                        ? Colors.green[700]
+                                        : Colors.orange[700],
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      favoriteRuns.first.hasLiveData
+                                          ? 'Showing live data from Environment Canada'
+                                          : 'Data temporarily unavailable - please try again later',
+                                      style: TextStyle(
+                                        color: favoriteRuns.first.hasLiveData
+                                            ? Colors.green[700]
+                                            : Colors.grey[600],
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          // Rivers list
+                          Expanded(
+                            child: ListView.builder(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              itemCount: favoriteRuns.length,
+                              itemBuilder: (context, index) {
+                                final runWithStations = favoriteRuns[index];
+                                final currentDischarge = _getCurrentDischarge(
+                                  runWithStations,
+                                );
 
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
-                              child: ListTile(
-                                onTap: () {
-                                  if (kDebugMode) {
-                                    print(
-                                      '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
-                                    );
-                                  }
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (context) => RiverDetailScreen(
-                                        riverData: _convertRunToLegacyFormat(
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  child: ListTile(
+                                    onTap: () {
+                                      if (kDebugMode) {
+                                        print(
+                                          '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
+                                        );
+                                      }
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              RiverDetailScreen(
+                                                riverData:
+                                                    _convertRunToLegacyFormat(
+                                                      runWithStations,
+                                                    ),
+                                              ),
+                                        ),
+                                      );
+                                    },
+                                    leading: IconButton(
+                                      icon: const Icon(
+                                        Icons.add,
+                                        color: Colors.blue,
+                                      ),
+                                      onPressed: () => _showLogDescentDialog(
+                                        _convertRunToLegacyFormat(
                                           runWithStations,
                                         ),
                                       ),
+                                      tooltip: 'Log Descent',
                                     ),
-                                  );
-                                },
-                                leading: IconButton(
-                                  icon: const Icon(
-                                    Icons.add,
-                                    color: Colors.blue,
-                                  ),
-                                  onPressed: () => _showLogDescentDialog(
-                                    _convertRunToLegacyFormat(runWithStations),
-                                  ),
-                                  tooltip: 'Log Descent',
-                                ),
-                                title: Text(
-                                  runWithStations.river?.name ??
-                                      'Unknown River',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                subtitle: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
+                                    title: Text(
+                                      runWithStations.river?.name ??
+                                          'Unknown River',
                                       style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    const SizedBox(height: 4),
-                                    if (currentDischarge != null)
-                                      Text(
-                                        'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s',
-                                        style: const TextStyle(fontSize: 13),
-                                      ),
-                                    //  Text('Status: $status'),
-                                    // Row(
-                                    //   children: [
-                                    //     Icon(
-                                    //       hasLiveData
-                                    //           ? Icons.live_tv
-                                    //           : Icons.auto_graph,
-                                    //       size: 12,
-                                    //       color: hasLiveData
-                                    //           ? Colors.green
-                                    //           : Colors.amber.shade700,
-                                    //     ),
-                                    //     const SizedBox(width: 4),
-                                    //     // Expanded(
-                                    //     //   child: Text(
-                                    //     //     runWithStations.lastDataUpdate
-                                    //     //             ?.toIso8601String() ??
-                                    //     //         (hasLiveData
-                                    //     //             ? 'Live data'
-                                    //     //             : 'No recent data'),
-                                    //     //     style: TextStyle(
-                                    //     //       fontSize: 12,
-                                    //     //       color: hasLiveData
-                                    //     //           ? Colors.green
-                                    //     //           : Colors.amber.shade700,
-                                    //     //       fontWeight: FontWeight.bold,
-                                    //     //     ),
-                                    //     //   ),
-                                    //     // ),
-                                    //   ],
-                                    // ),
-                                  ],
-                                ),
-
-                                trailing: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // Log descent button
-
-                                    // Remove from favorites button
-                                    IconButton(
-                                      icon: const Icon(
-                                        Icons.favorite,
-                                        color: Colors.red,
-                                      ),
-                                      onPressed: () =>
-                                          _toggleFavorite(runWithStations),
-                                      tooltip: 'Remove from favorites',
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        if (currentDischarge != null)
+                                          Text(
+                                            'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        //  Text('Status: $status'),
+                                        // Row(
+                                        //   children: [
+                                        //     Icon(
+                                        //       hasLiveData
+                                        //           ? Icons.live_tv
+                                        //           : Icons.auto_graph,
+                                        //       size: 12,
+                                        //       color: hasLiveData
+                                        //           ? Colors.green
+                                        //           : Colors.amber.shade700,
+                                        //     ),
+                                        //     const SizedBox(width: 4),
+                                        //     // Expanded(
+                                        //     //   child: Text(
+                                        //     //     runWithStations.lastDataUpdate
+                                        //     //             ?.toIso8601String() ??
+                                        //     //         (hasLiveData
+                                        //     //             ? 'Live data'
+                                        //     //             : 'No recent data'),
+                                        //     //     style: TextStyle(
+                                        //     //       fontSize: 12,
+                                        //     //       color: hasLiveData
+                                        //     //           ? Colors.green
+                                        //     //           : Colors.amber.shade700,
+                                        //     //       fontWeight: FontWeight.bold,
+                                        //     //     ),
+                                        //     //   ),
+                                        //     // ),
+                                        //   ],
+                                        // ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // Mini spinner when updating live data
+                                        if (_updatingRunIds.contains(
+                                          runWithStations.run.id,
+                                        ))
+                                          Container(
+                                            width: 16,
+                                            height: 16,
+                                            margin: const EdgeInsets.only(
+                                              right: 8,
+                                            ),
+                                            child:
+                                                const CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                  valueColor:
+                                                      AlwaysStoppedAnimation<
+                                                        Color
+                                                      >(Colors.blue),
+                                                ),
+                                          ),
+
+                                        // Remove from favorites button
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.favorite,
+                                            color: Colors.red,
+                                          ),
+                                          onPressed: () =>
+                                              _toggleFavorite(runWithStations),
+                                          tooltip: 'Remove from favorites',
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

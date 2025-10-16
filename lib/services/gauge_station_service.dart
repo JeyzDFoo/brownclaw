@@ -9,6 +9,15 @@ class GaugeStationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
+  // #todo: Add static caching for gauge stations to reduce Firestore reads
+  // static final Map<String, GaugeStation> _stationCache = {};
+  // static final Map<String, List<GaugeStation>> _runStationsCache = {};
+  // static DateTime? _lastCacheUpdate;
+  // static const Duration _cacheTimeout = Duration(hours: 1);
+
+  // #todo: Add batch operations for multiple station queries
+  // static Future<List<GaugeStation>> getStationsBatch(List<String> stationIds)
+
   // Collection reference
   static CollectionReference get _stationsCollection =>
       _firestore.collection('gauge_stations');
@@ -32,12 +41,23 @@ class GaugeStationService {
   // Get gauge station by ID
   static Future<GaugeStation?> getStationById(String stationId) async {
     try {
+      // #todo: Check cache first before making Firestore call
+      // if (_stationCache.containsKey(stationId) && _isCacheValid()) {
+      //   return _stationCache[stationId];
+      // }
+
       final doc = await _stationsCollection.doc(stationId).get();
       if (doc.exists) {
-        return GaugeStation.fromMap(
+        final station = GaugeStation.fromMap(
           doc.data() as Map<String, dynamic>,
           docId: doc.id,
         );
+
+        // #todo: Cache the result for future use
+        // _stationCache[stationId] = station;
+        // _lastCacheUpdate = DateTime.now();
+
+        return station;
       }
       return null;
     } catch (e) {
@@ -161,15 +181,17 @@ class GaugeStationService {
   static Future<void> updateStationLiveData(String stationId) async {
     try {
       // Fetch live data from external service
+      // #todo: Update to use LiveWaterData instead of Map<String, dynamic>
       final liveData = await LiveWaterDataService.fetchStationData(stationId);
 
       if (liveData != null) {
+        // #todo: Use LiveWaterData.toMap() instead of manual field extraction
         final updateData = <String, dynamic>{
-          'currentDischarge': liveData['flowRate'],
-          'currentWaterLevel': liveData['waterLevel'],
-          'currentTemperature': liveData['temperature'],
+          'currentDischarge': liveData.flowRate,
+          'currentWaterLevel': liveData.waterLevel,
+          'currentTemperature': liveData.temperature,
           'lastDataUpdate': FieldValue.serverTimestamp(),
-          'dataStatus': 'live',
+          'dataStatus': liveData.status.name,
           'updatedAt': FieldValue.serverTimestamp(),
         };
 
@@ -324,6 +346,101 @@ class GaugeStationService {
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error unlinking station: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Add a river run to a gauge station's associated runs list
+  static Future<void> addRunToStation(String stationId, String runId) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception('User must be authenticated to link runs to stations');
+    }
+
+    try {
+      // Get the current station data
+      final stationDoc = await _stationsCollection.doc(stationId).get();
+
+      if (!stationDoc.exists) {
+        throw Exception('Gauge station not found: $stationId');
+      }
+
+      final currentData = stationDoc.data() as Map<String, dynamic>;
+      final currentAssociatedRuns =
+          (currentData['associatedRiverRunIds'] as List?)?.cast<String>() ??
+          <String>[];
+
+      // Add the new run ID if it's not already in the list
+      if (!currentAssociatedRuns.contains(runId)) {
+        currentAssociatedRuns.add(runId);
+
+        await _stationsCollection.doc(stationId).update({
+          'associatedRiverRunIds': currentAssociatedRuns,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        if (kDebugMode) {
+          print('✅ Successfully added run $runId to station $stationId');
+        }
+      } else {
+        if (kDebugMode) {
+          print('ℹ️ Run $runId already associated with station $stationId');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error adding run to station: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Remove a river run from a gauge station's associated runs list
+  static Future<void> removeRunFromStation(
+    String stationId,
+    String runId,
+  ) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      throw Exception(
+        'User must be authenticated to unlink runs from stations',
+      );
+    }
+
+    try {
+      // Get the current station data
+      final stationDoc = await _stationsCollection.doc(stationId).get();
+
+      if (!stationDoc.exists) {
+        throw Exception('Gauge station not found: $stationId');
+      }
+
+      final currentData = stationDoc.data() as Map<String, dynamic>;
+      final currentAssociatedRuns =
+          (currentData['associatedRiverRunIds'] as List?)?.cast<String>() ??
+          <String>[];
+
+      // Remove the run ID if it exists in the list
+      if (currentAssociatedRuns.contains(runId)) {
+        currentAssociatedRuns.remove(runId);
+
+        await _stationsCollection.doc(stationId).update({
+          'associatedRiverRunIds': currentAssociatedRuns,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        if (kDebugMode) {
+          print('✅ Successfully removed run $runId from station $stationId');
+        }
+      } else {
+        if (kDebugMode) {
+          print('ℹ️ Run $runId was not associated with station $stationId');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error removing run from station: $e');
       }
       rethrow;
     }

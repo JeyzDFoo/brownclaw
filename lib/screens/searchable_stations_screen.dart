@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../services/firestore_station_service.dart';
 import '../services/canadian_water_service.dart';
-import '../services/favorite_rivers_service.dart';
+import '../services/user_favorites_service.dart';
+import '../services/river_run_service.dart';
 
 class NewStationSearchScreen extends StatefulWidget {
   const NewStationSearchScreen({super.key});
@@ -107,11 +108,13 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
   }
 
   void _loadFavorites() {
-    // Listen to user favorites stream
-    FavoriteRiversService.getUserFavorites().listen((favoriteIds) {
+    // Listen to user favorites stream (now using station IDs)
+    UserFavoritesService.getUserFavoriteStationIds().listen((
+      favoriteStationIds,
+    ) {
       if (mounted) {
         setState(() {
-          _favoriteStationIds = favoriteIds.toSet();
+          _favoriteStationIds = favoriteStationIds.toSet();
         });
       }
     });
@@ -251,20 +254,17 @@ class _NewStationSearchScreenState extends State<NewStationSearchScreen> {
 
   Future<void> _toggleFavorite(String stationId) async {
     try {
-      final station = _filteredStations.firstWhere((s) => s.id == stationId);
-      final riverData = _riverData[stationId] ?? {};
-
       if (_favoriteStationIds.contains(stationId)) {
-        await FavoriteRiversService.removeFavorite(stationId);
+        await UserFavoritesService.removeFavoriteByStationId(stationId);
         // setState will be updated by the stream listener
       } else {
-        await FavoriteRiversService.addFavorite(stationId, {
-          'name': station.name,
-          'province': station.province,
-          'flow': riverData['flow'] ?? 0.0,
-          'status': riverData['status'] ?? 'Unknown',
-          'timestamp': DateTime.now().toIso8601String(),
-        });
+        // Create a river run from station data and add to favorites
+        final station = _filteredStations.firstWhere((s) => s.id == stationId);
+        final runId = await RiverRunService.createRunFromStationData(
+          stationId,
+          station.name,
+        );
+        await UserFavoritesService.addFavoriteRun(runId);
         // setState will be updated by the stream listener
       }
     } catch (e) {
