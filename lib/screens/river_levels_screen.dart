@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
-import '../services/live_water_data_service.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
 import 'river_run_search_screen.dart';
@@ -33,237 +32,24 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   //
   // This will eliminate the repeated API calls and improve performance significantly.
 
-  Set<String> _lastFavoriteRunIds = {}; // Track the actual favorite run IDs
-  Set<String> _updatingRunIds =
-      {}; // Track which runs are currently updating (remove after refactor)
-  Map<String, LiveWaterData> _liveDataCache =
-      {}; // Temporary until provider migration (remove after refactor)
+  // 🔥 REMOVED: No more local caches or lifecycle management - providers handle everything!
+  // The screen is now PURE UI - just displays what providers give us
 
-  @override
-  void initState() {
-    super.initState();
-    // Initialize _lastFavoriteRunIds to prevent duplicate loads
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final favoritesProvider = context.read<FavoritesProvider>();
-      _lastFavoriteRunIds = Set<String>.from(favoritesProvider.favoriteRunIds);
+  // 🔥 REMOVED: Old cache-based helpers - now using provider directly in build()
 
-      // Quick test of live data service in debug mode
-      if (kDebugMode) {
-        _testLiveDataService();
-      }
-    });
-  }
+  /// Helper to get flow status from live data
+  String _getFlowStatus(
+    RiverRunWithStations runWithStations,
+    LiveWaterData? liveData,
+  ) {
+    final discharge = liveData?.flowRate;
 
-  /// Quick test to verify LiveWaterDataService is working
-  Future<void> _testLiveDataService() async {
-    if (kDebugMode) {
-      print('🧪 Testing LiveWaterDataService...');
-      try {
-        final testResult = await LiveWaterDataService.fetchStationData(
-          '08MF005',
-        );
-        print('🧪 Test result for 08MF005: $testResult');
-        if (testResult != null) {
-          print('🧪 Service is working! Flow: ${testResult.formattedFlowRate}');
-        } else {
-          print('🧪 Service returned null - might be network or API issue');
-        }
-      } catch (e) {
-        print('🧪 Service test failed: $e');
-      }
-    }
-  }
-
-  // Update live data in background with smart rate limiting
-  void _updateLiveDataInBackground(List<String> favoriteRunIds) async {
-    if (favoriteRunIds.isEmpty) return;
-
-    // Wait for the river run provider to have the runs loaded
-    final riverRunProvider = context.read<RiverRunProvider>();
-    if (riverRunProvider.isLoading) {
-      if (kDebugMode) {
-        print('🌊 Waiting for runs to load before fetching live data...');
-      }
-      // Wait a bit and try again
-      await Future.delayed(const Duration(milliseconds: 1000));
-      if (!mounted) return;
-
-      // Check again if still loading
-      if (riverRunProvider.isLoading) {
-        if (kDebugMode) {
-          print('🌊 Still loading runs, skipping live data update');
-        }
-        return;
-      }
-    }
-
-    // Mark all runs as updating
-    setState(() {
-      _updatingRunIds = Set<String>.from(favoriteRunIds);
-    });
-
-    // Add delay to let UI settle first
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    try {
-      // Collect unique station IDs directly from runs' stationId field
-      final Set<String> uniqueStationIds = {};
-      final currentRuns = riverRunProvider.favoriteRuns;
-
-      if (kDebugMode) {
-        print(
-          '🌊 Extracting station IDs from ${currentRuns.length} loaded runs...',
-        );
-      }
-
-      for (final runWithStations in currentRuns) {
-        final stationId = runWithStations.run.stationId;
-        if (stationId != null && stationId.isNotEmpty) {
-          uniqueStationIds.add(stationId);
-          if (kDebugMode) {
-            print(
-              '   Found station ID: $stationId for ${runWithStations.run.displayName}',
-            );
-          }
-        }
-      }
-
-      if (uniqueStationIds.isEmpty) {
-        if (kDebugMode) {
-          print('🌊 No station IDs found in loaded runs');
-        }
-        return;
-      }
-
-      if (kDebugMode) {
-        print(
-          '🌊 Fetching live data for ${uniqueStationIds.length} unique stations: ${uniqueStationIds.join(", ")}',
-        );
-      }
-
-      // #todo: Optimize batch processing with proper error handling per station
-      // #todo: Implement retry logic for failed API calls
-      // #todo: Add connection state monitoring to skip updates when offline
-      // Fetch live data directly using the service
-      final stationList = uniqueStationIds.toList();
-      const batchSize = 3; // Process max 3 stations at a time
-
-      for (int i = 0; i < stationList.length; i += batchSize) {
-        final batch = stationList.skip(i).take(batchSize);
-        final batchFutures = batch.map((stationId) async {
-          try {
-            final liveData = await LiveWaterDataService.fetchStationData(
-              stationId,
-            );
-            if (liveData != null) {
-              // Store live data in cache
-              _liveDataCache[stationId] = liveData;
-              if (kDebugMode) {
-                print(
-                  '✅ [UI-CACHE] Got live data for $stationId: ${liveData.formattedFlowRate} (${liveData.dataAge}) [${DateTime.now().millisecondsSinceEpoch}]',
-                );
-              }
-            }
-            return liveData;
-          } catch (e) {
-            if (kDebugMode) {
-              print('❌ Failed to fetch live data for $stationId: $e');
-            }
-            return null;
-          }
-        });
-
-        // Process batch and wait before next batch
-        await Future.wait(batchFutures);
-
-        // Small delay between batches to be API-friendly
-        if (i + batchSize < stationList.length) {
-          await Future.delayed(const Duration(milliseconds: 200));
-        }
-      }
-
-      // After all updates, trigger UI refresh by calling setState
-      if (mounted) {
-        setState(() {
-          // This will rebuild the UI with the new live data cache
-        });
-
-        if (kDebugMode) {
-          print('✅ Live data updated in background');
-        }
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Background live data update error: $e');
-      }
-    } finally {
-      // Clear the updating state
-      if (mounted) {
-        setState(() {
-          _updatingRunIds.clear();
-        });
-      }
-    }
-  }
-
-  // Get live data for a station from cache (will be moved to provider later)
-  // Updated to return LiveWaterData for type safety
-  LiveWaterData? _getLiveDataForStation(String? stationId) {
-    if (stationId == null || stationId.isEmpty) return null;
-    return _liveDataCache[stationId];
-  }
-
-  // Get current discharge from cache or RiverRunWithStations
-  double? _getCurrentDischarge(RiverRunWithStations runWithStations) {
-    // If run has stationId, check cache first
-    final stationId = runWithStations.run.stationId;
-    if (stationId != null && stationId.isNotEmpty) {
-      final liveData = _getLiveDataForStation(stationId);
-      if (liveData != null && liveData.flowRate != null) {
-        return liveData.flowRate;
-      }
-    }
-    // Fallback to original logic
-    return runWithStations.currentDischarge;
-  }
-
-  // Get current water level from cache or RiverRunWithStations
-  double? _getCurrentWaterLevel(RiverRunWithStations runWithStations) {
-    // If run has stationId, check cache first
-    final stationId = runWithStations.run.stationId;
-    if (stationId != null && stationId.isNotEmpty) {
-      final liveData = _getLiveDataForStation(stationId);
-      if (liveData != null && liveData.waterLevel != null) {
-        return liveData.waterLevel;
-      }
-    }
-    // Fallback to original logic
-    return runWithStations.currentWaterLevel;
-  }
-
-  // Check if run has live data (from cache or original logic)
-  bool _hasLiveData(RiverRunWithStations runWithStations) {
-    // If run has stationId, check if we have cached data
-    final stationId = runWithStations.run.stationId;
-    if (stationId != null && stationId.isNotEmpty) {
-      final liveData = _getLiveDataForStation(stationId);
-      return liveData != null;
-    }
-    // Fallback to original logic
-    return runWithStations.hasLiveData;
-  }
-
-  // Get flow status
-  String _getFlowStatus(RiverRunWithStations runWithStations) {
-    final discharge = _getCurrentDischarge(runWithStations);
-    final hasData = _hasLiveData(runWithStations);
-
-    if (!hasData || discharge == null) {
+    if (discharge == null) {
       final stationId = runWithStations.run.stationId;
       if (stationId != null && stationId.isNotEmpty) {
-        return 'Fetching...';
+        return 'Loading...';
       }
-      return 'No data';
+      return 'No Data';
     }
 
     final minFlow = runWithStations.run.minRecommendedFlow;
@@ -275,11 +61,35 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
       } else if (discharge > maxFlow) {
         return 'Too High';
       } else {
-        return 'Runnable';
+        return 'Runnable ✓';
       }
     }
 
     return 'Live';
+  }
+
+  /// Helper to check if we have live data
+  bool _hasLiveData(
+    RiverRunWithStations runWithStations,
+    LiveWaterData? liveData,
+  ) {
+    return liveData != null && liveData.flowRate != null;
+  }
+
+  /// Helper to get current discharge from live data
+  double? _getCurrentDischarge(
+    RiverRunWithStations runWithStations,
+    LiveWaterData? liveData,
+  ) {
+    return liveData?.flowRate ?? runWithStations.currentDischarge;
+  }
+
+  /// Helper to get current water level from live data
+  double? _getCurrentWaterLevel(
+    RiverRunWithStations runWithStations,
+    LiveWaterData? liveData,
+  ) {
+    return liveData?.waterLevel;
   }
 
   // Convert new RiverRunWithStations to legacy format for compatibility
@@ -288,6 +98,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
   // instead of typed models. Eliminating this would improve type safety and reduce mapping bugs.
   Map<String, dynamic> _convertRunToLegacyFormat(
     RiverRunWithStations runWithStations,
+    LiveWaterData? liveData,
   ) {
     final primaryStation = runWithStations.primaryStation;
     final stationId =
@@ -337,27 +148,48 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
       'difficulty': runWithStations.run.difficultyClass,
       'minRunnable': runWithStations.run.minRecommendedFlow ?? 0.0,
       'maxSafe': runWithStations.run.maxRecommendedFlow ?? 1000.0,
-      'flowRate': _getCurrentDischarge(runWithStations) ?? 0.0,
-      'waterLevel': _getCurrentWaterLevel(runWithStations) ?? 0.0,
+      'flowRate': _getCurrentDischarge(runWithStations, liveData) ?? 0.0,
+      'waterLevel': _getCurrentWaterLevel(runWithStations, liveData) ?? 0.0,
       'temperature': primaryStation?.currentTemperature ?? 0.0,
       'lastUpdated':
           runWithStations.lastDataUpdate?.toIso8601String() ??
           DateTime.now().toIso8601String(),
-      'dataSource': _hasLiveData(runWithStations) ? 'live' : 'unavailable',
-      'isLive': _hasLiveData(runWithStations),
-      'status': _getFlowStatus(runWithStations),
+      'dataSource': _hasLiveData(runWithStations, liveData)
+          ? 'live'
+          : 'unavailable',
+      'isLive': _hasLiveData(runWithStations, liveData),
+      'status': _getFlowStatus(runWithStations, liveData),
     };
   }
 
   Future<void> _refreshData() async {
-    final favoritesProvider = context.read<FavoritesProvider>();
-    final riverRunProvider = context.read<RiverRunProvider>();
+    // 🔥 OPTIMIZED: Clear cache and let providers re-fetch automatically
+    if (kDebugMode) {
+      print('🔄 Manual refresh requested');
+    }
 
-    // Force reload the favorite runs
-    await riverRunProvider.loadFavoriteRuns(favoritesProvider.favoriteRunIds);
+    // Clear the cache to force fresh data
+    RiverRunProvider.clearCache();
 
-    // Update live data
-    _updateLiveDataInBackground(favoritesProvider.favoriteRunIds.toList());
+    // Get current favorites and reload
+    final favoriteIds = context.read<FavoritesProvider>().favoriteRunIds;
+    if (favoriteIds.isNotEmpty) {
+      await context.read<RiverRunProvider>().loadFavoriteRuns(favoriteIds);
+
+      // Reload live data
+      final runs = context.read<RiverRunProvider>().favoriteRuns;
+      final stationIds = runs
+          .map((r) => r.run.stationId)
+          .whereType<String>()
+          .where((id) => id.isNotEmpty)
+          .toList();
+
+      if (stationIds.isNotEmpty && mounted) {
+        await context.read<LiveWaterDataProvider>().fetchMultipleStations(
+          stationIds,
+        );
+      }
+    }
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -704,52 +536,40 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<FavoritesProvider, RiverRunProvider>(
-      builder: (context, favoritesProvider, riverRunProvider, child) {
-        // Load favorites data when needed - provider handles smart caching
-        final currentFavoriteIds = favoritesProvider.favoriteRunIds;
-        if (!_lastFavoriteRunIds.containsAll(currentFavoriteIds) ||
-            !currentFavoriteIds.containsAll(_lastFavoriteRunIds)) {
-          _lastFavoriteRunIds = Set<String>.from(currentFavoriteIds);
-          // Schedule loading after the current build completes to avoid spinner flash
-          WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
-            // Only update live data after the runs are loaded
-            if (mounted) {
-              _updateLiveDataInBackground(currentFavoriteIds.toList());
-            }
-          });
-        }
-
+    // 🔥 OPTIMIZED: Consumer3 with LiveWaterDataProvider - Pure reactive pattern!
+    return Consumer3<
+      FavoritesProvider,
+      RiverRunProvider,
+      LiveWaterDataProvider
+    >(
+      builder: (context, favoritesProvider, riverRunProvider, liveDataProvider, child) {
+        final favoriteIds = favoritesProvider.favoriteRunIds;
         final favoriteRuns = riverRunProvider.favoriteRuns;
         final isLoading = riverRunProvider.isLoading;
         final error = riverRunProvider.error;
 
-        // Trigger live data fetch when runs finish loading
-        if (!isLoading &&
-            favoriteRuns.isNotEmpty &&
-            currentFavoriteIds.isNotEmpty) {
-          // Check if we need to fetch live data for these runs
-          final needsLiveDataUpdate = favoriteRuns.any((run) {
-            final stationId = run.run.stationId;
-            return stationId != null &&
-                stationId.isNotEmpty &&
-                !_liveDataCache.containsKey(stationId);
-          });
-
-          if (needsLiveDataUpdate) {
-            // Schedule live data update after this build cycle
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (mounted) {
-                if (kDebugMode) {
-                  print(
-                    '🌊 Auto-triggering live data update after runs loaded',
-                  );
+        // 🔥 Auto-load data when favorites exist but runs are empty (initial load only)
+        if (favoriteIds.isNotEmpty &&
+            favoriteRuns.isEmpty &&
+            !isLoading &&
+            error == null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              riverRunProvider.loadFavoriteRuns(favoriteIds).then((_) {
+                if (mounted) {
+                  final runs = riverRunProvider.favoriteRuns;
+                  final stationIds = runs
+                      .map((r) => r.run.stationId)
+                      .whereType<String>()
+                      .where((id) => id.isNotEmpty)
+                      .toList();
+                  if (stationIds.isNotEmpty) {
+                    liveDataProvider.fetchMultipleStations(stationIds);
+                  }
                 }
-                _updateLiveDataInBackground(currentFavoriteIds.toList());
-              }
-            });
-          }
+              });
+            }
+          });
         }
 
         return Scaffold(
@@ -940,16 +760,25 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                               itemCount: favoriteRuns.length,
                               itemBuilder: (context, index) {
                                 final runWithStations = favoriteRuns[index];
+                                final stationId = runWithStations.run.stationId;
+
+                                // 🔥 Get live data from provider (cached)
+                                final liveData = stationId != null
+                                    ? liveDataProvider.getLiveData(stationId)
+                                    : null;
+
                                 final currentDischarge = _getCurrentDischarge(
                                   runWithStations,
+                                  liveData,
                                 );
                                 final hasLiveData = _hasLiveData(
                                   runWithStations,
+                                  liveData,
                                 );
                                 final flowStatus = _getFlowStatus(
                                   runWithStations,
+                                  liveData,
                                 );
-                                final stationId = runWithStations.run.stationId;
 
                                 if (kDebugMode) {
                                   print(
@@ -961,27 +790,23 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                   );
                                   print('   Has Live Data: $hasLiveData');
                                   print('   Flow Status: $flowStatus');
-                                  if (stationId != null) {
-                                    final cachedData =
-                                        _liveDataCache[stationId];
-                                    print('   Cached Data: $cachedData');
-                                    if (cachedData != null) {
-                                      print(
-                                        '   Cached Flow Rate: ${cachedData.flowRate}',
-                                      );
-                                      print(
-                                        '   Cached Formatted: ${cachedData.formattedFlowRate}',
-                                      );
-                                      print(
-                                        '   Cached Station Name: ${cachedData.stationName}',
-                                      );
-                                      print(
-                                        '   Cached Data Source: ${cachedData.dataSource}',
-                                      );
-                                      print(
-                                        '   Cached Timestamp: ${cachedData.timestamp}',
-                                      );
-                                    }
+                                  if (liveData != null) {
+                                    print('   Live Data: $liveData');
+                                    print(
+                                      '   Live Flow Rate: ${liveData.flowRate}',
+                                    );
+                                    print(
+                                      '   Live Formatted: ${liveData.formattedFlowRate}',
+                                    );
+                                    print(
+                                      '   Live Station Name: ${liveData.stationName}',
+                                    );
+                                    print(
+                                      '   Live Data Source: ${liveData.dataSource}',
+                                    );
+                                    print(
+                                      '   Live Timestamp: ${liveData.timestamp}',
+                                    );
                                   }
                                   print(
                                     '   Fallback discharge from model: ${runWithStations.currentDischarge}',
@@ -1004,6 +829,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                                 riverData:
                                                     _convertRunToLegacyFormat(
                                                       runWithStations,
+                                                      liveData,
                                                     ),
                                               ),
                                         ),
@@ -1017,6 +843,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                       onPressed: () => _showLogDescentDialog(
                                         _convertRunToLegacyFormat(
                                           runWithStations,
+                                          liveData,
                                         ),
                                       ),
                                       tooltip: 'Log Descent',
@@ -1076,27 +903,7 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                     trailing: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        // Mini spinner when updating live data
-                                        if (_updatingRunIds.contains(
-                                          runWithStations.run.id,
-                                        ))
-                                          Container(
-                                            width: 16,
-                                            height: 16,
-                                            margin: const EdgeInsets.only(
-                                              right: 8,
-                                            ),
-                                            child:
-                                                const CircularProgressIndicator(
-                                                  strokeWidth: 2,
-                                                  valueColor:
-                                                      AlwaysStoppedAnimation<
-                                                        Color
-                                                      >(Colors.blue),
-                                                ),
-                                          ),
-
-                                        // Manual refresh button for this specific run
+                                        // 🔥 Manual refresh button - uses provider now!
                                         if (stationId != null &&
                                             stationId.isNotEmpty)
                                           IconButton(
@@ -1111,38 +918,26 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                                   '🔄 Manual refresh for station: $stationId',
                                                 );
                                               }
-                                              setState(() {
-                                                _updatingRunIds.add(
-                                                  runWithStations.run.id,
-                                                );
-                                              });
 
-                                              try {
-                                                final liveData =
-                                                    await LiveWaterDataService.fetchStationData(
-                                                      stationId,
-                                                    );
-                                                if (liveData != null) {
-                                                  _liveDataCache[stationId] =
-                                                      liveData;
-                                                  if (kDebugMode) {
-                                                    print(
-                                                      '✅ Manual refresh success: ${liveData.formattedFlowRate}',
-                                                    );
-                                                  }
-                                                }
-                                              } catch (e) {
-                                                if (kDebugMode) {
-                                                  print(
-                                                    '❌ Manual refresh failed: $e',
-                                                  );
-                                                }
-                                              } finally {
-                                                setState(() {
-                                                  _updatingRunIds.remove(
-                                                    runWithStations.run.id,
-                                                  );
-                                                });
+                                              // Use provider's fetchStationData which handles caching
+                                              await liveDataProvider
+                                                  .fetchStationData(stationId);
+
+                                              if (mounted) {
+                                                ScaffoldMessenger.of(
+                                                  context,
+                                                ).showSnackBar(
+                                                  const SnackBar(
+                                                    content: Text(
+                                                      'Station data refreshed',
+                                                    ),
+                                                    backgroundColor:
+                                                        Colors.green,
+                                                    duration: Duration(
+                                                      seconds: 1,
+                                                    ),
+                                                  ),
+                                                );
                                               }
                                             },
                                             tooltip: 'Refresh live data',

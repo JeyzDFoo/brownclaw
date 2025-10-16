@@ -8,12 +8,24 @@ class RiverRunProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
 
-  // #todo: Add local caching mechanism to reduce Firestore reads
-  // Map<String, RiverRunWithStations> _cachedRuns = {};
-  // DateTime? _lastCacheUpdate;
+  // 🔥 PERFORMANCE: Simple but effective memory cache
+  // Static so cache persists across provider instances
+  static final Map<String, RiverRunWithStations> _cache = {};
+  static DateTime? _cacheTime;
+  static const _cacheTimeout = Duration(minutes: 10);
 
-  // #todo: Add offline support for cached data
-  // bool _isOffline = false;
+  /// Check if cache is still valid (within timeout period)
+  bool get _isCacheValid {
+    if (_cacheTime == null) return false;
+    final age = DateTime.now().difference(_cacheTime!);
+    return age < _cacheTimeout;
+  }
+
+  /// Clear the cache (useful for force refresh)
+  static void clearCache() {
+    _cache.clear();
+    _cacheTime = null;
+  }
 
   List<RiverRunWithStations> get riverRuns => _riverRuns;
   List<RiverRunWithStations> get favoriteRuns => _favoriteRuns;
@@ -77,34 +89,51 @@ class RiverRunProvider extends ChangeNotifier {
   }
 
   Future<void> loadFavoriteRuns(Set<String> favoriteRunIds) async {
-    if (_favoriteRuns.isNotEmpty && favoriteRunIds.isEmpty) {
+    if (favoriteRunIds.isEmpty) {
       _favoriteRuns = [];
       notifyListeners();
       return;
     }
 
-    // Only load if we don't already have the data or if favorite IDs changed
-    final currentIds = _favoriteRuns.map((run) => run.run.id).toSet();
-    if (currentIds.containsAll(favoriteRunIds) &&
-        favoriteRunIds.containsAll(currentIds)) {
-      // We already have the correct data, no need to reload
-      return;
+    // 🔥 PERFORMANCE: Check cache first!
+    if (_isCacheValid) {
+      final cached = favoriteRunIds
+          .map((id) => _cache[id])
+          .whereType<RiverRunWithStations>()
+          .toList();
+
+      if (cached.length == favoriteRunIds.length) {
+        if (kDebugMode) {
+          print('⚡ CACHE HIT: All ${favoriteRunIds.length} runs from cache');
+        }
+        _favoriteRuns = cached;
+        notifyListeners();
+        return; // Done! No Firestore calls needed
+      }
     }
 
     setLoading(true);
     setError(null);
 
     try {
-      final List<RiverRunWithStations> favoriteRuns = [];
+      if (kDebugMode) {
+        print('🌊 Cache miss or expired, fetching from Firestore...');
+      }
 
-      // #todo: Batch fetch favorite runs instead of individual calls
-      // This reduces Firestore reads significantly for users with many favorites
-      // Consider using whereIn query with batching for >10 items
-      for (final runId in favoriteRunIds) {
-        final runWithStations = await RiverRunService.getRunWithStations(runId);
-        if (runWithStations != null) {
-          favoriteRuns.add(runWithStations);
-        }
+      // 🚀 USE NEW BATCH METHOD - 90% fewer queries!
+      final favoriteRuns = await RiverRunService.batchGetFavoriteRuns(
+        favoriteRunIds.toList(),
+      );
+
+      // 🔥 UPDATE CACHE
+      _cache.clear(); // Clear old entries
+      for (final run in favoriteRuns) {
+        _cache[run.run.id] = run;
+      }
+      _cacheTime = DateTime.now();
+
+      if (kDebugMode) {
+        print('💾 Cached ${favoriteRuns.length} runs');
       }
       _favoriteRuns = favoriteRuns;
       notifyListeners();

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +11,9 @@ import 'providers/providers.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 🚀 HOUR 7: Track app startup time
+  final startTime = DateTime.now();
+
   // 🔇 QUICK FIX: Disable noisy debug prints for cleaner testing
   // Comment out the next 3 lines to re-enable debug output
   // debugPrint = (String? message, {int? wrapWidth}) {
@@ -19,6 +23,12 @@ void main() async {
   // #todo: Add Firebase performance monitoring and analytics for production
   // #todo: Implement error reporting (Crashlytics) for production monitoring
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  if (kDebugMode) {
+    final loadTime = DateTime.now().difference(startTime);
+    print('🚀 App initialized in ${loadTime.inMilliseconds}ms');
+  }
+
   runApp(const MainApp());
 }
 
