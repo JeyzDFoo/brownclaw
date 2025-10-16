@@ -123,10 +123,7 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                         .push(
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                LogbookEntryScreen(
-                                                  entryId: doc.id,
-                                                  initialData: data,
-                                                ),
+                                                LogbookEntryScreen(),
                                           ),
                                         );
                                     // Refresh is automatic due to StreamBuilder
