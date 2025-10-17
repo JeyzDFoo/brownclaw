@@ -5,6 +5,7 @@ import '../providers/providers.dart';
 import '../models/models.dart';
 import 'create_river_run_screen.dart';
 import 'river_detail_screen.dart';
+import 'logbook_entry_screen.dart';
 
 class RiverRunSearchScreen extends StatefulWidget {
   const RiverRunSearchScreen({super.key});
@@ -324,6 +325,19 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
+                          leading: IconButton(
+                            icon: const Icon(Icons.add, color: Colors.blue),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => LogbookEntryScreen(
+                                    prefilledRun: runWithStations,
+                                  ),
+                                ),
+                              );
+                            },
+                            tooltip: 'Log Descent',
+                          ),
                           title: Text(
                             runWithStations.river?.name ?? 'Unknown River',
                             style: const TextStyle(fontWeight: FontWeight.bold),

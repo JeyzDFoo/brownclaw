@@ -37,6 +37,9 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
   String _selectedCountry = 'Canada';
   bool _isLoading = false;
 
+  // River selection
+  River? _selectedRiver;
+
   // Water station selection (gauge stations)
   WaterStation? _selectedWaterStation;
   List<WaterStation> _availableWaterStations = [];
@@ -109,6 +112,18 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
     _minFlowController.dispose();
     _maxFlowController.dispose();
     super.dispose();
+  }
+
+  // Get suggestions for rivers based on user input
+  Future<List<River>> _getSuggestedRivers(String query) async {
+    if (query.isEmpty) return [];
+
+    try {
+      final results = await RiverService.searchRivers(query).first;
+      return results;
+    } catch (e) {
+      return [];
+    }
   }
 
   Future<void> _loadGaugeStations([String? riverName]) async {
@@ -408,20 +423,106 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
               ),
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _riverNameController,
-                decoration: const InputDecoration(
-                  labelText: 'River Name *',
-                  hintText: 'e.g., Kicking Horse River',
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.water),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'River name is required';
+              // River Name with Autocomplete
+              Autocomplete<River>(
+                optionsBuilder: (TextEditingValue textEditingValue) async {
+                  if (textEditingValue.text.isEmpty) {
+                    return const Iterable<River>.empty();
                   }
-                  return null;
+                  return await _getSuggestedRivers(textEditingValue.text);
                 },
+                displayStringForOption: (River river) => river.name,
+                onSelected: (River river) {
+                  setState(() {
+                    _selectedRiver = river;
+                    _riverNameController.text = river.name;
+                    _selectedRegion = river.region;
+                    _selectedCountry = river.country;
+                  });
+                  // Reload gauge stations for the selected river
+                  _loadGaugeStations(river.name);
+                },
+                fieldViewBuilder:
+                    (
+                      BuildContext context,
+                      TextEditingController fieldController,
+                      FocusNode focusNode,
+                      VoidCallback onFieldSubmitted,
+                    ) {
+                      // Sync our controller with the autocomplete controller
+                      if (_riverNameController.text.isNotEmpty &&
+                          fieldController.text != _riverNameController.text) {
+                        fieldController.text = _riverNameController.text;
+                      }
+
+                      return TextFormField(
+                        controller: fieldController,
+                        focusNode: focusNode,
+                        decoration: InputDecoration(
+                          labelText: 'River Name *',
+                          hintText: 'Start typing to see suggestions...',
+                          border: const OutlineInputBorder(),
+                          prefixIcon: const Icon(Icons.water),
+                          suffixIcon: _selectedRiver != null
+                              ? Icon(Icons.check_circle, color: Colors.green)
+                              : null,
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'River name is required';
+                          }
+                          return null;
+                        },
+                        onChanged: (value) {
+                          _riverNameController.text = value;
+                          // Clear selection if user modifies the text
+                          if (_selectedRiver != null &&
+                              value != _selectedRiver!.name) {
+                            setState(() {
+                              _selectedRiver = null;
+                            });
+                          }
+                        },
+                      );
+                    },
+                optionsViewBuilder:
+                    (
+                      BuildContext context,
+                      AutocompleteOnSelected<River> onSelected,
+                      Iterable<River> options,
+                    ) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          borderRadius: BorderRadius.circular(4),
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxHeight: 200,
+                              maxWidth: 400,
+                            ),
+                            child: ListView.builder(
+                              padding: EdgeInsets.zero,
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final River river = options.elementAt(index);
+                                return ListTile(
+                                  dense: true,
+                                  title: Text(river.name),
+                                  subtitle: Text(
+                                    '${river.region}, ${river.country}',
+                                  ),
+                                  onTap: () {
+                                    onSelected(river);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
               ),
               const SizedBox(height: 16),
 

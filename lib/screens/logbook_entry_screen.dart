@@ -32,11 +32,9 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   double? _discharge;
   bool _isLoadingWaterData = false;
 
-  // Search results
-  List<River> _riverSearchResults = [];
+  // Run search results
   List<RiverRun> _runSearchResults = [];
   List<RiverRun> _allRunsForSelectedRiver = []; // Store all runs for filtering
-  bool _isSearchingRivers = false;
   bool _isSearchingRuns = false;
   bool _isSubmitting = false;
 
@@ -145,29 +143,15 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
     super.dispose();
   }
 
-  void _searchRivers(String query) async {
-    if (query.isEmpty) {
-      setState(() {
-        _riverSearchResults = [];
-        _isSearchingRivers = false;
-      });
-      return;
-    }
-
-    setState(() {
-      _isSearchingRivers = true;
-    });
+  // Get suggestions for rivers based on user input
+  Future<List<River>> _getSuggestedRivers(String query) async {
+    if (query.isEmpty) return [];
 
     try {
       final results = await RiverService.searchRivers(query).first;
-      setState(() {
-        _riverSearchResults = results;
-        _isSearchingRivers = false;
-      });
+      return results;
     } catch (e) {
-      setState(() {
-        _isSearchingRivers = false;
-      });
+      return [];
     }
   }
 
@@ -204,7 +188,6 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
     setState(() {
       _selectedRiver = river;
       _riverSearchController.text = river.name;
-      _riverSearchResults = [];
       // Clear run selection when river changes
       _selectedRun = null;
       _runSearchController.clear();
@@ -464,52 +447,100 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
             ),
             const SizedBox(height: 16),
 
-            // River Search
+            // River Search with Autocomplete
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextFormField(
-                  controller: _riverSearchController,
-                  decoration: InputDecoration(
-                    labelText: 'River Name',
-                    hintText: 'Search for a river...',
-                    border: const OutlineInputBorder(),
-                    prefixIcon: const Icon(Icons.water),
-                    suffixIcon: _isSearchingRivers
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Padding(
-                              padding: EdgeInsets.all(12.0),
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
-                          )
-                        : null,
-                  ),
-                  onChanged: _searchRivers,
-                ),
-                if (_riverSearchResults.isNotEmpty)
-                  Container(
-                    margin: const EdgeInsets.only(top: 4),
-                    constraints: const BoxConstraints(maxHeight: 200),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: ListView.builder(
-                      shrinkWrap: true,
-                      itemCount: _riverSearchResults.length,
-                      itemBuilder: (context, index) {
-                        final river = _riverSearchResults[index];
-                        return ListTile(
-                          dense: true,
-                          title: Text(river.name),
-                          subtitle: Text('${river.region}, ${river.country}'),
-                          onTap: () => _selectRiver(river),
+                Autocomplete<River>(
+                  optionsBuilder: (TextEditingValue textEditingValue) async {
+                    if (textEditingValue.text.isEmpty) {
+                      return const Iterable<River>.empty();
+                    }
+                    return await _getSuggestedRivers(textEditingValue.text);
+                  },
+                  displayStringForOption: (River river) => river.name,
+                  onSelected: (River river) {
+                    _selectRiver(river);
+                  },
+                  fieldViewBuilder:
+                      (
+                        BuildContext context,
+                        TextEditingController fieldController,
+                        FocusNode focusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        // Sync our controller with the autocomplete controller
+                        if (_riverSearchController.text.isNotEmpty &&
+                            fieldController.text !=
+                                _riverSearchController.text) {
+                          fieldController.text = _riverSearchController.text;
+                        }
+
+                        return TextFormField(
+                          controller: fieldController,
+                          focusNode: focusNode,
+                          decoration: InputDecoration(
+                            labelText: 'River Name',
+                            hintText: 'Start typing to see suggestions...',
+                            border: const OutlineInputBorder(),
+                            prefixIcon: const Icon(Icons.water),
+                            suffixIcon: _selectedRiver != null
+                                ? Icon(Icons.check_circle, color: Colors.green)
+                                : null,
+                          ),
+                          onChanged: (value) {
+                            _riverSearchController.text = value;
+                            // Clear selection if user modifies the text
+                            if (_selectedRiver != null &&
+                                value != _selectedRiver!.name) {
+                              setState(() {
+                                _selectedRiver = null;
+                                _selectedRun = null;
+                                _runSearchController.clear();
+                              });
+                            }
+                          },
                         );
                       },
-                    ),
-                  ),
+                  optionsViewBuilder:
+                      (
+                        BuildContext context,
+                        AutocompleteOnSelected<River> onSelected,
+                        Iterable<River> options,
+                      ) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4.0,
+                            borderRadius: BorderRadius.circular(4),
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(
+                                maxHeight: 200,
+                                maxWidth: 400,
+                              ),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final River river = options.elementAt(index);
+                                  return ListTile(
+                                    dense: true,
+                                    title: Text(river.name),
+                                    subtitle: Text(
+                                      '${river.region}, ${river.country}',
+                                    ),
+                                    onTap: () {
+                                      onSelected(river);
+                                    },
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                ),
               ],
             ),
             const SizedBox(height: 16),
