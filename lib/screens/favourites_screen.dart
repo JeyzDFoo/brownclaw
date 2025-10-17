@@ -204,43 +204,16 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
     };
   }
 
-  Future<void> _refreshData() async {
-    // 🔥 OPTIMIZED: Clear cache and let providers re-fetch automatically
-    if (kDebugMode) {
-      print('🔄 Manual refresh requested');
-    }
-
-    // Clear the cache to force fresh data
+  Future<void> _retryLoad() async {
+    // Clear error state and cache to trigger fresh reload
     RiverRunProvider.clearCache();
+    context.read<RiverRunProvider>().clearError();
 
-    // Get current favorites and reload
-    final favoriteIds = context.read<FavoritesProvider>().favoriteRunIds;
-    if (favoriteIds.isNotEmpty) {
-      await context.read<RiverRunProvider>().loadFavoriteRuns(favoriteIds);
+    // Reset previous favorites to force reload
+    _previousFavoriteIds.clear();
 
-      // Reload live data
-      final runs = context.read<RiverRunProvider>().favoriteRuns;
-      final stationIds = runs
-          .map((r) => r.run.stationId)
-          .whereType<String>()
-          .where((id) => id.isNotEmpty)
-          .toList();
-
-      if (stationIds.isNotEmpty && mounted) {
-        await context.read<LiveWaterDataProvider>().fetchMultipleStations(
-          stationIds,
-        );
-      }
-    }
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('River levels updated'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
+    // The rebuild will trigger _checkAndReloadFavorites automatically
+    setState(() {});
   }
 
   Future<void> _toggleFavorite(RiverRunWithStations runWithStations) async {
@@ -345,7 +318,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                             ),
                             const SizedBox(height: 16),
                             ElevatedButton.icon(
-                              onPressed: _refreshData,
+                              onPressed: _retryLoad,
                               icon: const Icon(Icons.refresh),
                               label: const Text('Retry'),
                               style: ElevatedButton.styleFrom(

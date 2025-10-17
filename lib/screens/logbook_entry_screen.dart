@@ -26,6 +26,7 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   River? _selectedRiver;
   RiverRun? _selectedRun;
   DateTime _selectedDate = DateTime.now();
+  double _rating = 0.0; // Rating from 0 to 3 stars
 
   // Water level data
   double? _waterLevel;
@@ -263,6 +264,7 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
         'section': _selectedRun!.name, // Keep for backward compatibility
         'difficulty': _selectedRun!.difficultyClass, // Get from run data
         'notes': _notesController.text.trim(),
+        'rating': _rating, // Star rating (0-3 with half stars)
         'userId': user.uid,
         'userEmail': user.email,
         'userName': user.displayName ?? user.email?.split('@')[0] ?? 'Kayaker',
@@ -521,6 +523,75 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
             if (_selectedRiver != null || _selectedRun != null)
               const SizedBox(height: 16),
 
+            // Rating Section
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.teal.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.teal.withOpacity(0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Text('😊', style: TextStyle(fontSize: 20)),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Rate your run',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      // Bad/Poor
+                      _buildEmojiButton(emoji: '😢', label: 'Poor', value: 1.0),
+                      // Okay/Average
+                      _buildEmojiButton(emoji: '😐', label: 'Okay', value: 2.0),
+                      // Good/Great
+                      _buildEmojiButton(
+                        emoji: '😊',
+                        label: 'Great',
+                        value: 3.0,
+                      ),
+                    ],
+                  ),
+                  if (_rating > 0) ...[
+                    const SizedBox(height: 12),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.teal.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          _getRatingLabel(_rating),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.teal[700],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
             // Notes field
             TextFormField(
               controller: _notesController,
@@ -581,5 +652,55 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildEmojiButton({
+    required String emoji,
+    required String label,
+    required double value,
+  }) {
+    final isSelected = _rating == value;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _rating = value;
+        });
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? Colors.teal.withOpacity(0.15)
+              : Colors.grey.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? Colors.teal : Colors.grey.withOpacity(0.3),
+            width: isSelected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          children: [
+            Text(emoji, style: TextStyle(fontSize: isSelected ? 44 : 40)),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: isSelected ? Colors.teal[700] : Colors.grey[700],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _getRatingLabel(double rating) {
+    if (rating == 1.0) return 'Poor run 😢';
+    if (rating == 2.0) return 'Okay run 😐';
+    if (rating == 3.0) return 'Great run! 😊';
+    return 'Rated';
   }
 }

@@ -178,10 +178,6 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Find River Runs'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: Column(
         children: [
           // Search and filter section

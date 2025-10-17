@@ -26,6 +26,9 @@ class _MainScreenState extends State<MainScreen> {
     const RiverRunSearchScreen(),
   ];
 
+  // Page names for dynamic AppBar title
+  final List<String> _pageNames = ['Favourites', 'Logbook', 'Find Runs'];
+
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -36,7 +39,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BrownClaw - Kayaking Hub'),
+        title: Text('Brown Claw - ${_pageNames[_selectedIndex]}'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           Consumer<UserProvider>(

@@ -1481,11 +1481,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     return {
       'count': count,
       'average': double.parse(average.toStringAsFixed(2)),
-      'minimum': minimum,
-      'maximum': maximum,
-      'percentile25': dischargeValues[p25Index],
-      'median': dischargeValues[p50Index],
-      'percentile75': dischargeValues[p75Index],
+      'minimum': double.parse(minimum.toStringAsFixed(2)),
+      'maximum': double.parse(maximum.toStringAsFixed(2)),
+      'percentile25': double.parse(
+        dischargeValues[p25Index].toStringAsFixed(2),
+      ),
+      'median': double.parse(dischargeValues[p50Index].toStringAsFixed(2)),
+      'percentile75': double.parse(
+        dischargeValues[p75Index].toStringAsFixed(2),
+      ),
       'dateRange': {
         'start':
             data.last['datetime'] ??
