@@ -1,161 +1,125 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/transalta_flow_data.dart';
-import '../services/transalta_service.dart';
+import '../providers/transalta_provider.dart';
 
-/// Example widget showing TransAlta Barrier Dam flow information
+/// Widget showing TransAlta Barrier Dam flow information
 ///
-/// This demonstrates how to use the TransAltaService in your app.
-/// You can customize the UI to match your app's design.
-class TransAltaFlowWidget extends StatefulWidget {
+/// Uses TransAltaProvider for centralized state management
+class TransAltaFlowWidget extends StatelessWidget {
   final double threshold;
 
-  const TransAltaFlowWidget({Key? key, this.threshold = 20.0})
-    : super(key: key);
-
-  @override
-  State<TransAltaFlowWidget> createState() => _TransAltaFlowWidgetState();
-}
-
-class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
-  bool _isLoading = true;
-  TransAltaFlowData? _flowData;
-  List<HighFlowPeriod>? _highFlowPeriods;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final data = await transAltaService.fetchFlowData();
-
-      if (data != null) {
-        final periods = data.getHighFlowHours(threshold: widget.threshold);
-
-        setState(() {
-          _flowData = data;
-          _highFlowPeriods = periods;
-          _isLoading = false;
-        });
-      } else {
-        setState(() {
-          _error = 'Unable to connect to TransAlta flow data';
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      // Better error message for CORS issues
-      String errorMessage = 'Error connecting to TransAlta';
-
-      if (e.toString().contains('XMLHttpRequest') ||
-          e.toString().contains('CORS') ||
-          e.toString().contains('Failed host lookup')) {
-        errorMessage =
-            'Unable to fetch data from TransAlta.\n\n'
-            'Note: Direct API access may be blocked in web browsers.\n'
-            'Visit transalta.com/river-flows for current data.';
-      }
-
-      setState(() {
-        _error = errorMessage;
-        _isLoading = false;
-      });
-    }
-  }
+  const TransAltaFlowWidget({super.key, this.threshold = 20.0});
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.all(16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  '🌊 Kananaskis River Flow',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _isLoading ? null : () => _loadData(),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Barrier Dam (≥${widget.threshold} m³/s)',
-              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-            ),
-            const Divider(height: 24),
+    return Consumer<TransAltaProvider>(
+      builder: (context, transAltaProvider, child) {
+        // Fetch data if not already loaded
+        if (!transAltaProvider.hasData &&
+            !transAltaProvider.isLoading &&
+            transAltaProvider.error == null) {
+          Future.microtask(() => transAltaProvider.fetchFlowData());
+        }
 
-            if (_isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: CircularProgressIndicator(),
-                ),
-              )
-            else if (_error != null)
-              Center(
-                child: Column(
+        return Card(
+          margin: const EdgeInsets.all(16),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 48,
-                      color: Colors.red,
+                    const Text(
+                      '🌊 Kananaskis River Flow',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(_error!, style: const TextStyle(color: Colors.red)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _loadData,
-                      child: const Text('Retry'),
+                    IconButton(
+                      icon: const Icon(Icons.refresh),
+                      onPressed: transAltaProvider.isLoading
+                          ? null
+                          : () => transAltaProvider.fetchFlowData(
+                              forceRefresh: true,
+                            ),
                     ),
                   ],
                 ),
-              )
-            else
-              _buildContent(),
-          ],
-        ),
-      ),
+                const SizedBox(height: 8),
+                Text(
+                  'Barrier Dam (≥${threshold.toStringAsFixed(0)} m³/s)',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+                ),
+                const Divider(height: 24),
+
+                if (transAltaProvider.isLoading)
+                  const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(24),
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                else if (transAltaProvider.error != null)
+                  Center(
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          size: 48,
+                          color: Colors.red,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          transAltaProvider.error!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => transAltaProvider.fetchFlowData(
+                            forceRefresh: true,
+                          ),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  )
+                else if (transAltaProvider.hasData)
+                  _buildContent(transAltaProvider),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildContent() {
-    if (_flowData == null) return const SizedBox();
+  Widget _buildContent(TransAltaProvider provider) {
+    final flowData = provider.flowData;
+    if (flowData == null) return const SizedBox();
+
+    final highFlowPeriods = provider.getAllFlowPeriods(threshold: threshold);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Current Flow
-        _buildCurrentFlow(),
+        _buildCurrentFlow(flowData.currentFlow),
 
         const SizedBox(height: 16),
         const Divider(),
         const SizedBox(height: 16),
 
         // High Flow Schedule
-        _buildHighFlowSchedule(),
+        _buildHighFlowSchedule(highFlowPeriods),
       ],
     );
   }
 
-  Widget _buildCurrentFlow() {
-    final current = _flowData?.currentFlow;
-
+  Widget _buildCurrentFlow(HourlyFlowEntry? current) {
     if (current == null) {
       return const Text('No current flow data available');
     }
@@ -200,8 +164,8 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     );
   }
 
-  Widget _buildHighFlowSchedule() {
-    if (_highFlowPeriods == null || _highFlowPeriods!.isEmpty) {
+  Widget _buildHighFlowSchedule(List<HighFlowPeriod> highFlowPeriods) {
+    if (highFlowPeriods.isEmpty) {
       return Column(
         children: [
           const Text(
@@ -210,7 +174,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
           ),
           const SizedBox(height: 8),
           Text(
-            'No flow periods ≥${widget.threshold} m³/s in the forecast',
+            'No flow periods ≥${threshold.toStringAsFixed(0)} m³/s in the forecast',
             style: TextStyle(color: Colors.grey[600]),
           ),
         ],
@@ -219,7 +183,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
 
     // Group periods by day
     final Map<int, List<HighFlowPeriod>> periodsByDay = {};
-    for (final period in _highFlowPeriods!) {
+    for (final period in highFlowPeriods) {
       periodsByDay.putIfAbsent(period.dayNumber, () => []).add(period);
     }
 
@@ -230,13 +194,13 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Flow Schedule (≥${widget.threshold} m³/s)',
+          'Flow Schedule (≥${threshold.toStringAsFixed(0)} m³/s)',
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
-        Text(
-          'Includes ${TransAltaService.travelTimeMinutes}min travel time from dam to window maker',
-          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        const Text(
+          'Includes 45min travel time from dam to window maker',
+          style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 12),
 
