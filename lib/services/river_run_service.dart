@@ -268,6 +268,38 @@ class RiverRunService {
     }
   }
 
+  /// Check if a river run with the same riverId and name exists
+  /// Returns existing run ID if found, null otherwise
+  static Future<String?> findExistingRun({
+    required String riverId,
+    required String name,
+  }) async {
+    try {
+      final normalizedName = name.trim().toLowerCase();
+
+      final snapshot = await _runsCollection
+          .where('riverId', isEqualTo: riverId)
+          .get();
+
+      for (final doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final existingName =
+            (data['name'] as String?)?.trim().toLowerCase() ?? '';
+
+        if (existingName == normalizedName) {
+          return doc.id;
+        }
+      }
+
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error checking for duplicate run: $e');
+      }
+      return null; // Return null on error to allow creation
+    }
+  }
+
   // Get runs by difficulty class
   static Stream<List<RiverRun>> getRunsByDifficulty(String difficultyClass) {
     return _runsCollection

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../services/river_service.dart';
+import '../services/river_run_service.dart';
 import '../services/gauge_station_service.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
@@ -236,18 +237,55 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
       // First, create or find the river
       String riverId;
 
-      // Check if river already exists
+      // Check if river already exists (same name + same region)
       final existingRivers = await RiverService.searchRivers(
         _riverNameController.text.trim(),
       ).first;
       final existingRiver = existingRivers.firstWhere(
         (river) =>
             river.name.toLowerCase() ==
-            _riverNameController.text.trim().toLowerCase(),
+                _riverNameController.text.trim().toLowerCase() &&
+            river.region.toLowerCase() == _selectedRegion.toLowerCase(),
         orElse: () => const River(id: '', name: '', region: '', country: ''),
       );
 
       if (existingRiver.id.isNotEmpty) {
+        // Found duplicate - show dialog
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          final shouldContinue = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('⚠️ Duplicate River'),
+              content: Text(
+                'A river named "${_riverNameController.text.trim()}" already exists in $_selectedRegion.\n\n'
+                'Would you like to add a run to the existing river?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () => Navigator.pop(context, true),
+                  child: const Text('Use Existing River'),
+                ),
+              ],
+            ),
+          );
+
+          if (shouldContinue != true) {
+            return; // User cancelled
+          }
+
+          setState(() {
+            _isLoading = true;
+          });
+        }
+
         riverId = existingRiver.id;
       } else {
         // Create new river
@@ -260,6 +298,39 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
         );
 
         riverId = await RiverService.addRiver(newRiver);
+      }
+
+      // Check if a run with the same name already exists on this river
+      final existingRunId = await RiverRunService.findExistingRun(
+        riverId: riverId,
+        name: _runNameController.text.trim(),
+      );
+
+      if (existingRunId != null) {
+        // Found duplicate run - show dialog
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+
+          await showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('⚠️ Duplicate Run'),
+              content: Text(
+                'A run named "${_runNameController.text.trim()}" already exists on this river.\n\n'
+                'Please choose a different name for your run.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+        return; // Don't create duplicate
       }
 
       // Create the river run
