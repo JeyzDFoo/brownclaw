@@ -14,7 +14,8 @@ class RiverRunSearchScreen extends StatefulWidget {
   State<RiverRunSearchScreen> createState() => _RiverRunSearchScreenState();
 }
 
-class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
+class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
 
   List<RiverRunWithStations> _riverRuns = [];
@@ -25,6 +26,9 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
 
   List<String> _availableDifficulties = ['All Difficulties'];
   List<String> _availableRegions = ['All Regions'];
+
+  @override
+  bool get wantKeepAlive => true; // Keep state alive when navigating away
 
   // Convert RiverRunWithStations to legacy format for RiverDetailScreen
   Map<String, dynamic> _convertRunToLegacyFormat(
@@ -65,7 +69,10 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
   @override
   void initState() {
     super.initState();
-    _loadInitialData();
+    // Only load if we don't have data already (for when kept alive)
+    if (_riverRuns.isEmpty) {
+      _loadInitialData();
+    }
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -78,13 +85,22 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
   Future<void> _loadInitialData() async {
     if (_isLoading) return;
 
+    if (!mounted) return; // Check if widget is still mounted
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       // Load all runs (including those without live data)
-      final allRuns = await RiverRunService.getAllRunsWithStations().first;
+      // Use a timeout to prevent indefinite waiting
+      final allRuns = await RiverRunService.getAllRunsWithStations().first
+          .timeout(
+            const Duration(seconds: 30),
+            onTimeout: () => <RiverRunWithStations>[],
+          );
+
+      if (!mounted) return; // Check before setState
 
       setState(() {
         _riverRuns = allRuns;
@@ -93,6 +109,9 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
 
       // Load all difficulty classes
       final difficulties = await RiverRunService.getAllDifficultyClasses();
+
+      if (!mounted) return; // Check before setState
+
       setState(() {
         _availableDifficulties = ['All Difficulties', ...difficulties];
       });
@@ -103,9 +122,11 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
         ).showSnackBar(SnackBar(content: Text('Error loading river runs: $e')));
       }
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -178,6 +199,7 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       body: Column(
         children: [

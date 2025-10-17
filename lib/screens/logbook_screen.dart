@@ -12,8 +12,12 @@ class LogBookScreen extends StatefulWidget {
   State<LogBookScreen> createState() => _LogBookScreenState();
 }
 
-class _LogBookScreenState extends State<LogBookScreen> {
+class _LogBookScreenState extends State<LogBookScreen>
+    with AutomaticKeepAliveClientMixin {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  bool get wantKeepAlive => true; // Keep state alive when navigating away
 
   Future<void> _deleteLogEntry(String entryId) async {
     try {
@@ -34,6 +38,7 @@ class _LogBookScreenState extends State<LogBookScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       body: Consumer<UserProvider>(
         builder: (context, userProvider, child) {

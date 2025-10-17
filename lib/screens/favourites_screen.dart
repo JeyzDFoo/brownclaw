@@ -17,8 +17,12 @@ class FavouritesScreen extends StatefulWidget {
   State<FavouritesScreen> createState() => _FavouritesScreenState();
 }
 
-class _FavouritesScreenState extends State<FavouritesScreen> {
+class _FavouritesScreenState extends State<FavouritesScreen>
+    with AutomaticKeepAliveClientMixin {
   Set<String> _previousFavoriteIds = {};
+
+  @override
+  bool get wantKeepAlive => true; // Keep state alive when navigating away
 
   @override
   void initState() {
@@ -276,6 +280,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     // 🔥 OPTIMIZED: Consumer4 with LiveWaterDataProvider and TransAltaProvider - Pure reactive pattern!
     return Consumer4<
       FavoritesProvider,
