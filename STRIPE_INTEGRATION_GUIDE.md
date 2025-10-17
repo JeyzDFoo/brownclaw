@@ -111,6 +111,8 @@ import Stripe from 'stripe';
 
 admin.initializeApp();
 
+// #todo: STRIPE INTEGRATION - Add your Stripe Secret Key here
+// Get from: https://dashboard.stripe.com/test/apikeys
 // Initialize Stripe with your secret key
 const stripe = new Stripe('sk_test_YOUR_SECRET_KEY_HERE', {
   apiVersion: '2023-10-16',
@@ -255,6 +257,9 @@ export const cancelSubscription = functions.https.onCall(async (data, context) =
 // Stripe Webhook Handler
 export const stripeWebhook = functions.https.onRequest(async (req, res) => {
   const sig = req.headers['stripe-signature'];
+  
+  // #todo: STRIPE INTEGRATION - Add your Webhook Secret here
+  // Get from: https://dashboard.stripe.com/test/webhooks (after creating endpoint)
   const webhookSecret = 'whsec_YOUR_WEBHOOK_SECRET';
 
   try {
