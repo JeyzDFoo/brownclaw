@@ -9,7 +9,9 @@ import 'river_detail_screen.dart';
 import 'logbook_entry_screen.dart';
 
 class FavouritesScreen extends StatefulWidget {
-  const FavouritesScreen({super.key});
+  final VoidCallback? onNavigateToSearch;
+
+  const FavouritesScreen({super.key, this.onNavigateToSearch});
 
   @override
   State<FavouritesScreen> createState() => _FavouritesScreenState();
@@ -268,27 +270,6 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
         return Scaffold(
           body: Column(
             children: [
-              // Action button
-              Container(
-                padding: const EdgeInsets.all(16.0),
-                child: Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const RiverRunSearchScreen(),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.add_circle_outline),
-                    label: const Text('Add River Runs'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.teal,
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
               Expanded(
                 child: isLoading
                     ? const Center(
@@ -383,55 +364,6 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                       )
                     : Column(
                         children: [
-                          // Data source info banner
-                          if (favoriteRuns.isNotEmpty)
-                            Container(
-                              width: double.infinity,
-                              margin: const EdgeInsets.all(16),
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color:
-                                    (favoriteRuns.first.hasLiveData
-                                            ? Colors.green
-                                            : Colors.orange)
-                                        .withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color:
-                                      (favoriteRuns.first.hasLiveData
-                                              ? Colors.green
-                                              : Colors.orange)
-                                          .withOpacity(0.3),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    favoriteRuns.first.hasLiveData
-                                        ? Icons.live_tv
-                                        : Icons.info_outline,
-                                    color: favoriteRuns.first.hasLiveData
-                                        ? Colors.green[700]
-                                        : Colors.orange[700],
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Text(
-                                      favoriteRuns.first.hasLiveData
-                                          ? 'Showing live data from Environment Canada'
-                                          : 'Data temporarily unavailable - please try again later',
-                                      style: TextStyle(
-                                        color: favoriteRuns.first.hasLiveData
-                                            ? Colors.green[700]
-                                            : Colors.grey[600],
-                                        fontSize: 13,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
                           // Rivers list
                           Expanded(
                             child: ListView.builder(
@@ -678,6 +610,24 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                       ),
               ),
             ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () {
+              if (widget.onNavigateToSearch != null) {
+                widget.onNavigateToSearch!();
+              } else {
+                // Fallback to navigation if callback not provided
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const RiverRunSearchScreen(),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Add Run to Favourites'),
+            backgroundColor: Colors.teal,
+            foregroundColor: Colors.white,
           ),
         );
       },

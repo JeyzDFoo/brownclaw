@@ -17,11 +17,24 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _selectedIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   // #todo: Implement lazy loading of screens to improve initial load time
   // Only initialize screens when first accessed
-  final List<Widget> _screens = [
-    const FavouritesScreen(),
+  List<Widget> get _screens => [
+    FavouritesScreen(onNavigateToSearch: () => _onItemTapped(2)),
     const LogBookScreen(),
     const RiverRunSearchScreen(),
   ];
@@ -30,6 +43,14 @@ class _MainScreenState extends State<MainScreen> {
   final List<String> _pageNames = ['Favourites', 'Logbook', 'Find Runs'];
 
   void _onItemTapped(int index) {
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void _onPageChanged(int index) {
     setState(() {
       _selectedIndex = index;
     });
@@ -163,7 +184,11 @@ class _MainScreenState extends State<MainScreen> {
           const SizedBox(width: 16),
         ],
       ),
-      body: _screens[_selectedIndex],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: _onPageChanged,
+        children: _screens,
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

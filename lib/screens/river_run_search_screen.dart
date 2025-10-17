@@ -253,32 +253,6 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-
-                // Create new run button
-                SizedBox(
-                  width: double.infinity,
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      final result = await Navigator.of(context).push<bool>(
-                        MaterialPageRoute(
-                          builder: (context) => const CreateRiverRunScreen(),
-                        ),
-                      );
-
-                      // If a new run was created, refresh the data
-                      if (result == true) {
-                        _loadInitialData();
-                      }
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('Create New Run'),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.teal,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                  ),
-                ),
               ],
             ),
           ),
@@ -445,6 +419,24 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                   ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await Navigator.of(context).push<bool>(
+            MaterialPageRoute(
+              builder: (context) => const CreateRiverRunScreen(),
+            ),
+          );
+
+          // If a new run was created, refresh the data
+          if (result == true) {
+            _loadInitialData();
+          }
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Create New Run'),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
       ),
     );
   }
