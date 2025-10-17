@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/logbook_provider.dart';
 import 'logbook_entry_screen.dart';
 
 class LogBookScreen extends StatefulWidget {
@@ -192,15 +193,28 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                         ),
                                         onSelected: (value) async {
                                           if (value == 'edit') {
+                                            // Set the editing entry in the provider
+                                            context
+                                                .read<LogbookProvider>()
+                                                .setEditingEntry(doc.id, data);
+
                                             final result =
                                                 await Navigator.of(
                                                   context,
                                                 ).push(
                                                   MaterialPageRoute(
                                                     builder: (context) =>
-                                                        LogbookEntryScreen(),
+                                                        const LogbookEntryScreen(),
                                                   ),
                                                 );
+
+                                            // Clear editing state when returning
+                                            if (mounted) {
+                                              context
+                                                  .read<LogbookProvider>()
+                                                  .clearEditingEntry();
+                                            }
+
                                             if (result == true && mounted) {
                                               // Entry was edited successfully
                                             }

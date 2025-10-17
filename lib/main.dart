@@ -47,6 +47,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LiveWaterDataProvider()),
+        ChangeNotifierProvider(create: (_) => LogbookProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

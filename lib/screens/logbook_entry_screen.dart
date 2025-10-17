@@ -20,7 +20,6 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   final _riverSearchController = TextEditingController();
   final _runSearchController = TextEditingController();
   final _notesController = TextEditingController();
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Selected values
   River? _selectedRiver;
@@ -44,18 +43,97 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   @override
   void initState() {
     super.initState();
-    // Pre-fill with data if provided
-    if (widget.prefilledRun != null) {
-      _selectedRiver = widget.prefilledRun!.river;
-      _selectedRun = widget.prefilledRun!.run;
-      if (_selectedRiver != null) {
-        _riverSearchController.text = _selectedRiver!.name;
+
+    // Check if we're in edit mode via provider
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final logbookProvider = context.read<LogbookProvider>();
+
+      if (logbookProvider.isEditMode &&
+          logbookProvider.editingEntryData != null) {
+        _loadEditingData(logbookProvider.editingEntryData!);
+      } else if (widget.prefilledRun != null) {
+        // Pre-fill with data if provided
+        _selectedRiver = widget.prefilledRun!.river;
+        _selectedRun = widget.prefilledRun!.run;
+        if (_selectedRiver != null) {
+          _riverSearchController.text = _selectedRiver!.name;
+        }
+        if (_selectedRun != null) {
+          _runSearchController.text = _selectedRun!.name;
+          // Fetch water level data for the prefilled run
+          _fetchWaterLevelForDate();
+        }
       }
-      if (_selectedRun != null) {
-        _runSearchController.text = _selectedRun!.name;
-        // Fetch water level data for the prefilled run
-        _fetchWaterLevelForDate();
+    });
+  }
+
+  void _loadEditingData(Map<String, dynamic> data) async {
+    setState(() {
+      // Load notes
+      _notesController.text = data['notes'] ?? '';
+
+      // Load rating
+      if (data['rating'] != null) {
+        _rating = (data['rating'] as num).toDouble();
       }
+
+      // Load date
+      if (data['runDate'] != null) {
+        try {
+          _selectedDate = DateTime.parse(data['runDate']);
+        } catch (e) {
+          // Keep default date if parsing fails
+        }
+      }
+
+      // Load water level data
+      _waterLevel = data['waterLevel'];
+      _discharge = data['discharge'];
+    });
+
+    // Fetch the actual River and RiverRun objects from the database
+    if (data['riverRunId'] != null) {
+      try {
+        // Get the run by ID
+        final run = await RiverRunService.getRunById(data['riverRunId']);
+        if (run != null) {
+          setState(() {
+            _selectedRun = run;
+            _runSearchController.text = run.name;
+          });
+
+          // Get the river for this run
+          final river = await RiverService.getRiverById(run.riverId);
+          if (river != null) {
+            setState(() {
+              _selectedRiver = river;
+              _riverSearchController.text = river.name;
+            });
+          }
+        }
+      } catch (e) {
+        // If we can't fetch the data, fall back to display names
+        if (mounted) {
+          setState(() {
+            if (data['riverName'] != null) {
+              _riverSearchController.text = data['riverName'];
+            }
+            if (data['section'] != null) {
+              _runSearchController.text = data['section'];
+            }
+          });
+        }
+      }
+    } else {
+      // Fallback: just display the names without actual objects
+      setState(() {
+        if (data['riverName'] != null) {
+          _riverSearchController.text = data['riverName'];
+        }
+        if (data['section'] != null) {
+          _runSearchController.text = data['section'];
+        }
+      });
     }
   }
 
@@ -143,6 +221,11 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
         _runSearchResults = runs; // Show all runs initially
         _isSearchingRuns = false;
       });
+
+      // Auto-select if there's only one run
+      if (runs.length == 1) {
+        _selectRun(runs.first);
+      }
     } catch (e) {
       setState(() {
         _isSearchingRuns = false;
@@ -253,44 +336,68 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
     final user = context.read<UserProvider>().user;
     if (user == null) return;
 
+    final logbookProvider = context.read<LogbookProvider>();
+    final isEditMode = logbookProvider.isEditMode;
+
     setState(() {
       _isSubmitting = true;
     });
 
     try {
-      await _firestore.collection('river_descents').add({
+      final entryData = {
         'riverRunId': _selectedRun!.id,
         'riverName': _selectedRiver!.name, // Keep for backward compatibility
         'section': _selectedRun!.name, // Keep for backward compatibility
         'difficulty': _selectedRun!.difficultyClass, // Get from run data
         'notes': _notesController.text.trim(),
-        'rating': _rating, // Star rating (0-3 with half stars)
+        'rating': _rating, // Emoji rating
         'userId': user.uid,
         'userEmail': user.email,
         'userName': user.displayName ?? user.email?.split('@')[0] ?? 'Kayaker',
-        'timestamp': FieldValue.serverTimestamp(),
         'date': _selectedDate.toIso8601String().split('T')[0],
         'runDate': _selectedDate.toIso8601String().split('T')[0],
         // Water level data
         'waterLevel': _waterLevel,
         'discharge': _discharge,
         'stationId': _selectedRun!.stationId,
-      });
+      };
 
-      if (mounted) {
-        Navigator.of(context).pop(true); // Return true to indicate success
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Log entry added successfully!'),
-            backgroundColor: Colors.green,
-          ),
+      if (isEditMode && logbookProvider.editingEntryId != null) {
+        // Update existing entry
+        await logbookProvider.updateEntry(
+          logbookProvider.editingEntryId!,
+          entryData,
         );
+
+        if (mounted) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Log entry updated successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        // Add new entry (include timestamp for new entries only)
+        entryData['timestamp'] = FieldValue.serverTimestamp();
+        await logbookProvider.addEntry(entryData);
+
+        if (mounted) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Log entry added successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('Error adding entry: $e')));
+        ).showSnackBar(SnackBar(content: Text('Error saving entry: $e')));
       }
     } finally {
       if (mounted) {
@@ -303,9 +410,12 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final logbookProvider = context.watch<LogbookProvider>();
+    final isEditMode = logbookProvider.isEditMode;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Log River Descent'),
+        title: Text(isEditMode ? 'Edit River Descent' : 'Log River Descent'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           if (_isSubmitting)
@@ -617,7 +727,11 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.save),
-                label: Text(_isSubmitting ? 'Saving...' : 'Log Descent'),
+                label: Text(
+                  _isSubmitting
+                      ? (isEditMode ? 'Updating...' : 'Saving...')
+                      : (isEditMode ? 'Update' : 'Save'),
+                ),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(16),
                   backgroundColor: Colors.teal,
