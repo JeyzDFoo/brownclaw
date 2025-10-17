@@ -13,7 +13,11 @@ import '../models/transalta_flow_data.dart';
 /// whitewater activities on the Kananaskis River.
 class TransAltaService {
   static const String _baseUrl = 'https://transalta.com/river-flows/';
-  static const String _dataEndpoint = '$_baseUrl?get-riverflow-data=1';
+  static const String _transAltaEndpoint = '$_baseUrl?get-riverflow-data=1';
+  
+  // CORS proxy to bypass browser restrictions
+  static const String _corsProxy = 'https://corsproxy.io/?';
+  static const String _dataEndpoint = '$_corsProxy$_transAltaEndpoint';
 
   // Water travel time from Barrier Dam to downstream locations
   static const int travelTimeMinutes = 45; // to Canoe Meadows

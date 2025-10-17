@@ -39,21 +39,44 @@ class TransAltaFlowData {
   }
 
   /// Get all high flow hours (above threshold) across all forecast days
+  /// Groups consecutive hours into separate periods to handle on/off cycles
   List<HighFlowPeriod> getHighFlowHours({double threshold = 20.0}) {
     final List<HighFlowPeriod> periods = [];
 
     for (final forecast in forecasts) {
       final date = forecast.getDate();
-      final highFlowEntries = forecast.entries
-          .where((entry) => entry.barrierFlow >= threshold)
-          .toList();
 
-      if (highFlowEntries.isNotEmpty) {
+      // Group consecutive high-flow hours into separate periods
+      List<HourlyFlowEntry> currentPeriod = [];
+
+      for (int i = 0; i < forecast.entries.length; i++) {
+        final entry = forecast.entries[i];
+
+        if (entry.barrierFlow >= threshold) {
+          currentPeriod.add(entry);
+        } else {
+          // Flow dropped below threshold, save current period if any
+          if (currentPeriod.isNotEmpty) {
+            periods.add(
+              HighFlowPeriod(
+                date: date,
+                dayNumber: forecast.day,
+                entries: List.from(currentPeriod),
+                threshold: threshold,
+              ),
+            );
+            currentPeriod = [];
+          }
+        }
+      }
+
+      // Don't forget the last period if it ends at the day boundary
+      if (currentPeriod.isNotEmpty) {
         periods.add(
           HighFlowPeriod(
             date: date,
             dayNumber: forecast.day,
-            entries: highFlowEntries,
+            entries: List.from(currentPeriod),
             threshold: threshold,
           ),
         );
@@ -231,8 +254,66 @@ class HighFlowPeriod {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
   }
 
+  /// Get friendly day name (Today, Tomorrow, or day of week)
+  String get dayName {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final tomorrow = today.add(const Duration(days: 1));
+    final forecastDate = DateTime(date.year, date.month, date.day);
+
+    if (forecastDate == today) {
+      return 'Today';
+    } else if (forecastDate == tomorrow) {
+      return 'Tomorrow';
+    } else {
+      // Return day of week
+      const days = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+      return days[forecastDate.weekday - 1];
+    }
+  }
+
   /// Get total hours of high flow
   int get totalHours => entries.length;
+
+  /// Get minimum flow in this period
+  double get minFlow {
+    if (entries.isEmpty) return 0;
+    return entries.map((e) => e.barrierFlow).reduce((a, b) => a < b ? a : b);
+  }
+
+  /// Get maximum flow in this period
+  double get maxFlow {
+    if (entries.isEmpty) return 0;
+    return entries.map((e) => e.barrierFlow).reduce((a, b) => a > b ? a : b);
+  }
+
+  /// Get average flow in this period
+  double get avgFlow {
+    if (entries.isEmpty) return 0;
+    final sum = entries.map((e) => e.barrierFlow).reduce((a, b) => a + b);
+    return sum / entries.length;
+  }
+
+  /// Get flow range as a string (e.g., "20-25 m³/s" or "22 m³/s" if constant)
+  String get flowRangeString {
+    if (entries.isEmpty) return 'N/A';
+    final min = minFlow;
+    final max = maxFlow;
+
+    if (min == max) {
+      return '${min.toStringAsFixed(0)} m³/s';
+    } else {
+      return '${min.toStringAsFixed(0)}-${max.toStringAsFixed(0)} m³/s';
+    }
+  }
 }
 
 /// Flow status levels based on flow rate

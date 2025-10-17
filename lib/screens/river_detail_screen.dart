@@ -10,6 +10,7 @@ import '../services/historical_water_data_service.dart';
 import '../services/river_run_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
+import '../widgets/transalta_flow_widget.dart';
 import 'edit_river_run_screen.dart';
 import 'premium_purchase_screen.dart';
 
@@ -1008,6 +1009,13 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               ),
 
               const SizedBox(height: 16),
+
+              // TransAlta Flow Widget - Special case for Kananaskis River
+              if (riverName.toLowerCase().contains('kananaskis'))
+                const TransAltaFlowWidget(threshold: 20.0),
+
+              if (riverName.toLowerCase().contains('kananaskis'))
+                const SizedBox(height: 16),
 
               // Historical Discharge Chart Card
               Card(

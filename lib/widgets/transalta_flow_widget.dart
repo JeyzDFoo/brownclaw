@@ -47,13 +47,25 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         });
       } else {
         setState(() {
-          _error = 'Unable to fetch flow data';
+          _error = 'Unable to connect to TransAlta flow data';
           _isLoading = false;
         });
       }
     } catch (e) {
+      // Better error message for CORS issues
+      String errorMessage = 'Error connecting to TransAlta';
+
+      if (e.toString().contains('XMLHttpRequest') ||
+          e.toString().contains('CORS') ||
+          e.toString().contains('Failed host lookup')) {
+        errorMessage =
+            'Unable to fetch data from TransAlta.\n\n'
+            'Note: Direct API access may be blocked in web browsers.\n'
+            'Visit transalta.com/river-flows for current data.';
+      }
+
       setState(() {
-        _error = 'Error: $e';
+        _error = errorMessage;
         _isLoading = false;
       });
     }
@@ -183,14 +195,6 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
           ),
           const SizedBox(height: 8),
-          Text(
-            'Water arrives downstream: ${current.getArrivalTimeString()}',
-            style: const TextStyle(fontSize: 12),
-          ),
-          Text(
-            'Period: ${current.hourEndingString}',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
         ],
       ),
     );
@@ -201,39 +205,48 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
       return Column(
         children: [
           const Text(
-            'High Flow Schedule',
+            'Flow Schedule',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           Text(
-            'No high flow periods ≥${widget.threshold} m³/s in the forecast',
+            'No flow periods ≥${widget.threshold} m³/s in the forecast',
             style: TextStyle(color: Colors.grey[600]),
           ),
         ],
       );
     }
 
+    // Group periods by day
+    final Map<int, List<HighFlowPeriod>> periodsByDay = {};
+    for (final period in _highFlowPeriods!) {
+      periodsByDay.putIfAbsent(period.dayNumber, () => []).add(period);
+    }
+
+    // Sort days
+    final sortedDays = periodsByDay.keys.toList()..sort();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'High Flow Schedule (≥${widget.threshold} m³/s)',
+          'Flow Schedule (≥${widget.threshold} m³/s)',
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
-          '+${TransAltaService.travelTimeMinutes}min travel time from dam',
+          'Includes ${TransAltaService.travelTimeMinutes}min travel time from dam to window maker',
           style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
         const SizedBox(height: 12),
 
-        ..._highFlowPeriods!.map((period) => _buildDayCard(period)).toList(),
+        ...sortedDays.map((day) => _buildDayCard(day, periodsByDay[day]!)),
       ],
     );
   }
 
-  Widget _buildDayCard(HighFlowPeriod period) {
-    final isToday = period.dayNumber == 0;
+  Widget _buildDayCard(int dayNumber, List<HighFlowPeriod> periods) {
+    final firstPeriod = periods.first;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -247,49 +260,104 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  period.dateString,
+                  firstPeriod.dayName,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (isToday)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Text(
-                      'Today',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    firstPeriod.dateString,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                const SizedBox(width: 4),
-                Text(
-                  period.arrivalTimeRange,
-                  style: const TextStyle(fontSize: 14),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            Text(
-              '${period.totalHours} hours of high flow',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-            ),
+            const SizedBox(height: 12),
+
+            // Show each period
+            ...periods.asMap().entries.map((entry) {
+              final index = entry.key;
+              final period = entry.value;
+
+              return Padding(
+                padding: EdgeInsets.only(
+                  bottom: index < periods.length - 1 ? 8.0 : 0.0,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (periods.length > 1)
+                      Text(
+                        'Period ${index + 1}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    if (periods.length > 1) const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.access_time,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              period.arrivalTimeRange,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.water_drop,
+                              size: 16,
+                              color: Colors.grey,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              period.flowRangeString,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '(${period.totalHours}h)',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            }),
           ],
         ),
       ),

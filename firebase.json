@@ -36,7 +36,30 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "headers": [
+      {
+        "source": "/api/transalta/**",
+        "headers": [
+          {
+            "key": "Access-Control-Allow-Origin",
+            "value": "*"
+          },
+          {
+            "key": "Access-Control-Allow-Methods",
+            "value": "GET, OPTIONS"
+          },
+          {
+            "key": "Access-Control-Allow-Headers",
+            "value": "Content-Type"
+          }
+        ]
+      }
+    ],
     "rewrites": [
+      {
+        "source": "/api/transalta/flow-data",
+        "function": "getTransAltaFlowData"
+      },
       {
         "source": "**",
         "destination": "/index.html"
