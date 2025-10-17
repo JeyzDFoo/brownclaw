@@ -1,0 +1,511 @@
+{
+  "name": "pv_hydro_river_flow_by_site",
+  "elements": [
+    {
+      "day": 0,
+      "entry": [
+        {
+          "period": "2025-10-17 01",
+          "barrier": 8,
+          "pocaterra": 3
+        },
+        {
+          "period": "2025-10-17 02",
+          "barrier": 1,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 03",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 04",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 05",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 06",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 07",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 08",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 09",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 10",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 11",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 12",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 13",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 14",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 15",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 16",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-17 17",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 18",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 19",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 20",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 21",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 22",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 23",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-17 24",
+          "barrier": 26,
+          "pocaterra": 23
+        }
+      ]
+    },
+    {
+      "day": 1,
+      "entry": [
+        {
+          "period": "2025-10-18 01",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 02",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 03",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 04",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 05",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 06",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 07",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 08",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 09",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 10",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 11",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 12",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 13",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 14",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 15",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 16",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 17",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-18 18",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 19",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 20",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 21",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 22",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 23",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-18 24",
+          "barrier": 26,
+          "pocaterra": 1
+        }
+      ]
+    },
+    {
+      "day": 2,
+      "entry": [
+        {
+          "period": "2025-10-19 01",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 02",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 03",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 04",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 05",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 06",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 07",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 08",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 09",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 10",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 11",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 12",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 13",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 14",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 15",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 16",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 17",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-19 18",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 19",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 20",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 21",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 22",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 23",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-19 24",
+          "barrier": 26,
+          "pocaterra": 1
+        }
+      ]
+    },
+    {
+      "day": 3,
+      "entry": [
+        {
+          "period": "2025-10-20 01",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 02",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 03",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 04",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 05",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 06",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 07",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 08",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 09",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 10",
+          "barrier": 26,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 11",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 12",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 13",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 14",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 15",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 16",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 17",
+          "barrier": 0,
+          "pocaterra": 1
+        },
+        {
+          "period": "2025-10-20 18",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 19",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 20",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 21",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 22",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 23",
+          "barrier": 26,
+          "pocaterra": 23
+        },
+        {
+          "period": "2025-10-20 24",
+          "barrier": 26,
+          "pocaterra": 1
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "href": "http://denodo.transalta.org:9090/server/hydro/hydro_river_flow/views/pv_hydro_river_flow_by_site?%24format=json"
+    }
+  ]
+}
