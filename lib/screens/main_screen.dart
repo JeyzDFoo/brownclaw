@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
-import '../utils/live_data_tester.dart';
-import '../utils/test_live_data_simple.dart';
 import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
@@ -61,8 +58,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Brown Claw - ${_pageNames[_selectedIndex]}'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(_pageNames[_selectedIndex]),
         actions: [
           Consumer<UserProvider>(
             builder: (context, userProvider, child) {
@@ -81,40 +77,6 @@ class _MainScreenState extends State<MainScreen> {
                     await userProvider.signOut();
                     if (context.mounted) {
                       Navigator.pushReplacementNamed(context, '/');
-                    }
-                  } else if (value == 'test_live_data') {
-                    // #todo: Remove debug options before production deployment
-                    // Debug: Test live data functionality
-                    if (kDebugMode) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Testing live data...')),
-                      );
-                      await LiveDataTester.testKnownStations();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Live data test complete'),
-                          ),
-                        );
-                      }
-                    }
-                  } else if (value == 'test_simple_fetch') {
-                    // #todo: Remove debug options before production deployment
-                    // Debug: Test simple direct fetch
-                    if (kDebugMode) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Testing simple fetch...'),
-                        ),
-                      );
-                      await TestLiveDataSimple.testDirectFetch();
-                      if (context.mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Simple fetch test complete'),
-                          ),
-                        );
-                      }
                     }
                   }
                 },
@@ -166,28 +128,6 @@ class _MainScreenState extends State<MainScreen> {
                       },
                     ),
                   ),
-                  if (kDebugMode)
-                    const PopupMenuItem(
-                      value: 'test_live_data',
-                      child: Row(
-                        children: [
-                          Icon(Icons.refresh),
-                          SizedBox(width: 8),
-                          Text('Test Live Data'),
-                        ],
-                      ),
-                    ),
-                  if (kDebugMode)
-                    const PopupMenuItem(
-                      value: 'test_simple_fetch',
-                      child: Row(
-                        children: [
-                          Icon(Icons.sensors),
-                          SizedBox(width: 8),
-                          Text('Test Simple Fetch'),
-                        ],
-                      ),
-                    ),
                   const PopupMenuItem(
                     value: 'logout',
                     child: Row(
@@ -200,7 +140,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ],
                 child: CircleAvatar(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
                   child: Text(
                     (user?.displayName?.isNotEmpty == true)
                         ? user!.displayName![0].toUpperCase()

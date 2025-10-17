@@ -264,11 +264,7 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit River Run'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Edit River Run')),
       body: _isLoading && _riverRun == null
           ? const Center(child: CircularProgressIndicator())
           : Form(

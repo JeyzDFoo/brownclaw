@@ -262,11 +262,7 @@ class _StationSearchScreenState extends State<StationSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Search Water Stations'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
+      appBar: AppBar(title: const Text('Search Water Stations')),
       body: Column(
         children: [
           // Search bar

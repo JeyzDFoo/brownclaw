@@ -26,9 +26,16 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Upgrade to Premium'),
-        backgroundColor: Colors.amber,
-        foregroundColor: Colors.black,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.workspace_premium, color: Colors.white),
+            const SizedBox(width: 8),
+            const Text('Upgrade to Premium'),
+          ],
+        ),
+        backgroundColor: Colors.amber.shade700,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),

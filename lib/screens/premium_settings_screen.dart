@@ -10,9 +10,14 @@ class PremiumSettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Premium Settings'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.workspace_premium, color: Colors.amber.shade700),
+            const SizedBox(width: 8),
+            const Text('Premium'),
+          ],
+        ),
       ),
       body: Consumer<PremiumProvider>(
         builder: (context, premiumProvider, child) {

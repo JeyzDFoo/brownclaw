@@ -39,15 +39,21 @@ class ThemeProvider extends ChangeNotifier {
 
   // Theme data
   ThemeData get lightTheme => ThemeData(
-    colorScheme: ColorScheme.fromSeed(seedColor: Colors.brown),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: Colors.brown,
+      secondary: const Color(0xFF009688), // Teal - our water/adventure color
+    ),
     useMaterial3: true,
+    appBarTheme: const AppBarTheme(elevation: 2, centerTitle: false),
   );
 
   ThemeData get darkTheme => ThemeData(
     colorScheme: ColorScheme.fromSeed(
       seedColor: Colors.brown,
       brightness: Brightness.dark,
+      secondary: const Color(0xFF009688), // Teal - our water/adventure color
     ),
     useMaterial3: true,
+    appBarTheme: const AppBarTheme(elevation: 2, centerTitle: false),
   );
 }

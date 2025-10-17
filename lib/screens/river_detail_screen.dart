@@ -700,8 +700,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(riverName),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
         actions: [
           // Edit button - only visible to admins
           Consumer<UserProvider>(
