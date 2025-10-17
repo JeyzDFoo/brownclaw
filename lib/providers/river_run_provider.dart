@@ -7,6 +7,7 @@ class RiverRunProvider extends ChangeNotifier {
   List<RiverRunWithStations> _favoriteRuns = [];
   bool _isLoading = false;
   String? _error;
+  bool _isInitialized = false;
 
   // 🔥 PERFORMANCE: Simple but effective memory cache
   // Static so cache persists across provider instances
@@ -25,6 +26,22 @@ class RiverRunProvider extends ChangeNotifier {
   static void clearCache() {
     _cache.clear();
     _cacheTime = null;
+  }
+
+  RiverRunProvider() {
+    // Load all runs when provider is created
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+
+    if (kDebugMode) {
+      print('🚀 RiverRunProvider: Initializing and loading all runs...');
+    }
+
+    await loadAllRuns();
   }
 
   List<RiverRunWithStations> get riverRuns => _riverRuns;
@@ -96,6 +113,32 @@ class RiverRunProvider extends ChangeNotifier {
       setError(e.toString());
       if (kDebugMode) {
         print('Error loading river runs: $e');
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> deleteRiverRun(String runId) async {
+    try {
+      // Delete from Firestore
+      await RiverRunService.deleteRun(runId);
+
+      // Remove from cache
+      _cache.remove(runId);
+
+      // Remove from local lists
+      _riverRuns.removeWhere((run) => run.run.id == runId);
+      _favoriteRuns.removeWhere((run) => run.run.id == runId);
+
+      if (kDebugMode) {
+        print('✅ Deleted run $runId and updated cache');
+      }
+
+      notifyListeners();
+    } catch (e) {
+      setError(e.toString());
+      if (kDebugMode) {
+        print('❌ Error deleting river run: $e');
       }
       rethrow;
     }

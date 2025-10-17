@@ -18,14 +18,12 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
     with AutomaticKeepAliveClientMixin {
   final TextEditingController _searchController = TextEditingController();
 
-  List<RiverRunWithStations> _riverRuns = [];
   List<RiverRunWithStations> _filteredRuns = [];
-  bool _isLoading = false;
   String _selectedDifficulty = 'All Difficulties';
   String _selectedRegion = 'All Regions';
 
   List<String> _availableDifficulties = ['All Difficulties'];
-  List<String> _availableRegions = ['All Regions'];
+  final List<String> _availableRegions = ['All Regions'];
 
   @override
   bool get wantKeepAlive => true; // Keep state alive when navigating away
@@ -69,11 +67,8 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
   @override
   void initState() {
     super.initState();
-    // Only load if we don't have data already (for when kept alive)
-    if (_riverRuns.isEmpty) {
-      _loadInitialData();
-    }
-    _searchController.addListener(_onSearchChanged);
+    // Load difficulty classes once
+    _loadDifficultyClasses();
   }
 
   @override
@@ -82,65 +77,22 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
     super.dispose();
   }
 
-  Future<void> _loadInitialData() async {
-    if (_isLoading) return;
-
-    if (!mounted) return; // Check if widget is still mounted
-
-    setState(() {
-      _isLoading = true;
-    });
-
+  Future<void> _loadDifficultyClasses() async {
     try {
-      // Load all runs (including those without live data)
-      // Use a timeout to prevent indefinite waiting
-      final allRuns = await RiverRunService.getAllRunsWithStations().first
-          .timeout(
-            const Duration(seconds: 30),
-            onTimeout: () => <RiverRunWithStations>[],
-          );
-
-      if (!mounted) return; // Check before setState
-
-      setState(() {
-        _riverRuns = allRuns;
-        _filteredRuns = allRuns;
-      });
-
-      // Load all difficulty classes
       final difficulties = await RiverRunService.getAllDifficultyClasses();
-
-      if (!mounted) return; // Check before setState
-
-      setState(() {
-        _availableDifficulties = ['All Difficulties', ...difficulties];
-      });
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error loading river runs: $e')));
-      }
-    } finally {
       if (mounted) {
         setState(() {
-          _isLoading = false;
+          _availableDifficulties = ['All Difficulties', ...difficulties];
         });
       }
+    } catch (e) {
+      // Silently fail - not critical
     }
   }
 
-  void _onSearchChanged() {
-    if (_searchController.text.length < 2 &&
-        _searchController.text.isNotEmpty) {
-      return; // Don't search for single characters
-    }
-    _filterRuns();
-  }
-
-  void _filterRuns() {
+  void _filterRuns(List<RiverRunWithStations> allRuns) {
     final query = _searchController.text.toLowerCase();
-    final filteredRuns = _riverRuns.where((runWithStations) {
+    final filteredRuns = allRuns.where((runWithStations) {
       // Filter by search query
       final matchesQuery =
           query.isEmpty ||
@@ -166,300 +118,358 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
   }
 
   Future<void> _toggleFavorite(RiverRunWithStations runWithStations) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final favoritesProvider = context.read<FavoritesProvider>();
+
     try {
       // Use FavoritesProvider for automatic UI updates
-      await context.read<FavoritesProvider>().toggleFavorite(
-        runWithStations.run.id,
-      );
+      await favoritesProvider.toggleFavorite(runWithStations.run.id);
 
-      final isFavorite = context.read<FavoritesProvider>().isFavorite(
-        runWithStations.run.id,
-      );
+      final isFavorite = favoritesProvider.isFavorite(runWithStations.run.id);
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              isFavorite
-                  ? '${runWithStations.run.displayName} added to favorites'
-                  : '${runWithStations.run.displayName} removed from favorites',
-            ),
-            backgroundColor: isFavorite ? Colors.green : Colors.orange,
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(
+            isFavorite
+                ? '${runWithStations.run.displayName} added to favorites'
+                : '${runWithStations.run.displayName} removed from favorites',
           ),
-        );
-      }
+          backgroundColor: isFavorite ? Colors.green : Colors.orange,
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error updating favorites: $e')));
-      }
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text('Error updating favorites: $e')),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    return Scaffold(
-      body: Column(
-        children: [
-          // Search and filter section
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                // Search bar
-                TextField(
-                  controller: _searchController,
-                  decoration: const InputDecoration(
-                    hintText: 'Search river runs...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
 
-                // Filter dropdowns
-                Row(
+    return Consumer<RiverRunProvider>(
+      builder: (context, riverRunProvider, child) {
+        // Get all runs from provider
+        final allRuns = riverRunProvider.riverRuns;
+        final isLoading = riverRunProvider.isLoading;
+        final error = riverRunProvider.error;
+
+        // Apply filters whenever runs change
+        if (_filteredRuns.isEmpty && allRuns.isNotEmpty) {
+          // Initial filter
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _filterRuns(allRuns);
+          });
+        }
+
+        return Scaffold(
+          body: Column(
+            children: [
+              // Search and filter section
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Column(
                   children: [
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedDifficulty,
-                        decoration: const InputDecoration(
-                          labelText: 'Difficulty',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                        ),
-                        items: _availableDifficulties.map((difficulty) {
-                          return DropdownMenuItem(
-                            value: difficulty,
-                            child: Text(difficulty),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedDifficulty = value ?? 'All Difficulties';
-                          });
-                          _filterRuns();
-                        },
+                    // Search bar
+                    TextField(
+                      controller: _searchController,
+                      decoration: const InputDecoration(
+                        hintText: 'Search river runs...',
+                        prefixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(),
                       ),
+                      onChanged: (_) => _filterRuns(allRuns),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: DropdownButtonFormField<String>(
-                        value: _selectedRegion,
-                        decoration: const InputDecoration(
-                          labelText: 'Region',
-                          border: OutlineInputBorder(),
-                          contentPadding: EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
+                    const SizedBox(height: 12),
+
+                    // Filter dropdowns
+                    Row(
+                      children: [
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedDifficulty,
+                            decoration: const InputDecoration(
+                              labelText: 'Difficulty',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            items: _availableDifficulties.map((difficulty) {
+                              return DropdownMenuItem(
+                                value: difficulty,
+                                child: Text(difficulty),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedDifficulty =
+                                    value ?? 'All Difficulties';
+                              });
+                              _filterRuns(allRuns);
+                            },
                           ),
                         ),
-                        items: _availableRegions.map((region) {
-                          return DropdownMenuItem(
-                            value: region,
-                            child: Text(region),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedRegion = value ?? 'All Regions';
-                          });
-                          _filterRuns();
-                        },
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedRegion,
+                            decoration: const InputDecoration(
+                              labelText: 'Region',
+                              border: OutlineInputBorder(),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                            ),
+                            items: _availableRegions.map((region) {
+                              return DropdownMenuItem(
+                                value: region,
+                                child: Text(region),
+                              );
+                            }).toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedRegion = value ?? 'All Regions';
+                              });
+                              _filterRuns(allRuns);
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          // Results section
-          Expanded(
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredRuns.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.kayaking, size: 64, color: Colors.grey[400]),
-                        const SizedBox(height: 16),
-                        Text(
-                          _searchController.text.isNotEmpty
-                              ? 'No runs match your search'
-                              : 'No river runs available',
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                        if (_searchController.text.isNotEmpty) ...[
-                          const SizedBox(height: 8),
-                          TextButton(
-                            onPressed: () {
-                              _searchController.clear();
-                              _filterRuns();
-                            },
-                            child: const Text('Clear search'),
-                          ),
-                        ],
-                      ],
-                    ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _filteredRuns.length,
-                    itemBuilder: (context, index) {
-                      final runWithStations = _filteredRuns[index];
-
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          leading: IconButton(
-                            icon: const Icon(Icons.add, color: Colors.blue),
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => LogbookEntryScreen(
-                                    prefilledRun: runWithStations,
-                                  ),
-                                ),
-                              );
-                            },
-                            tooltip: 'Log Descent',
-                          ),
-                          title: Text(
-                            runWithStations.river?.name ?? 'Unknown River',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
+              // Results section
+              Expanded(
+                child: isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 64,
+                              color: Colors.red[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Error loading runs',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
                               ),
-                              const SizedBox(height: 4),
-                              if (runWithStations.river?.region != null)
-                                Text(
-                                  runWithStations.river!.region,
-                                  style: const TextStyle(fontSize: 13),
-                                ),
-                              if (runWithStations.run.description != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  runWithStations.run.description!,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey,
-                                  ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Icon(
-                                    runWithStations.hasLiveData
-                                        ? Icons.wifi
-                                        : Icons.wifi_off,
-                                    size: 16,
-                                    color: runWithStations.hasLiveData
-                                        ? Colors.green
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    runWithStations.hasLiveData
-                                        ? 'Live data available'
-                                        : 'No live data',
-                                    style: TextStyle(
-                                      color: runWithStations.hasLiveData
-                                          ? Colors.green
-                                          : Colors.grey,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  if (runWithStations.currentDischarge !=
-                                      null) ...[
-                                    const SizedBox(width: 12),
-                                    Text(
-                                      '${runWithStations.currentDischarge!.toStringAsFixed(1)} m³/s',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ],
-                                ],
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: Colors.grey[500],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: () => riverRunProvider.loadAllRuns(),
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : _filteredRuns.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.kayaking,
+                              size: 64,
+                              color: Colors.grey[400],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              _searchController.text.isNotEmpty
+                                  ? 'No runs match your search'
+                                  : 'No river runs available',
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                            if (_searchController.text.isNotEmpty) ...[
+                              const SizedBox(height: 8),
+                              TextButton(
+                                onPressed: () {
+                                  _searchController.clear();
+                                  _filterRuns(allRuns);
+                                },
+                                child: const Text('Clear search'),
                               ),
                             ],
-                          ),
-                          trailing: Consumer<FavoritesProvider>(
-                            builder: (context, favoritesProvider, child) {
-                              final isFavorite = favoritesProvider.isFavorite(
-                                runWithStations.run.id,
-                              );
+                          ],
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _filteredRuns.length,
+                        itemBuilder: (context, index) {
+                          final runWithStations = _filteredRuns[index];
 
-                              return IconButton(
-                                icon: Icon(
-                                  isFavorite
-                                      ? Icons.favorite
-                                      : Icons.favorite_border,
-                                  color: isFavorite ? Colors.red : Colors.grey,
-                                ),
-                                onPressed: () =>
-                                    _toggleFavorite(runWithStations),
-                              );
-                            },
-                          ),
-                          onTap: () {
-                            // Navigate to the same detail screen used in favorites
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => RiverDetailScreen(
-                                  riverData: _convertRunToLegacyFormat(
-                                    runWithStations,
-                                  ),
+                          return Card(
+                            margin: const EdgeInsets.only(bottom: 8),
+                            child: ListTile(
+                              leading: IconButton(
+                                icon: const Icon(Icons.add, color: Colors.blue),
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) => LogbookEntryScreen(
+                                        prefilledRun: runWithStations,
+                                      ),
+                                    ),
+                                  );
+                                },
+                                tooltip: 'Log Descent',
+                              ),
+                              title: Text(
+                                runWithStations.river?.name ?? 'Unknown River',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(
-              builder: (context) => const CreateRiverRunScreen(),
-            ),
-          );
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${runWithStations.run.name} - ${runWithStations.run.difficultyClass}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  if (runWithStations.river?.region != null)
+                                    Text(
+                                      runWithStations.river!.region,
+                                      style: const TextStyle(fontSize: 13),
+                                    ),
+                                  if (runWithStations.run.description !=
+                                      null) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      runWithStations.run.description!,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        runWithStations.hasLiveData
+                                            ? Icons.wifi
+                                            : Icons.wifi_off,
+                                        size: 16,
+                                        color: runWithStations.hasLiveData
+                                            ? Colors.green
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        runWithStations.hasLiveData
+                                            ? 'Live data available'
+                                            : 'No live data',
+                                        style: TextStyle(
+                                          color: runWithStations.hasLiveData
+                                              ? Colors.green
+                                              : Colors.grey,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                      if (runWithStations.currentDischarge !=
+                                          null) ...[
+                                        const SizedBox(width: 12),
+                                        Text(
+                                          '${runWithStations.currentDischarge!.toStringAsFixed(1)} m³/s',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              trailing: Consumer<FavoritesProvider>(
+                                builder: (context, favoritesProvider, child) {
+                                  final isFavorite = favoritesProvider
+                                      .isFavorite(runWithStations.run.id);
 
-          // If a new run was created, refresh the data
-          if (result == true) {
-            _loadInitialData();
-          }
-        },
-        icon: const Icon(Icons.add),
-        label: const Text('Create New Run'),
-        backgroundColor: Colors.teal,
-        foregroundColor: Colors.white,
-      ),
+                                  return IconButton(
+                                    icon: Icon(
+                                      isFavorite
+                                          ? Icons.favorite
+                                          : Icons.favorite_border,
+                                      color: isFavorite
+                                          ? Colors.red
+                                          : Colors.grey,
+                                    ),
+                                    onPressed: () =>
+                                        _toggleFavorite(runWithStations),
+                                  );
+                                },
+                              ),
+                              onTap: () {
+                                // Navigate to the same detail screen used in favorites
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RiverDetailScreen(
+                                      riverData: _convertRunToLegacyFormat(
+                                        runWithStations,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (context) => const CreateRiverRunScreen(),
+                ),
+              );
+
+              // If a new run was created, refresh the data from provider
+              if (result == true) {
+                riverRunProvider.loadAllRuns();
+              }
+            },
+            icon: const Icon(Icons.add),
+            label: const Text('Create New Run'),
+            backgroundColor: Colors.teal,
+            foregroundColor: Colors.white,
+          ),
+        );
+      },
     );
   }
 }

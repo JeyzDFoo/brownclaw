@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/models.dart';
 import '../services/river_run_service.dart';
+import '../providers/river_run_provider.dart';
 
 class EditRiverRunScreen extends StatefulWidget {
   final Map<String, dynamic> riverData;
@@ -257,6 +259,76 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
         setState(() {
           _isLoading = false;
         });
+      }
+    }
+  }
+
+  Future<void> _deleteRun() async {
+    if (_riverRun == null) return;
+
+    // Show confirmation dialog
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('⚠️ Delete River Run'),
+        content: Text(
+          'Are you sure you want to delete "${_riverRun!.name}"?\n\n'
+          'This action cannot be undone. However, any logbook entries '
+          'referencing this run will be preserved.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldDelete != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Use provider to delete and update state
+      await context.read<RiverRunProvider>().deleteRiverRun(_riverRun!.id);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('River run deleted successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Pop edit screen, then pop detail screen since run no longer exists
+        Navigator.of(context).pop(true); // Return true to trigger refresh
+
+        // Close the detail screen after a brief delay
+        Future.delayed(const Duration(milliseconds: 200), () {
+          if (context.mounted) {
+            Navigator.of(context).pop();
+          }
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting run: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -538,30 +610,49 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
                     ),
                     const SizedBox(height: 32),
 
-                    // Save Button
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _saveChanges,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.teal,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
+                    // Action Buttons
+                    Row(
+                      children: [
+                        // Delete Button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _isLoading ? null : _deleteRun,
+                            icon: const Icon(Icons.delete),
+                            label: const Text('Delete Run'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.red,
+                              side: const BorderSide(color: Colors.red),
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                          ),
                         ),
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                'Save Changes',
-                                style: TextStyle(fontSize: 16),
-                              ),
-                      ),
+                        const SizedBox(width: 16),
+                        // Save Changes Button
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            onPressed: _isLoading ? null : _saveChanges,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.teal,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                            ),
+                            child: _isLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Save Changes',
+                                    style: TextStyle(fontSize: 16),
+                                  ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 16),
                   ],
