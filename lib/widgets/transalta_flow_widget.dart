@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transalta_flow_data.dart';
 import '../providers/transalta_provider.dart';
+import '../providers/premium_provider.dart';
+import '../screens/premium_purchase_screen.dart';
 
 /// Widget showing TransAlta Barrier Dam flow information
 ///
 /// Uses TransAltaProvider for centralized state management
+/// Days beyond tomorrow require premium subscription
 class TransAltaFlowWidget extends StatelessWidget {
   final double threshold;
 
@@ -13,8 +16,8 @@ class TransAltaFlowWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<TransAltaProvider>(
-      builder: (context, transAltaProvider, child) {
+    return Consumer2<TransAltaProvider, PremiumProvider>(
+      builder: (context, transAltaProvider, premiumProvider, child) {
         // Fetch data if not already loaded
         if (!transAltaProvider.hasData &&
             !transAltaProvider.isLoading &&
@@ -88,7 +91,7 @@ class TransAltaFlowWidget extends StatelessWidget {
                     ),
                   )
                 else if (transAltaProvider.hasData)
-                  _buildContent(transAltaProvider),
+                  _buildContent(transAltaProvider, premiumProvider),
               ],
             ),
           ),
@@ -97,7 +100,10 @@ class TransAltaFlowWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(TransAltaProvider provider) {
+  Widget _buildContent(
+    TransAltaProvider provider,
+    PremiumProvider premiumProvider,
+  ) {
     final flowData = provider.flowData;
     if (flowData == null) return const SizedBox();
 
@@ -114,7 +120,7 @@ class TransAltaFlowWidget extends StatelessWidget {
         const SizedBox(height: 16),
 
         // High Flow Schedule
-        _buildHighFlowSchedule(highFlowPeriods),
+        _buildHighFlowSchedule(highFlowPeriods, premiumProvider),
       ],
     );
   }
@@ -164,7 +170,10 @@ class TransAltaFlowWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildHighFlowSchedule(List<HighFlowPeriod> highFlowPeriods) {
+  Widget _buildHighFlowSchedule(
+    List<HighFlowPeriod> highFlowPeriods,
+    PremiumProvider premiumProvider,
+  ) {
     if (highFlowPeriods.isEmpty) {
       return Column(
         children: [
@@ -190,6 +199,8 @@ class TransAltaFlowWidget extends StatelessWidget {
     // Sort days
     final sortedDays = periodsByDay.keys.toList()..sort();
 
+    final isPremium = premiumProvider.isPremium;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -204,8 +215,87 @@ class TransAltaFlowWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        ...sortedDays.map((day) => _buildDayCard(day, periodsByDay[day]!)),
+        // Show Today and Tomorrow for everyone
+        ...sortedDays
+            .where((day) => day <= 1) // 0 = today, 1 = tomorrow
+            .map((day) => _buildDayCard(day, periodsByDay[day]!)),
+
+        // Show remaining days only for premium users, or paywall
+        if (sortedDays.any((day) => day > 1))
+          if (isPremium)
+            ...sortedDays
+                .where((day) => day > 1)
+                .map((day) => _buildDayCard(day, periodsByDay[day]!))
+          else
+            _buildPaywallCard(sortedDays.where((day) => day > 1).length),
       ],
+    );
+  }
+
+  Widget _buildPaywallCard(int lockedDaysCount) {
+    return Builder(
+      builder: (context) {
+        return Card(
+          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 1,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Colors.blue.withOpacity(0.1),
+                  Colors.purple.withOpacity(0.1),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  Icon(Icons.lock, size: 32, color: Colors.blue[700]),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Unlock ${lockedDaysCount > 1 ? "$lockedDaysCount More Days" : "1 More Day"}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue[900],
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'See the full 4-day forecast with Premium',
+                    style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const PremiumPurchaseScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.star),
+                    label: const Text('Upgrade to Premium'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[700],
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 
