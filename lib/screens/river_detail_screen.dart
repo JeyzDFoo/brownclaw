@@ -918,97 +918,98 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
               const SizedBox(height: 16),
 
-              // Current Conditions Card
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Current Conditions',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+              // Current Conditions Card - Hidden for Kananaskis (uses TransAlta widget instead)
+              if (!riverName.toLowerCase().contains('kananaskis'))
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Current Conditions',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      if (_isLoading)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(20.0),
-                            child: CircularProgressIndicator(
-                              color: Colors.teal,
+                        if (_isLoading)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(20.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.teal,
+                              ),
                             ),
-                          ),
-                        )
-                      else if (_error != null)
-                        Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: Colors.red[300],
-                                size: 48,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Error loading live data',
-                                style: TextStyle(color: Colors.red[600]),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _error!,
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
+                          )
+                        else if (_error != null)
+                          Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red[300],
+                                  size: 48,
                                 ),
-                                textAlign: TextAlign.center,
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Error loading live data',
+                                  style: TextStyle(color: Colors.red[600]),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _error!,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_liveData != null)
+                          Column(
+                            children: [
+                              _buildDataRow(
+                                icon: Icons.water_drop,
+                                label: 'Flow Rate',
+                                value: _liveData!.formattedFlowRate,
+                                color: Colors.blue,
+                              ),
+                              const SizedBox(height: 12),
+                              // _buildDataRow(
+                              //   icon: Icons.thermostat,
+                              //   label: 'Temperature',
+                              //   value:
+                              //       '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
+                              //   color: Colors.orange,
+                              // ),
+                              // const SizedBox(height: 12),
+                              _buildDataRow(
+                                icon: Icons.schedule,
+                                label: 'Last Updated',
+                                value: _formatDateTime(
+                                  _liveData!.timestamp.toIso8601String(),
+                                ),
+                                color: Colors.grey,
                               ),
                             ],
-                          ),
-                        )
-                      else if (_liveData != null)
-                        Column(
-                          children: [
-                            _buildDataRow(
-                              icon: Icons.water_drop,
-                              label: 'Flow Rate',
-                              value: _liveData!.formattedFlowRate,
-                              color: Colors.blue,
+                          )
+                        else
+                          const Center(
+                            child: Text(
+                              'No live data available',
+                              style: TextStyle(color: Colors.grey),
                             ),
-                            const SizedBox(height: 12),
-                            // _buildDataRow(
-                            //   icon: Icons.thermostat,
-                            //   label: 'Temperature',
-                            //   value:
-                            //       '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
-                            //   color: Colors.orange,
-                            // ),
-                            // const SizedBox(height: 12),
-                            _buildDataRow(
-                              icon: Icons.schedule,
-                              label: 'Last Updated',
-                              value: _formatDateTime(
-                                _liveData!.timestamp.toIso8601String(),
-                              ),
-                              color: Colors.grey,
-                            ),
-                          ],
-                        )
-                      else
-                        const Center(
-                          child: Text(
-                            'No live data available',
-                            style: TextStyle(color: Colors.grey),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+              if (!riverName.toLowerCase().contains('kananaskis'))
+                const SizedBox(height: 16),
 
               // TransAlta Flow Widget - Special case for Kananaskis River
               if (riverName.toLowerCase().contains('kananaskis'))
@@ -1017,290 +1018,290 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               if (riverName.toLowerCase().contains('kananaskis'))
                 const SizedBox(height: 16),
 
-              // Historical Discharge Chart Card
-              Card(
-                key: ValueKey('chart_card_${widget.riverData['stationId']}'),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Real-time Discharge History',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+              // Historical Discharge Chart Card - Hidden for Kananaskis (uses TransAlta widget instead)
+              if (!riverName.toLowerCase().contains('kananaskis'))
+                Card(
+                  key: ValueKey('chart_card_${widget.riverData['stationId']}'),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Real-time Discharge History',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const SizedBox(height: 16),
+                        const SizedBox(height: 16),
 
-                      if (_isLoadingChart)
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(40.0),
-                            child: CircularProgressIndicator(
-                              color: Colors.teal,
+                        if (_isLoadingChart)
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: CircularProgressIndicator(
+                                color: Colors.teal,
+                              ),
                             ),
-                          ),
-                        )
-                      else if (_chartError != null)
-                        Center(
-                          child: Column(
-                            children: [
-                              Icon(
-                                Icons.error_outline,
-                                color: Colors.red[300],
-                                size: 48,
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                'Real historical data unavailable',
-                                style: TextStyle(color: Colors.red[600]),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Unable to fetch government historical data for this station',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
+                          )
+                        else if (_chartError != null)
+                          Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red[300],
+                                  size: 48,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ),
-                        )
-                      else if (_historicalData.isNotEmpty)
-                        SizedBox(
-                          height: 200,
-                          child: LineChart(
-                            key: ValueKey(
-                              'chart_${widget.riverData['stationId']}',
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Real historical data unavailable',
+                                  style: TextStyle(color: Colors.red[600]),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Unable to fetch government historical data for this station',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
                             ),
-                            LineChartData(
-                              gridData: FlGridData(
-                                show: true,
-                                drawHorizontalLine: true,
-                                drawVerticalLine: false,
-                                horizontalInterval: _historicalData.isNotEmpty
+                          )
+                        else if (_historicalData.isNotEmpty)
+                          SizedBox(
+                            height: 200,
+                            child: LineChart(
+                              key: ValueKey(
+                                'chart_${widget.riverData['stationId']}',
+                              ),
+                              LineChartData(
+                                gridData: FlGridData(
+                                  show: true,
+                                  drawHorizontalLine: true,
+                                  drawVerticalLine: false,
+                                  horizontalInterval: _historicalData.isNotEmpty
+                                      ? (_historicalData
+                                                    .map((e) => e.y)
+                                                    .reduce(
+                                                      (a, b) => a > b ? a : b,
+                                                    ) /
+                                                6)
+                                            .clamp(2.0, 20.0)
+                                      : 10,
+                                  getDrawingHorizontalLine: (value) {
+                                    return FlLine(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      strokeWidth: 1,
+                                    );
+                                  },
+                                ),
+                                titlesData: FlTitlesData(
+                                  leftTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 50,
+                                      getTitlesWidget: (value, meta) {
+                                        return Text(
+                                          '${value.toInt()}',
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                            fontSize: 12,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  bottomTitles: AxisTitles(
+                                    sideTitles: SideTitles(
+                                      showTitles: true,
+                                      reservedSize: 50,
+                                      interval: _historicalData.isNotEmpty
+                                          ? (_historicalData.last.x -
+                                                    _historicalData.first.x) /
+                                                4
+                                          : null,
+                                      getTitlesWidget: (value, meta) {
+                                        final dateTime =
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              value.toInt(),
+                                            );
+
+                                        // Show actual date in MM/DD format
+                                        final dateStr =
+                                            '${dateTime.month.toString().padLeft(2, '0')}/${dateTime.day.toString().padLeft(2, '0')}';
+
+                                        return Transform.rotate(
+                                          angle:
+                                              -0.5, // Slight angle to fit better
+                                          child: Text(
+                                            dateStr,
+                                            style: const TextStyle(
+                                              color: Colors.grey,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                  topTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                  rightTitles: const AxisTitles(
+                                    sideTitles: SideTitles(showTitles: false),
+                                  ),
+                                ),
+                                borderData: FlBorderData(
+                                  show: true,
+                                  border: Border.all(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    width: 1,
+                                  ),
+                                ),
+                                lineTouchData: LineTouchData(
+                                  enabled: true,
+                                  touchTooltipData: LineTouchTooltipData(
+                                    getTooltipItems: (touchedSpots) {
+                                      return touchedSpots.map((touchedSpot) {
+                                        final dateTime =
+                                            DateTime.fromMillisecondsSinceEpoch(
+                                              touchedSpot.x.toInt(),
+                                            );
+                                        final flow = touchedSpot.y;
+
+                                        // Format date as "Oct 15, 2025"
+                                        final months = [
+                                          'Jan',
+                                          'Feb',
+                                          'Mar',
+                                          'Apr',
+                                          'May',
+                                          'Jun',
+                                          'Jul',
+                                          'Aug',
+                                          'Sep',
+                                          'Oct',
+                                          'Nov',
+                                          'Dec',
+                                        ];
+                                        final formattedDate =
+                                            '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
+
+                                        return LineTooltipItem(
+                                          '$formattedDate\n${flow.toStringAsFixed(1)} cms',
+                                          const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
+                                        );
+                                      }).toList();
+                                    },
+                                  ),
+                                  touchCallback:
+                                      (
+                                        FlTouchEvent event,
+                                        LineTouchResponse? touchResponse,
+                                      ) {
+                                        // Optional: Add haptic feedback on touch
+                                        // HapticFeedback.lightImpact();
+                                      },
+                                  handleBuiltInTouches: true,
+                                ),
+                                lineBarsData: [
+                                  LineChartBarData(
+                                    spots: _historicalData,
+                                    isCurved: true,
+                                    color: Colors.teal,
+                                    barWidth: 3,
+                                    isStrokeCapRound: true,
+                                    belowBarData: BarAreaData(
+                                      show: true,
+                                      color: Colors.teal.withOpacity(0.1),
+                                    ),
+                                    dotData: FlDotData(
+                                      show: false,
+                                      getDotPainter:
+                                          (spot, percent, barData, index) {
+                                            return FlDotCirclePainter(
+                                              radius: 4,
+                                              color: Colors.white,
+                                              strokeWidth: 2,
+                                              strokeColor: Colors.teal,
+                                            );
+                                          },
+                                    ),
+                                  ),
+                                ],
+                                minY: _historicalData.isNotEmpty
                                     ? (_historicalData
                                                   .map((e) => e.y)
                                                   .reduce(
-                                                    (a, b) => a > b ? a : b,
-                                                  ) /
-                                              6)
-                                          .clamp(2.0, 20.0)
-                                    : 10,
-                                getDrawingHorizontalLine: (value) {
-                                  return FlLine(
-                                    color: Colors.grey.withOpacity(0.3),
-                                    strokeWidth: 1,
-                                  );
-                                },
+                                                    (a, b) => a < b ? a : b,
+                                                  ) *
+                                              0.8)
+                                          .clamp(0, double.infinity)
+                                    : 0,
+                                maxY: _historicalData.isNotEmpty
+                                    ? _historicalData
+                                              .map((e) => e.y)
+                                              .reduce((a, b) => a > b ? a : b) *
+                                          1.3
+                                    : 80,
                               ),
-                              titlesData: FlTitlesData(
-                                leftTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 50,
-                                    getTitlesWidget: (value, meta) {
-                                      return Text(
-                                        '${value.toInt()}',
-                                        style: const TextStyle(
-                                          color: Colors.grey,
-                                          fontSize: 12,
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                bottomTitles: AxisTitles(
-                                  sideTitles: SideTitles(
-                                    showTitles: true,
-                                    reservedSize: 50,
-                                    interval: _historicalData.isNotEmpty
-                                        ? (_historicalData.last.x -
-                                                  _historicalData.first.x) /
-                                              4
-                                        : null,
-                                    getTitlesWidget: (value, meta) {
-                                      final dateTime =
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                            value.toInt(),
-                                          );
-
-                                      // Show actual date in MM/DD format
-                                      final dateStr =
-                                          '${dateTime.month.toString().padLeft(2, '0')}/${dateTime.day.toString().padLeft(2, '0')}';
-
-                                      return Transform.rotate(
-                                        angle:
-                                            -0.5, // Slight angle to fit better
-                                        child: Text(
-                                          dateStr,
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 10,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                topTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
-                                rightTitles: const AxisTitles(
-                                  sideTitles: SideTitles(showTitles: false),
-                                ),
+                            ),
+                          )
+                        else
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(40.0),
+                              child: Text(
+                                'No historical data available',
+                                style: TextStyle(color: Colors.grey),
                               ),
-                              borderData: FlBorderData(
-                                show: true,
-                                border: Border.all(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  width: 1,
-                                ),
-                              ),
-                              lineTouchData: LineTouchData(
-                                enabled: true,
-                                touchTooltipData: LineTouchTooltipData(
-                                  getTooltipItems: (touchedSpots) {
-                                    return touchedSpots.map((touchedSpot) {
-                                      final dateTime =
-                                          DateTime.fromMillisecondsSinceEpoch(
-                                            touchedSpot.x.toInt(),
-                                          );
-                                      final flow = touchedSpot.y;
+                            ),
+                          ),
 
-                                      // Format date as "Oct 15, 2025"
-                                      final months = [
-                                        'Jan',
-                                        'Feb',
-                                        'Mar',
-                                        'Apr',
-                                        'May',
-                                        'Jun',
-                                        'Jul',
-                                        'Aug',
-                                        'Sep',
-                                        'Oct',
-                                        'Nov',
-                                        'Dec',
-                                      ];
-                                      final formattedDate =
-                                          '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
-
-                                      return LineTooltipItem(
-                                        '$formattedDate\n${flow.toStringAsFixed(1)} cms',
-                                        const TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                        ),
-                                      );
-                                    }).toList();
-                                  },
+                        if (_historicalData.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.info_outline,
+                                  size: 16,
+                                  color: Colors.grey[600],
                                 ),
-                                touchCallback:
-                                    (
-                                      FlTouchEvent event,
-                                      LineTouchResponse? touchResponse,
-                                    ) {
-                                      // Optional: Add haptic feedback on touch
-                                      // HapticFeedback.lightImpact();
-                                    },
-                                handleBuiltInTouches: true,
-                              ),
-                              lineBarsData: [
-                                LineChartBarData(
-                                  spots: _historicalData,
-                                  isCurved: true,
-                                  color: Colors.teal,
-                                  barWidth: 3,
-                                  isStrokeCapRound: true,
-                                  belowBarData: BarAreaData(
-                                    show: true,
-                                    color: Colors.teal.withOpacity(0.1),
-                                  ),
-                                  dotData: FlDotData(
-                                    show: false,
-                                    getDotPainter:
-                                        (spot, percent, barData, index) {
-                                          return FlDotCirclePainter(
-                                            radius: 4,
-                                            color: Colors.white,
-                                            strokeWidth: 2,
-                                            strokeColor: Colors.teal,
-                                          );
-                                        },
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Discharge in cms',
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 12,
                                   ),
                                 ),
                               ],
-                              minY: _historicalData.isNotEmpty
-                                  ? (_historicalData
-                                                .map((e) => e.y)
-                                                .reduce(
-                                                  (a, b) => a < b ? a : b,
-                                                ) *
-                                            0.8)
-                                        .clamp(0, double.infinity)
-                                  : 0,
-                              maxY: _historicalData.isNotEmpty
-                                  ? _historicalData
-                                            .map((e) => e.y)
-                                            .reduce((a, b) => a > b ? a : b) *
-                                        1.3
-                                  : 80,
                             ),
                           ),
-                        )
-                      else
-                        const Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(40.0),
-                            child: Text(
-                              'No historical data available',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                        ),
 
-                      if (_historicalData.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.info_outline,
-                                size: 16,
-                                color: Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Discharge in cms',
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Day range selector
+                        const SizedBox(height: 16),
+                        _buildDayRangeSelector(),
 
-                      // Day range selector
-                      const SizedBox(height: 16),
-                      _buildDayRangeSelector(),
+                        // Flow statistics section
+                        const SizedBox(height: 16),
+                        _buildFlowStatistics(),
 
-                      // Flow statistics section
-                      const SizedBox(height: 16),
-                      _buildFlowStatistics(),
-
-                      // Recent trend section
-                      const SizedBox(height: 16),
-                      _buildRecentTrend(),
-                    ],
+                        // Recent trend section
+                        const SizedBox(height: 16),
+                        _buildRecentTrend(),
+                      ],
+                    ),
                   ),
                 ),
-              ),
 
               const SizedBox(height: 32),
             ],
