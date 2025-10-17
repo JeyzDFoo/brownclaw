@@ -8,7 +8,9 @@ import '../services/river_run_service.dart';
 import '../services/historical_water_data_service.dart';
 
 class LogbookEntryScreen extends StatefulWidget {
-  const LogbookEntryScreen({super.key});
+  final RiverRunWithStations? prefilledRun;
+
+  const LogbookEntryScreen({super.key, this.prefilledRun});
 
   @override
   State<LogbookEntryScreen> createState() => _LogbookEntryScreenState();
@@ -37,6 +39,24 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
   bool _isSearchingRivers = false;
   bool _isSearchingRuns = false;
   bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Pre-fill with data if provided
+    if (widget.prefilledRun != null) {
+      _selectedRiver = widget.prefilledRun!.river;
+      _selectedRun = widget.prefilledRun!.run;
+      if (_selectedRiver != null) {
+        _riverSearchController.text = _selectedRiver!.name;
+      }
+      if (_selectedRun != null) {
+        _runSearchController.text = _selectedRun!.name;
+        // Fetch water level data for the prefilled run
+        _fetchWaterLevelForDate();
+      }
+    }
+  }
 
   @override
   void dispose() {

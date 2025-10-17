@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/river_run_service.dart';
 import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
+import 'logbook_entry_screen.dart';
 
 class RiverLevelsScreen extends StatefulWidget {
   const RiverLevelsScreen({super.key});
@@ -259,312 +259,6 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
         );
       }
     }
-  }
-
-  Future<void> _showLogDescentDialog(Map<String, dynamic> river) async {
-    final riverName = river['riverName'] as String? ?? 'Unknown River';
-    final sectionData = river['section'];
-    final sectionName = sectionData is Map
-        ? (sectionData['name'] as String? ?? '')
-        : (sectionData as String? ?? '');
-    final sectionClass = sectionData is Map
-        ? (sectionData['class'] as String? ?? 'Class II')
-        : (river['difficulty'] as String? ?? 'Class II');
-    final currentFlowRate = river['flowRate'] as double?;
-
-    final riverNameController = TextEditingController(text: riverName);
-    final sectionController = TextEditingController(text: sectionName);
-    final notesController = TextEditingController();
-    final waterLevelController = TextEditingController(
-      text: currentFlowRate != null
-          ? '${currentFlowRate.toStringAsFixed(1)} m³/s'
-          : '',
-    );
-
-    // Ensure selectedDifficulty is one of the valid dropdown values
-    final validDifficulties = [
-      'Class I',
-      'Class II',
-      'Class III',
-      'Class IV',
-      'Class V',
-      'Class VI',
-    ];
-    String selectedDifficulty = validDifficulties.contains(sectionClass)
-        ? sectionClass
-        : 'Class II';
-
-    List<String> existingSections = [];
-    bool isLoadingSections = true;
-    String? selectedSection;
-
-    // Load existing sections for this river
-    try {
-      final sectionsQuery = await FirebaseFirestore.instance
-          .collection('river_descents')
-          .where('riverName', isEqualTo: riverName)
-          .get();
-
-      final sections = sectionsQuery.docs
-          .map((doc) {
-            final sectionData = doc.data()['section'];
-            if (sectionData is Map) {
-              return sectionData['name'] as String?;
-            } else {
-              return sectionData as String?;
-            }
-          })
-          .where((section) => section != null && section.isNotEmpty)
-          .cast<String>()
-          .toSet()
-          .toList();
-
-      existingSections = sections..sort();
-      isLoadingSections = false;
-
-      // Pre-select section if it exists in the list
-      if (sectionName.isNotEmpty && existingSections.contains(sectionName)) {
-        selectedSection = sectionName;
-        sectionController.text = sectionName;
-      }
-    } catch (e) {
-      isLoadingSections = false;
-    }
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) => AlertDialog(
-          title: const Text('Log River Descent'),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: riverNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'River Name',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.water),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                // Section selector with dropdown and custom input
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (isLoadingSections)
-                      const Row(
-                        children: [
-                          SizedBox(
-                            height: 16,
-                            width: 16,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          ),
-                          SizedBox(width: 8),
-                          Text('Loading sections...'),
-                        ],
-                      )
-                    else if (existingSections.isNotEmpty) ...[
-                      DropdownButtonFormField<String?>(
-                        value: selectedSection,
-                        decoration: const InputDecoration(
-                          labelText: 'Select Existing Section',
-                          border: OutlineInputBorder(),
-                          prefixIcon: Icon(Icons.list),
-                        ),
-                        items: [
-                          const DropdownMenuItem<String?>(
-                            value: null,
-                            child: Text('Select a section...'),
-                          ),
-                          ...existingSections.map(
-                            (section) => DropdownMenuItem(
-                              value: section,
-                              child: Text(section),
-                            ),
-                          ),
-                        ],
-                        onChanged: (value) {
-                          setState(() {
-                            selectedSection = value;
-                            if (value != null) {
-                              sectionController.text = value;
-                            }
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      const Center(
-                        child: Text(
-                          'OR',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                    ],
-                    TextField(
-                      controller: sectionController,
-                      decoration: InputDecoration(
-                        labelText: existingSections.isNotEmpty
-                            ? 'Add New Section/Run'
-                            : 'Section/Run',
-                        hintText:
-                            'e.g., Upper Canyon, Lower Falls, Put-in to Take-out',
-                        border: const OutlineInputBorder(),
-                        prefixIcon: const Icon(Icons.location_on),
-                      ),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedSection =
-                              null; // Clear dropdown selection when typing
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: selectedDifficulty,
-                  decoration: const InputDecoration(
-                    labelText: 'Difficulty Class',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.trending_up),
-                  ),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'Class I',
-                      child: Text('Class I - Easy'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Class II',
-                      child: Text('Class II - Novice'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Class III',
-                      child: Text('Class III - Intermediate'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Class IV',
-                      child: Text('Class IV - Advanced'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Class V',
-                      child: Text('Class V - Expert'),
-                    ),
-                    DropdownMenuItem(
-                      value: 'Class VI',
-                      child: Text('Class VI - Extreme'),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    setState(() {
-                      selectedDifficulty = value!;
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: waterLevelController,
-                  decoration: const InputDecoration(
-                    labelText: 'Water Level',
-                    hintText: 'e.g., 2.5 ft, Medium, High',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.height),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes',
-                    hintText: 'How was your run? Any highlights or tips?',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.notes),
-                  ),
-                  maxLines: 3,
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (riverNameController.text.trim().isEmpty ||
-                    sectionController.text.trim().isEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please fill in river name and section'),
-                    ),
-                  );
-                  return;
-                }
-
-                final user = context.read<UserProvider>().user;
-                if (user == null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Please sign in to log descents'),
-                    ),
-                  );
-                  return;
-                }
-
-                try {
-                  await FirebaseFirestore.instance
-                      .collection('river_descents')
-                      .add({
-                        'riverName': riverNameController.text.trim(),
-                        'section': {
-                          'name': sectionController.text.trim(),
-                          'class': selectedDifficulty,
-                        },
-                        'difficulty': selectedDifficulty,
-                        'waterLevel': waterLevelController.text.trim(),
-                        'notes': notesController.text.trim(),
-                        'userId': user.uid,
-                        'userEmail': user.email,
-                        'userName':
-                            user.displayName ??
-                            user.email?.split('@')[0] ??
-                            'Kayaker',
-                        'timestamp': FieldValue.serverTimestamp(),
-                        'date': DateTime.now().toIso8601String().split('T')[0],
-                      });
-
-                  if (mounted) {
-                    Navigator.of(context).pop();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('River descent logged successfully!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Error logging descent: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                }
-              },
-              child: const Text('Log Descent'),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   @override
@@ -875,13 +569,17 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
                                             Icons.add,
                                             color: Colors.blue,
                                           ),
-                                          onPressed: () =>
-                                              _showLogDescentDialog(
-                                                _convertRunToLegacyFormat(
-                                                  currentRunWithStations,
-                                                  liveData,
-                                                ),
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LogbookEntryScreen(
+                                                      prefilledRun:
+                                                          currentRunWithStations,
+                                                    ),
                                               ),
+                                            );
+                                          },
                                           tooltip: 'Log Descent',
                                         ),
                                         title: Text(
