@@ -128,6 +128,20 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                 // Header Section with Key Stats
                                 Row(
                                   children: [
+                                    // Rating Emoji as leading icon
+                                    if (data['rating'] != null &&
+                                        data['rating'] > 0)
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 12,
+                                        ),
+                                        child: Text(
+                                          _getRatingEmoji(
+                                            (data['rating'] as num).toDouble(),
+                                          ),
+                                          style: const TextStyle(fontSize: 32),
+                                        ),
+                                      ),
                                     // Primary Info
                                     Expanded(
                                       child: Column(
@@ -264,49 +278,6 @@ class _LogBookScreenState extends State<LogBookScreen> {
                                       ),
                                   ],
                                 ),
-
-                                // Rating Display
-                                if (data['rating'] != null &&
-                                    data['rating'] > 0)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 12),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.teal.withOpacity(0.08),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            _getRatingEmoji(
-                                              (data['rating'] as num)
-                                                  .toDouble(),
-                                            ),
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            _getRatingText(
-                                              (data['rating'] as num)
-                                                  .toDouble(),
-                                            ),
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                              color: Colors.teal[700],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
 
                                 // Visual Separator
                                 if (data['notes']?.toString().isNotEmpty ==
@@ -479,12 +450,5 @@ class _LogBookScreenState extends State<LogBookScreen> {
     if (rating == 2.0) return '😐';
     if (rating == 3.0) return '😊';
     return '😐'; // Default
-  }
-
-  String _getRatingText(double rating) {
-    if (rating == 1.0) return 'Poor';
-    if (rating == 2.0) return 'Okay';
-    if (rating == 3.0) return 'Great';
-    return 'Rated';
   }
 }
