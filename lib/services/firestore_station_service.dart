@@ -96,14 +96,19 @@ class FirestoreStationService {
   // Singleton pattern to prevent multiple instances
   static FirestoreStationService? _instance;
 
-  // #todo: Add static caching for station data to reduce Firestore reads
-  // static final Map<String, List<StationModel>> _provinceCache = {};
-  // static final Map<String, StationModel> _stationCache = {};
-  // static DateTime? _lastCacheUpdate;
-  // static const Duration _cacheTimeout = Duration(hours: 1); // Stations don't change often
+  // Static caching for station data to reduce Firestore reads
+  static final Map<String, List<StationModel>> _provinceCache = {};
+  static final Map<String, StationModel> _stationCache = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
+  static final Map<String, DateTime> _stationCacheTimestamps = {};
+  static final Map<String, Future<List<StationModel>>> _activeQueries = {};
+  static const Duration cacheValidityDuration = Duration(
+    hours: 1,
+  ); // Stations don't change often
 
-  // #todo: Add pagination support for large station lists
-  // static const int _defaultPageSize = 50;
+  // Pagination support for large station lists
+  static const int defaultPageSize = 50;
+  static const int maxPageSize = 100;
 
   FirestoreStationService._internal();
 
@@ -112,11 +117,27 @@ class FirestoreStationService {
     return _instance!;
   }
 
-  // Cache for province data to avoid repeated queries
-  static final Map<String, List<StationModel>> _provinceCache = {};
-  static final Map<String, DateTime> _cacheTimestamps = {};
-  static final Map<String, Future<List<StationModel>>> _activeQueries = {};
-  static const Duration cacheValidityDuration = Duration(minutes: 10);
+  /// Check if cache entry is valid
+  static bool _isCacheValid(String key, Map<String, DateTime> timestamps) {
+    if (!timestamps.containsKey(key)) return false;
+    final age = DateTime.now().difference(timestamps[key]!);
+    return age < cacheValidityDuration;
+  }
+
+  /// Get station from individual station cache
+  static StationModel? _getStationFromCache(String stationId) {
+    if (_stationCache.containsKey(stationId) &&
+        _isCacheValid(stationId, _stationCacheTimestamps)) {
+      return _stationCache[stationId];
+    }
+    return null;
+  }
+
+  /// Add station to individual station cache
+  static void _addStationToCache(String stationId, StationModel station) {
+    _stationCache[stationId] = station;
+    _stationCacheTimestamps[stationId] = DateTime.now();
+  }
 
   /// Search stations by name with text matching (AB and BC only)
   Future<List<StationModel>> searchStationsByName(String query) async {
@@ -167,17 +188,34 @@ class FirestoreStationService {
     }
   }
 
-  /// Get all stations (AB and BC only, with optional limit)
-  Future<List<StationModel>> getAllStations({int? limit}) async {
+  /// Get all stations (AB and BC only, with optional limit and pagination)
+  Future<List<StationModel>> getAllStations({int? limit, int page = 1}) async {
     try {
-      // #todo: Check cache first to avoid redundant Firestore reads
-      // if (_isCacheValid() && _provinceCache.containsKey('ALL')) {
-      //   var cached = _provinceCache['ALL']!;
-      //   return limit != null ? cached.take(limit).toList() : cached;
-      // }
+      // Validate pagination parameters
+      final effectiveLimit = limit ?? defaultPageSize;
+      final safeLimit = effectiveLimit.clamp(1, maxPageSize);
+      final safePage = page.clamp(1, 999);
+
+      // Check cache first to avoid redundant Firestore reads
+      const cacheKey = 'ALL';
+      if (_isCacheValid(cacheKey, _cacheTimestamps) &&
+          _provinceCache.containsKey(cacheKey)) {
+        final cached = _provinceCache[cacheKey]!;
+
+        // Apply pagination to cached results
+        final startIndex = (safePage - 1) * safeLimit;
+        if (startIndex >= cached.length) {
+          return []; // Page beyond available data
+        }
+
+        final endIndex = (startIndex + safeLimit).clamp(0, cached.length);
+        return cached.sublist(startIndex, endIndex);
+      }
 
       if (kDebugMode) {
-        print('Getting all stations for AB and BC provinces');
+        print(
+          'Getting all stations for AB and BC provinces (page: $safePage, limit: $safeLimit)',
+        );
       }
 
       // Fetch provinces individually with error handling for each
@@ -203,9 +241,14 @@ class FirestoreStationService {
       // Combine stations
       final allStations = [...albertaStations, ...bcStations];
 
-      // #todo: Cache the combined results for future use
-      // _provinceCache['ALL'] = allStations;
-      // _lastCacheUpdate = DateTime.now();
+      // Cache the combined results for future use
+      _provinceCache[cacheKey] = allStations;
+      _cacheTimestamps[cacheKey] = DateTime.now();
+
+      // Also cache individual stations
+      for (final station in allStations) {
+        _addStationToCache(station.id, station);
+      }
 
       if (kDebugMode) {
         print(
@@ -213,12 +256,14 @@ class FirestoreStationService {
         );
       }
 
-      // Apply limit if specified
-      if (limit != null && allStations.length > limit) {
-        return allStations.take(limit).toList();
+      // Apply pagination
+      final startIndex = (safePage - 1) * safeLimit;
+      if (startIndex >= allStations.length) {
+        return []; // Page beyond available data
       }
 
-      return allStations;
+      final endIndex = (startIndex + safeLimit).clamp(0, allStations.length);
+      return allStations.sublist(startIndex, endIndex);
     } catch (e) {
       if (kDebugMode) {
         print('Error getting all stations: $e');
@@ -227,10 +272,67 @@ class FirestoreStationService {
     }
   }
 
+  /// Batch get stations by IDs (optimized for multiple lookups)
+  Future<List<StationModel>> getStationsBatch(List<String> stationIds) async {
+    if (stationIds.isEmpty) return [];
+
+    try {
+      final results = <StationModel>[];
+      final uncachedIds = <String>[];
+
+      // Check cache first
+      for (final stationId in stationIds) {
+        final cached = _getStationFromCache(stationId);
+        if (cached != null) {
+          results.add(cached);
+        } else {
+          uncachedIds.add(stationId);
+        }
+      }
+
+      if (uncachedIds.isEmpty) {
+        if (kDebugMode) {
+          print('All ${stationIds.length} stations found in cache');
+        }
+        return results;
+      }
+
+      // Fetch uncached stations in batches (Firestore limit is 10 for whereIn)
+      for (int i = 0; i < uncachedIds.length; i += 10) {
+        final batchIds = uncachedIds.skip(i).take(10).toList();
+        final snapshot = await _firestore
+            .collection(collectionName)
+            .where(FieldPath.documentId, whereIn: batchIds)
+            .get();
+
+        for (final doc in snapshot.docs) {
+          final station = StationModel.fromFirestore(doc);
+          results.add(station);
+          _addStationToCache(doc.id, station);
+        }
+      }
+
+      if (kDebugMode) {
+        print(
+          'Batch fetched ${results.length} stations (${uncachedIds.length} from Firestore, ${stationIds.length - uncachedIds.length} from cache)',
+        );
+      }
+
+      return results;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error in batch get stations: $e');
+      }
+      return [];
+    }
+  }
+
   /// Clear the cache (useful for refresh functionality)
   void clearCache() {
     _provinceCache.clear();
+    _stationCache.clear();
     _cacheTimestamps.clear();
+    _stationCacheTimestamps.clear();
     _activeQueries.clear();
     if (kDebugMode) {
       print('Station cache cleared');

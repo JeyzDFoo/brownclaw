@@ -39,7 +39,8 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // #todo: Add caching provider for shared data management
+        // Caching provider - foundation for all data caching
+        ChangeNotifierProvider(create: (_) => CacheProvider()),
         // #todo: Consider adding StationProvider for centralized station data
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => RiverRunProvider()),

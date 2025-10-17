@@ -10,14 +10,37 @@ class UserFavoritesService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // #todo: Add local caching to reduce Firestore reads for favorites
-  // static Map<String, List<String>>? _cachedFavoriteRunIds;
-  // static String? _cachedUserId;
-  // static DateTime? _lastCacheUpdate;
-  // static const Duration _cacheTimeout = Duration(minutes: 10);
+  // Local caching to reduce Firestore reads for favorites
+  static final Map<String, List<String>> _cachedFavoriteRunIds = {};
+  static final Map<String, DateTime> _cacheTimestamps = {};
+  static const Duration _cacheTimeout = Duration(minutes: 10);
 
-  // #todo: Add offline support for favorites
-  // static bool _isOffline = false;
+  // Cache for favorite runs with details
+  static final Map<String, List<RiverRun>> _cachedFavoriteRuns = {};
+  static final Map<String, DateTime> _runsCacheTimestamps = {};
+
+  // Offline support for favorites
+  static bool _isOffline = false;
+
+  /// Check if cache is valid for a given user
+  static bool _isCacheValid(String userId, Map<String, DateTime> timestamps) {
+    if (!timestamps.containsKey(userId)) return false;
+    final age = DateTime.now().difference(timestamps[userId]!);
+    return age < _cacheTimeout;
+  }
+
+  /// Clear all caches
+  static void clearCache() {
+    _cachedFavoriteRunIds.clear();
+    _cacheTimestamps.clear();
+    _cachedFavoriteRuns.clear();
+    _runsCacheTimestamps.clear();
+  }
+
+  /// Set offline mode
+  static void setOfflineMode(bool offline) {
+    _isOffline = offline;
+  }
 
   // Collection reference
   static CollectionReference get _favoritesCollection =>
@@ -28,10 +51,24 @@ class UserFavoritesService {
     final user = _auth.currentUser;
     if (user == null) return Stream.value([]);
 
-    // #todo: Check cache first to reduce Firestore reads
-    // if (_cachedUserId == user.uid && _isCacheValid()) {
-    //   return Stream.value(_cachedFavoriteRunIds![user.uid] ?? []);
-    // }
+    // Check cache first to reduce Firestore reads
+    if (_cachedFavoriteRunIds.containsKey(user.uid) &&
+        _isCacheValid(user.uid, _cacheTimestamps)) {
+      // Return cached data as stream, but also listen for updates
+      if (!_isOffline) {
+        // Start listening for updates in background
+        _favoritesCollection.doc(user.uid).snapshots().listen((doc) {
+          if (doc.exists) {
+            final data = doc.data() as Map<String, dynamic>?;
+            final favoriteRuns = data?['riverRuns'] as List?;
+            final result = favoriteRuns?.cast<String>() ?? <String>[];
+            _cachedFavoriteRunIds[user.uid] = result;
+            _cacheTimestamps[user.uid] = DateTime.now();
+          }
+        });
+      }
+      return Stream.value(_cachedFavoriteRunIds[user.uid]!);
+    }
 
     return _favoritesCollection.doc(user.uid).snapshots().map((doc) {
       if (!doc.exists) return <String>[];
@@ -39,10 +76,9 @@ class UserFavoritesService {
       final favoriteRuns = data?['riverRuns'] as List?;
       final result = favoriteRuns?.cast<String>() ?? <String>[];
 
-      // #todo: Cache the result for future use
-      // _cachedFavoriteRunIds = {user.uid: result};
-      // _cachedUserId = user.uid;
-      // _lastCacheUpdate = DateTime.now();
+      // Cache the result for future use
+      _cachedFavoriteRunIds[user.uid] = result;
+      _cacheTimestamps[user.uid] = DateTime.now();
 
       return result;
     });
@@ -53,15 +89,13 @@ class UserFavoritesService {
     return getUserFavoriteRunIds().asyncMap((runIds) async {
       if (runIds.isEmpty) return <String>[];
 
-      // #todo: This makes individual Firestore calls for each run
-      // Consider batching these reads or caching run data
-      final stationIds = <String>[];
-      for (final runId in runIds) {
-        final run = await RiverRunService.getRunById(runId);
-        if (run?.stationId != null) {
-          stationIds.add(run!.stationId!);
-        }
-      }
+      // Use batch operations instead of individual Firestore calls
+      final runs = await RiverRunService.getRunsBatch(runIds);
+      final stationIds = runs
+          .where((run) => run.stationId != null)
+          .map((run) => run.stationId!)
+          .toList();
+
       return stationIds;
     });
   }
@@ -71,13 +105,24 @@ class UserFavoritesService {
     return getUserFavoriteRunIds().asyncMap((runIds) async {
       if (runIds.isEmpty) return <RiverRun>[];
 
-      final runs = <RiverRun>[];
-      for (final runId in runIds) {
-        final run = await RiverRunService.getRunById(runId);
-        if (run != null) {
-          runs.add(run);
+      final user = _auth.currentUser;
+      if (user != null) {
+        // Check cache first
+        if (_cachedFavoriteRuns.containsKey(user.uid) &&
+            _isCacheValid(user.uid, _runsCacheTimestamps)) {
+          return _cachedFavoriteRuns[user.uid]!;
         }
       }
+
+      // Use batch operations instead of individual calls
+      final runs = await RiverRunService.getRunsBatch(runIds);
+
+      // Cache the results
+      if (user != null) {
+        _cachedFavoriteRuns[user.uid] = runs;
+        _runsCacheTimestamps[user.uid] = DateTime.now();
+      }
+
       return runs;
     });
   }
@@ -109,21 +154,34 @@ class UserFavoritesService {
     }
 
     try {
-      // #todo: Implement optimistic updates - update cache immediately
-      // then sync to Firestore, rollback on failure
+      // Implement optimistic updates - update cache immediately
+      final currentFavorites = _cachedFavoriteRunIds[user.uid] ?? [];
+      if (!currentFavorites.contains(runId)) {
+        _cachedFavoriteRunIds[user.uid] = [...currentFavorites, runId];
+        _cacheTimestamps[user.uid] = DateTime.now();
+      }
 
+      // Clear runs cache since it will be stale
+      _cachedFavoriteRuns.remove(user.uid);
+      _runsCacheTimestamps.remove(user.uid);
+
+      // Then sync to Firestore
       await _favoritesCollection.doc(user.uid).set({
         'riverRuns': FieldValue.arrayUnion([runId]),
         'lastUpdated': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      // #todo: Update cache after successful Firestore write
-      // _updateCacheAfterAdd(user.uid, runId);
-
       if (kDebugMode) {
         print('✅ Successfully added run $runId to favorites');
       }
     } catch (e) {
+      // Rollback on failure
+      if (_cachedFavoriteRunIds.containsKey(user.uid)) {
+        _cachedFavoriteRunIds[user.uid] = _cachedFavoriteRunIds[user.uid]!
+            .where((id) => id != runId)
+            .toList();
+      }
+
       if (kDebugMode) {
         print('❌ Error adding favorite run: $e');
       }
@@ -138,7 +196,22 @@ class UserFavoritesService {
       throw Exception('User must be authenticated to manage favorites');
     }
 
+    // Store original state for rollback
+    final originalFavorites = _cachedFavoriteRunIds[user.uid];
+
     try {
+      // Optimistic update - remove from cache immediately
+      if (_cachedFavoriteRunIds.containsKey(user.uid)) {
+        _cachedFavoriteRunIds[user.uid] = _cachedFavoriteRunIds[user.uid]!
+            .where((id) => id != runId)
+            .toList();
+        _cacheTimestamps[user.uid] = DateTime.now();
+      }
+
+      // Clear runs cache since it will be stale
+      _cachedFavoriteRuns.remove(user.uid);
+      _runsCacheTimestamps.remove(user.uid);
+
       // Check if document exists first
       final docRef = _favoritesCollection.doc(user.uid);
       final doc = await docRef.get();
@@ -160,6 +233,11 @@ class UserFavoritesService {
         print('✅ Successfully removed run $runId from favorites');
       }
     } catch (e) {
+      // Rollback on failure
+      if (originalFavorites != null) {
+        _cachedFavoriteRunIds[user.uid] = originalFavorites;
+      }
+
       if (kDebugMode) {
         print('❌ Error removing favorite run: $e');
       }
@@ -202,12 +280,29 @@ class UserFavoritesService {
     if (user == null) return false;
 
     try {
+      // Check cache first
+      if (_cachedFavoriteRunIds.containsKey(user.uid) &&
+          _isCacheValid(user.uid, _cacheTimestamps)) {
+        return _cachedFavoriteRunIds[user.uid]!.contains(runId);
+      }
+
+      // Cache miss - fetch from Firestore
       final doc = await _favoritesCollection.doc(user.uid).get();
-      if (!doc.exists) return false;
+      if (!doc.exists) {
+        _cachedFavoriteRunIds[user.uid] = [];
+        _cacheTimestamps[user.uid] = DateTime.now();
+        return false;
+      }
 
       final data = doc.data() as Map<String, dynamic>?;
       final favoriteRuns = data?['riverRuns'] as List?;
-      return favoriteRuns?.contains(runId) ?? false;
+      final result = favoriteRuns?.cast<String>() ?? <String>[];
+
+      // Cache the result
+      _cachedFavoriteRunIds[user.uid] = result;
+      _cacheTimestamps[user.uid] = DateTime.now();
+
+      return result.contains(runId);
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error checking favorite status: $e');
@@ -235,6 +330,12 @@ class UserFavoritesService {
     if (user == null) return;
 
     try {
+      // Clear cache immediately (optimistic)
+      _cachedFavoriteRunIds[user.uid] = [];
+      _cachedFavoriteRuns.remove(user.uid);
+      _cacheTimestamps[user.uid] = DateTime.now();
+      _runsCacheTimestamps.remove(user.uid);
+
       await _favoritesCollection.doc(user.uid).delete();
 
       if (kDebugMode) {

@@ -43,24 +43,37 @@ class RiverRunProvider extends ChangeNotifier {
   }
 
   Future<void> loadAllRuns() async {
+    // Check cache first before making Firestore call
+    if (_cache.isNotEmpty && _isCacheValid) {
+      _riverRuns = _cache.values.toList();
+      if (kDebugMode) {
+        print('⚡ CACHE HIT: Loaded ${_riverRuns.length} runs from cache');
+      }
+      notifyListeners();
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
     try {
-      // #todo: Check cache first before making Firestore call
-      // if (_cachedRuns.isNotEmpty && _lastCacheUpdate != null &&
-      //     DateTime.now().difference(_lastCacheUpdate!) < Duration(minutes: 5)) {
-      //   _riverRuns = _cachedRuns.values.toList();
-      //   notifyListeners();
-      //   return;
-      // }
+      if (kDebugMode) {
+        print('🌊 Cache miss or expired, fetching all runs from Firestore...');
+      }
 
       final runs = await RiverRunService.getAllRunsWithStations().first;
       _riverRuns = runs;
 
-      // #todo: Cache the loaded data to reduce subsequent Firestore reads
-      // _cachedRuns = {for (var run in runs) run.run.id: run};
-      // _lastCacheUpdate = DateTime.now();
+      // Cache the loaded data to reduce subsequent Firestore reads
+      _cache.clear();
+      for (final run in runs) {
+        _cache[run.run.id] = run;
+      }
+      _cacheTime = DateTime.now();
+
+      if (kDebugMode) {
+        print('💾 Cached ${runs.length} runs');
+      }
 
       notifyListeners();
     } catch (e) {
@@ -153,16 +166,30 @@ class RiverRunProvider extends ChangeNotifier {
 
     // Don't set loading state - this is a background update
     try {
-      // #todo: Optimize live data refresh to avoid redundant Firestore calls
-      // Only fetch live data, not the entire run data which is already cached
-      final List<RiverRunWithStations> favoriteRuns = [];
-      for (final runId in favoriteRunIds) {
-        final runWithStations = await RiverRunService.getRunWithStations(runId);
-        if (runWithStations != null) {
-          favoriteRuns.add(runWithStations);
-        }
+      // Optimize live data refresh to avoid redundant Firestore calls
+      // Use batch method instead of individual calls
+      if (kDebugMode) {
+        print(
+          '🔄 Refreshing live data for ${favoriteRunIds.length} favorites...',
+        );
       }
+
+      final favoriteRuns = await RiverRunService.batchGetFavoriteRuns(
+        favoriteRunIds.toList(),
+      );
+
+      // Update cache with fresh data
+      for (final run in favoriteRuns) {
+        _cache[run.run.id] = run;
+      }
+      _cacheTime = DateTime.now();
+
       _favoriteRuns = favoriteRuns;
+
+      if (kDebugMode) {
+        print('✅ Live data refreshed and cached');
+      }
+
       notifyListeners(); // Update UI with fresh live data
     } catch (e) {
       if (kDebugMode) {

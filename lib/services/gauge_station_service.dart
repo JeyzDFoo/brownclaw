@@ -9,14 +9,108 @@ class GaugeStationService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // #todo: Add static caching for gauge stations to reduce Firestore reads
-  // static final Map<String, GaugeStation> _stationCache = {};
-  // static final Map<String, List<GaugeStation>> _runStationsCache = {};
-  // static DateTime? _lastCacheUpdate;
-  // static const Duration _cacheTimeout = Duration(hours: 1);
+  // Static caching for gauge stations to reduce Firestore reads
+  static final Map<String, GaugeStation> _stationCache = {};
+  static final Map<String, List<GaugeStation>> _runStationsCache = {};
+  static final Map<String, DateTime> _stationCacheTimestamps = {};
+  static final Map<String, DateTime> _runStationsCacheTimestamps = {};
+  static const Duration _cacheTimeout = Duration(hours: 1);
 
-  // #todo: Add batch operations for multiple station queries
-  // static Future<List<GaugeStation>> getStationsBatch(List<String> stationIds)
+  /// Batch operations for multiple station queries
+  static Future<List<GaugeStation>> getStationsBatch(
+    List<String> stationIds,
+  ) async {
+    if (stationIds.isEmpty) return [];
+
+    try {
+      final results = <GaugeStation>[];
+      final uncachedIds = <String>[];
+
+      // Check cache first
+      for (final stationId in stationIds) {
+        final cached = _getFromCache(stationId);
+        if (cached != null) {
+          results.add(cached);
+        } else {
+          uncachedIds.add(stationId);
+        }
+      }
+
+      // Fetch uncached stations in batches (Firestore limit is 10 for whereIn)
+      if (uncachedIds.isNotEmpty) {
+        for (int i = 0; i < uncachedIds.length; i += 10) {
+          final batchIds = uncachedIds.skip(i).take(10).toList();
+          final snapshot = await _stationsCollection
+              .where(FieldPath.documentId, whereIn: batchIds)
+              .get();
+
+          for (final doc in snapshot.docs) {
+            final station = GaugeStation.fromMap(
+              doc.data() as Map<String, dynamic>,
+              docId: doc.id,
+            );
+            results.add(station);
+            _addToCache(doc.id, station);
+          }
+        }
+      }
+
+      return results;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting stations batch: $e');
+      }
+      return [];
+    }
+  }
+
+  /// Check if cache entry is still valid
+  static bool _isCacheValid(String key, Map<String, DateTime> timestamps) {
+    if (!timestamps.containsKey(key)) return false;
+    final age = DateTime.now().difference(timestamps[key]!);
+    return age < _cacheTimeout;
+  }
+
+  /// Get station from cache if valid
+  static GaugeStation? _getFromCache(String stationId) {
+    if (_stationCache.containsKey(stationId) &&
+        _isCacheValid(stationId, _stationCacheTimestamps)) {
+      return _stationCache[stationId];
+    }
+    return null;
+  }
+
+  /// Add station to cache
+  static void _addToCache(String stationId, GaugeStation station) {
+    _stationCache[stationId] = station;
+    _stationCacheTimestamps[stationId] = DateTime.now();
+  }
+
+  /// Get run stations from cache if valid
+  static List<GaugeStation>? _getRunStationsFromCache(String runId) {
+    if (_runStationsCache.containsKey(runId) &&
+        _isCacheValid(runId, _runStationsCacheTimestamps)) {
+      return _runStationsCache[runId];
+    }
+    return null;
+  }
+
+  /// Add run stations to cache
+  static void _addRunStationsToCache(
+    String runId,
+    List<GaugeStation> stations,
+  ) {
+    _runStationsCache[runId] = stations;
+    _runStationsCacheTimestamps[runId] = DateTime.now();
+  }
+
+  /// Clear all station caches
+  static void clearCache() {
+    _stationCache.clear();
+    _runStationsCache.clear();
+    _stationCacheTimestamps.clear();
+    _runStationsCacheTimestamps.clear();
+  }
 
   // Collection reference
   static CollectionReference get _stationsCollection =>
@@ -41,10 +135,11 @@ class GaugeStationService {
   // Get gauge station by ID
   static Future<GaugeStation?> getStationById(String stationId) async {
     try {
-      // #todo: Check cache first before making Firestore call
-      // if (_stationCache.containsKey(stationId) && _isCacheValid()) {
-      //   return _stationCache[stationId];
-      // }
+      // Check cache first before making Firestore call
+      final cached = _getFromCache(stationId);
+      if (cached != null) {
+        return cached;
+      }
 
       final doc = await _stationsCollection.doc(stationId).get();
       if (doc.exists) {
@@ -53,9 +148,8 @@ class GaugeStationService {
           docId: doc.id,
         );
 
-        // #todo: Cache the result for future use
-        // _stationCache[stationId] = station;
-        // _lastCacheUpdate = DateTime.now();
+        // Cache the result for future use
+        _addToCache(stationId, station);
 
         return station;
       }

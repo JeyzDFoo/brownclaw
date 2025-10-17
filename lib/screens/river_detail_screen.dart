@@ -1,11 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import '../services/live_water_data_service.dart';
 import '../services/historical_water_data_service.dart';
+import '../services/river_run_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
+import '../providers/providers.dart';
+import 'edit_river_run_screen.dart';
 
 class RiverDetailScreen extends StatefulWidget {
   final Map<String, dynamic> riverData;
@@ -28,12 +33,51 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   String? _chartError;
   int _selectedDays = 30; // Default to 30 days of historical data
 
+  // Stream subscription for real-time river run updates
+  StreamSubscription<RiverRun?>? _runSubscription;
+  Map<String, dynamic> _currentRiverData = {};
+
   @override
   void initState() {
     super.initState();
+    _currentRiverData = Map<String, dynamic>.from(widget.riverData);
+    _setupRunStream();
     _loadLiveData();
     _loadHistoricalData();
     _loadStatisticsData();
+  }
+
+  @override
+  void dispose() {
+    _runSubscription?.cancel();
+    super.dispose();
+  }
+
+  /// Set up Firestore stream to watch for river run changes
+  void _setupRunStream() {
+    final runId = widget.riverData['runId'] as String?;
+    if (runId == null || runId.isEmpty) {
+      if (kDebugMode) {
+        print('No runId found in riverData, skipping stream setup');
+      }
+      return;
+    }
+
+    _runSubscription = RiverRunService.watchRunById(runId).listen((run) {
+      if (run != null && mounted) {
+        setState(() {
+          // Update the difficulty and other run details in the current data
+          _currentRiverData['difficulty'] = run.difficultyClass;
+          _currentRiverData['section'] = {
+            'name': run.name,
+            'difficulty': run.difficultyClass,
+          };
+          _currentRiverData['minRunnable'] = run.minRecommendedFlow ?? 0.0;
+          _currentRiverData['maxSafe'] = run.maxRecommendedFlow ?? 1000.0;
+          _currentRiverData['location'] = run.putIn ?? 'Unknown Location';
+        });
+      }
+    });
   }
 
   /// Validates if the river has a valid station ID for data fetching
@@ -525,21 +569,21 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     String status;
 
     try {
-      riverName = widget.riverData['riverName'] as String? ?? 'Unknown River';
-      stationId = widget.riverData['stationId'] as String? ?? 'Unknown';
-      location = widget.riverData['location'] as String? ?? 'Unknown Location';
+      riverName = _currentRiverData['riverName'] as String? ?? 'Unknown River';
+      stationId = _currentRiverData['stationId'] as String? ?? 'Unknown';
+      location = _currentRiverData['location'] as String? ?? 'Unknown Location';
 
       // Handle section data (could be Map or String for backward compatibility)
-      final sectionData = widget.riverData['section'];
+      final sectionData = _currentRiverData['section'];
       section = sectionData is Map<String, dynamic>
           ? (sectionData['name'] as String? ?? '')
           : (sectionData as String? ?? '');
       sectionClass = sectionData is Map<String, dynamic>
           ? (sectionData['difficulty'] as String? ?? 'Unknown')
-          : (widget.riverData['difficulty'] as String? ?? 'Unknown');
+          : (_currentRiverData['difficulty'] as String? ?? 'Unknown');
 
-      difficulty = widget.riverData['difficulty'] as String? ?? 'Unknown';
-      status = widget.riverData['status'] as String? ?? 'Unknown';
+      difficulty = _currentRiverData['difficulty'] as String? ?? 'Unknown';
+      status = _currentRiverData['status'] as String? ?? 'Unknown';
 
       if (kDebugMode) {
         print(
@@ -588,6 +632,30 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         backgroundColor: Colors.teal,
         foregroundColor: Colors.white,
         actions: [
+          // Edit button - only visible to admins
+          Consumer<UserProvider>(
+            builder: (context, userProvider, child) {
+              if (!userProvider.isAdmin) return const SizedBox.shrink();
+
+              return IconButton(
+                icon: const Icon(Icons.edit),
+                tooltip: 'Edit Run Details',
+                onPressed: () async {
+                  final result = await Navigator.of(context).push<bool>(
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EditRiverRunScreen(riverData: widget.riverData),
+                    ),
+                  );
+
+                  // Refresh data if changes were made
+                  if (result == true && mounted) {
+                    _refreshAllData();
+                  }
+                },
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _refreshAllData,
@@ -694,7 +762,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                       ),
                       const SizedBox(height: 8),
                       // Show station ID only if it's a valid gauge station
-                      if (widget.riverData['hasValidStation'] == true)
+                      if (_currentRiverData['hasValidStation'] == true)
                         Row(
                           children: [
                             Icon(
@@ -748,9 +816,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                           ),
                         ),
                       // Show flow recommendations if available
-                      if (widget.riverData['minRunnable'] != null &&
-                          widget.riverData['maxSafe'] != null &&
-                          widget.riverData['minRunnable'] > 0)
+                      if (_currentRiverData['minRunnable'] != null &&
+                          _currentRiverData['maxSafe'] != null &&
+                          _currentRiverData['minRunnable'] > 0)
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
                           child: Row(
@@ -763,7 +831,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  'Recommended flow: ${widget.riverData['minRunnable']}-${widget.riverData['maxSafe']} m³/s',
+                                  'Recommended flow: ${_currentRiverData['minRunnable']}-${_currentRiverData['maxSafe']} m³/s',
                                   style: TextStyle(
                                     color: Colors.blue[600],
                                     fontWeight: FontWeight.w500,

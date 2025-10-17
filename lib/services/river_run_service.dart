@@ -10,13 +10,35 @@ class RiverRunService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // #todo: Add static caching to reduce redundant Firestore reads
-  // static final Map<String, RiverRunWithStations> _runCache = {};
-  // static DateTime? _lastCacheUpdate;
-  // static const Duration _cacheTimeout = Duration(minutes: 10);
+  // Static caching to reduce redundant Firestore reads
+  static final Map<String, RiverRun> _runCache = {};
+  static final Map<String, RiverRunWithStations> _runWithStationsCache = {};
+  static final Map<String, DateTime> _runCacheTimestamps = {};
+  static final Map<String, DateTime> _runWithStationsTimestamps = {};
+  static const Duration _cacheTimeout = Duration(minutes: 10);
 
-  // #todo: Add connection state monitoring for offline support
-  // static bool _isOffline = false;
+  // Connection state monitoring for offline support
+  static bool _isOffline = false;
+
+  /// Check if cache entry is valid
+  static bool _isCacheValid(String key, Map<String, DateTime> timestamps) {
+    if (!timestamps.containsKey(key)) return false;
+    final age = DateTime.now().difference(timestamps[key]!);
+    return age < _cacheTimeout;
+  }
+
+  /// Clear all caches
+  static void clearCache() {
+    _runCache.clear();
+    _runWithStationsCache.clear();
+    _runCacheTimestamps.clear();
+    _runWithStationsTimestamps.clear();
+  }
+
+  /// Set offline mode
+  static void setOfflineMode(bool offline) {
+    _isOffline = offline;
+  }
 
   // Collection reference
   static CollectionReference get _runsCollection =>
@@ -41,17 +63,24 @@ class RiverRunService {
   // Get run by ID
   static Future<RiverRun?> getRunById(String runId) async {
     try {
-      // #todo: Check cache first before making Firestore call
-      // if (_runCache.containsKey(runId) && _isCacheValid()) {
-      //   return _runCache[runId]?.run;
-      // }
+      // Check cache first before making Firestore call
+      if (_runCache.containsKey(runId) &&
+          _isCacheValid(runId, _runCacheTimestamps)) {
+        return _runCache[runId];
+      }
 
       final doc = await _runsCollection.doc(runId).get();
       if (doc.exists) {
-        return RiverRun.fromMap(
+        final run = RiverRun.fromMap(
           doc.data() as Map<String, dynamic>,
           docId: doc.id,
         );
+
+        // Cache the result
+        _runCache[runId] = run;
+        _runCacheTimestamps[runId] = DateTime.now();
+
+        return run;
       }
       return null;
     } catch (e) {
@@ -59,6 +88,72 @@ class RiverRunService {
         print('Error getting run by ID: $e');
       }
       return null;
+    }
+  }
+
+  // Watch run by ID (real-time stream)
+  static Stream<RiverRun?> watchRunById(String runId) {
+    return _runsCollection.doc(runId).snapshots().map((doc) {
+      if (doc.exists) {
+        final run = RiverRun.fromMap(
+          doc.data() as Map<String, dynamic>,
+          docId: doc.id,
+        );
+
+        // Update cache when stream emits
+        _runCache[runId] = run;
+        _runCacheTimestamps[runId] = DateTime.now();
+
+        return run;
+      }
+      return null;
+    });
+  }
+
+  // Get multiple runs by IDs (batch operation)
+  static Future<List<RiverRun>> getRunsBatch(List<String> runIds) async {
+    if (runIds.isEmpty) return [];
+
+    try {
+      final results = <RiverRun>[];
+      final uncachedIds = <String>[];
+
+      // Check cache first
+      for (final runId in runIds) {
+        if (_runCache.containsKey(runId) &&
+            _isCacheValid(runId, _runCacheTimestamps)) {
+          results.add(_runCache[runId]!);
+        } else {
+          uncachedIds.add(runId);
+        }
+      }
+
+      // Firestore whereIn limit is 10 items per query
+      for (int i = 0; i < uncachedIds.length; i += 10) {
+        final batchIds = uncachedIds.skip(i).take(10).toList();
+        final snapshot = await _runsCollection
+            .where(FieldPath.documentId, whereIn: batchIds)
+            .get();
+
+        for (final doc in snapshot.docs) {
+          final run = RiverRun.fromMap(
+            doc.data() as Map<String, dynamic>,
+            docId: doc.id,
+          );
+          results.add(run);
+
+          // Cache each result
+          _runCache[doc.id] = run;
+          _runCacheTimestamps[doc.id] = DateTime.now();
+        }
+      }
+
+      return results;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting runs batch: $e');
+      }
+      return [];
     }
   }
 

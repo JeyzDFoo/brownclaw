@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/river_run_service.dart';
-import '../services/user_favorites_service.dart';
+import '../providers/providers.dart';
 import '../models/models.dart';
 import 'create_river_run_screen.dart';
+import 'river_detail_screen.dart';
 
 class RiverRunSearchScreen extends StatefulWidget {
   const RiverRunSearchScreen({super.key});
@@ -16,7 +18,6 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
 
   List<RiverRunWithStations> _riverRuns = [];
   List<RiverRunWithStations> _filteredRuns = [];
-  Set<String> _favoriteRunIds = {};
   bool _isLoading = false;
   String _selectedDifficulty = 'All Difficulties';
   String _selectedRegion = 'All Regions';
@@ -24,11 +25,46 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
   List<String> _availableDifficulties = ['All Difficulties'];
   List<String> _availableRegions = ['All Regions'];
 
+  // Convert RiverRunWithStations to legacy format for RiverDetailScreen
+  Map<String, dynamic> _convertRunToLegacyFormat(
+    RiverRunWithStations runWithStations,
+  ) {
+    final primaryStation = runWithStations.primaryStation;
+    final stationId =
+        primaryStation?.stationId ?? runWithStations.run.stationId;
+
+    return {
+      'runId': runWithStations.run.id, // Add runId for Firestore stream
+      'stationId': stationId,
+      'riverName': runWithStations.river?.name ?? runWithStations.run.name,
+      'section': {
+        'name': runWithStations.run.name,
+        'difficulty': runWithStations.run.difficultyClass,
+      },
+      'hasValidStation':
+          stationId != null &&
+          stationId.isNotEmpty &&
+          RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase()),
+      'location': runWithStations.run.putIn ?? 'Unknown Location',
+      'difficulty': runWithStations.run.difficultyClass,
+      'minRunnable': runWithStations.run.minRecommendedFlow ?? 0.0,
+      'maxSafe': runWithStations.run.maxRecommendedFlow ?? 1000.0,
+      'flowRate': runWithStations.currentDischarge ?? 0.0,
+      'waterLevel': runWithStations.currentWaterLevel ?? 0.0,
+      'temperature': primaryStation?.currentTemperature ?? 0.0,
+      'lastUpdated':
+          runWithStations.lastDataUpdate?.toIso8601String() ??
+          DateTime.now().toIso8601String(),
+      'dataSource': runWithStations.hasLiveData ? 'live' : 'unavailable',
+      'isLive': runWithStations.hasLiveData,
+      'status': runWithStations.flowStatus,
+    };
+  }
+
   @override
   void initState() {
     super.initState();
     _loadInitialData();
-    _loadFavorites();
     _searchController.addListener(_onSearchChanged);
   }
 
@@ -72,14 +108,6 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
     }
   }
 
-  void _loadFavorites() {
-    UserFavoritesService.getUserFavoriteRunIds().listen((favoriteIds) {
-      setState(() {
-        _favoriteRunIds = favoriteIds.toSet();
-      });
-    });
-  }
-
   void _onSearchChanged() {
     if (_searchController.text.length < 2 &&
         _searchController.text.isNotEmpty) {
@@ -117,32 +145,26 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
 
   Future<void> _toggleFavorite(RiverRunWithStations runWithStations) async {
     try {
-      final isFavorite = _favoriteRunIds.contains(runWithStations.run.id);
+      // Use FavoritesProvider for automatic UI updates
+      await context.read<FavoritesProvider>().toggleFavorite(
+        runWithStations.run.id,
+      );
 
-      if (isFavorite) {
-        await UserFavoritesService.removeFavoriteRun(runWithStations.run.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${runWithStations.run.displayName} removed from favorites',
-              ),
-              backgroundColor: Colors.orange,
+      final isFavorite = context.read<FavoritesProvider>().isFavorite(
+        runWithStations.run.id,
+      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              isFavorite
+                  ? '${runWithStations.run.displayName} added to favorites'
+                  : '${runWithStations.run.displayName} removed from favorites',
             ),
-          );
-        }
-      } else {
-        await UserFavoritesService.addFavoriteRun(runWithStations.run.id);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                '${runWithStations.run.displayName} added to favorites',
-              ),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
+            backgroundColor: isFavorite ? Colors.green : Colors.orange,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
@@ -302,9 +324,6 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                     itemCount: _filteredRuns.length,
                     itemBuilder: (context, index) {
                       final runWithStations = _filteredRuns[index];
-                      final isFavorite = _favoriteRunIds.contains(
-                        runWithStations.run.id,
-                      );
 
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
@@ -380,19 +399,35 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen> {
                               ),
                             ],
                           ),
-                          trailing: IconButton(
-                            icon: Icon(
-                              isFavorite
-                                  ? Icons.favorite
-                                  : Icons.favorite_border,
-                              color: isFavorite ? Colors.red : Colors.grey,
-                            ),
-                            onPressed: () => _toggleFavorite(runWithStations),
+                          trailing: Consumer<FavoritesProvider>(
+                            builder: (context, favoritesProvider, child) {
+                              final isFavorite = favoritesProvider.isFavorite(
+                                runWithStations.run.id,
+                              );
+
+                              return IconButton(
+                                icon: Icon(
+                                  isFavorite
+                                      ? Icons.favorite
+                                      : Icons.favorite_border,
+                                  color: isFavorite ? Colors.red : Colors.grey,
+                                ),
+                                onPressed: () =>
+                                    _toggleFavorite(runWithStations),
+                              );
+                            },
                           ),
                           onTap: () {
-                            // Navigate to river detail screen
-                            // TODO: Update RiverDetailScreen to accept RiverRunWithStations
-                            // For now, we'll need to convert to legacy format
+                            // Navigate to the same detail screen used in favorites
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => RiverDetailScreen(
+                                  riverData: _convertRunToLegacyFormat(
+                                    runWithStations,
+                                  ),
+                                ),
+                              ),
+                            );
                           },
                         ),
                       );

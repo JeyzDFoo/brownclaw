@@ -9,6 +9,15 @@ class UserProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
 
+  // Check if current user is an admin
+  // Currently set to make all users admin by default
+  bool get isAdmin {
+    return true; // All users are admin by default
+    // To use email-based admin check, replace with:
+    // if (_user == null || _user!.email == null) return false;
+    // return _adminEmails.contains(_user!.email!.toLowerCase());
+  }
+
   UserProvider() {
     // Listen to auth state changes
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
