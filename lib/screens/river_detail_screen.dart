@@ -11,6 +11,7 @@ import '../services/river_run_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import '../widgets/transalta_flow_widget.dart';
+import '../widgets/user_runs_history_widget.dart';
 import 'edit_river_run_screen.dart';
 import 'premium_purchase_screen.dart';
 
@@ -1301,6 +1302,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                       ],
                     ),
                   ),
+                ),
+
+              // User's historical runs on this river
+              if (_currentRiverData['runId'] != null &&
+                  _currentRiverData['runId'].toString().isNotEmpty)
+                UserRunsHistoryWidget(
+                  riverRunId: _currentRiverData['runId'] as String,
+                  riverName: riverName,
                 ),
 
               const SizedBox(height: 32),

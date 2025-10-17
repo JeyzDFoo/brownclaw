@@ -32,7 +32,7 @@ class RiverDescent {
     return RiverDescent(
       id: docId,
       riverRunId: map['riverRunId'] as String? ?? '',
-      waterLevel: map['waterLevel'] as String? ?? '',
+      waterLevel: _safeToString(map['waterLevel']),
       notes: map['notes'] as String? ?? '',
       userId: map['userId'] as String? ?? '',
       userEmail: map['userEmail'] as String?,
@@ -64,6 +64,13 @@ class RiverDescent {
   }
 
   // Helper methods
+  static String _safeToString(dynamic value) {
+    if (value == null) return '';
+    if (value is String) return value;
+    if (value is num) return value.toString();
+    return value.toString();
+  }
+
   static double? _safeToDouble(dynamic value) {
     if (value == null) return null;
     if (value is double) return value;
