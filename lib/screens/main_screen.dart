@@ -5,7 +5,7 @@ import '../providers/providers.dart';
 import '../utils/live_data_tester.dart';
 import '../utils/test_live_data_simple.dart';
 import 'logbook_screen.dart';
-import 'river_levels_screen.dart';
+import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
 
 class MainScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class _MainScreenState extends State<MainScreen> {
   // #todo: Implement lazy loading of screens to improve initial load time
   // Only initialize screens when first accessed
   final List<Widget> _screens = [
-    const RiverLevelsScreen(),
+    const FavouritesScreen(),
     const LogBookScreen(),
     const RiverRunSearchScreen(),
   ];

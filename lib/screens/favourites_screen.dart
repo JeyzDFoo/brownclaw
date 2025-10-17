@@ -8,14 +8,14 @@ import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
 import 'logbook_entry_screen.dart';
 
-class RiverLevelsScreen extends StatefulWidget {
-  const RiverLevelsScreen({super.key});
+class FavouritesScreen extends StatefulWidget {
+  const FavouritesScreen({super.key});
 
   @override
-  State<RiverLevelsScreen> createState() => _RiverLevelsScreenState();
+  State<FavouritesScreen> createState() => _FavouritesScreenState();
 }
 
-class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
+class _FavouritesScreenState extends State<FavouritesScreen> {
   Set<String> _previousFavoriteIds = {};
 
   @override
@@ -33,9 +33,23 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
       // Only reload if not already loading
       final riverRunProvider = context.read<RiverRunProvider>();
       if (!riverRunProvider.isLoading && currentFavoriteIds.isNotEmpty) {
-        Future.microtask(() {
+        Future.microtask(() async {
           if (mounted) {
-            riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
+            await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
+
+            // After loading runs, fetch live data for the stations
+            final runs = riverRunProvider.favoriteRuns;
+            final stationIds = runs
+                .map((r) => r.run.stationId)
+                .whereType<String>()
+                .where((id) => id.isNotEmpty)
+                .toList();
+
+            if (stationIds.isNotEmpty && mounted) {
+              await context.read<LiveWaterDataProvider>().fetchMultipleStations(
+                stationIds,
+              );
+            }
           }
         });
       }
@@ -281,37 +295,25 @@ class _RiverLevelsScreenState extends State<RiverLevelsScreen> {
         return Scaffold(
           body: Column(
             children: [
-              // Action buttons row
+              // Action button
               Container(
                 padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const RiverRunSearchScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.add_circle_outline),
-                      label: const Text('Add River Runs'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
+                child: Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const RiverRunSearchScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.add_circle_outline),
+                    label: const Text('Add River Runs'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.teal,
+                      foregroundColor: Colors.white,
                     ),
-                    ElevatedButton.icon(
-                      onPressed: _refreshData,
-                      icon: const Icon(Icons.refresh),
-                      label: const Text('Refresh'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal,
-                        foregroundColor: Colors.white,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
               Expanded(

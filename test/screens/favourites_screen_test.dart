@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:brownclaw/screens/river_levels_screen.dart';
+import 'package:brownclaw/screens/favourites_screen.dart';
 import 'package:brownclaw/providers/providers.dart';
 import 'package:brownclaw/models/models.dart';
 
@@ -149,7 +149,7 @@ class MockLiveWaterDataProvider extends LiveWaterDataProvider {
 }
 
 void main() {
-  group('RiverLevelsScreen Favorites Tests', () {
+  group('FavouritesScreen Favorites Tests', () {
     late MockFavoritesProvider mockFavoritesProvider;
     late MockRiverRunProvider mockRiverRunProvider;
     late MockLiveWaterDataProvider mockLiveWaterDataProvider;
@@ -173,7 +173,7 @@ void main() {
             value: mockLiveWaterDataProvider,
           ),
         ],
-        child: const MaterialApp(home: RiverLevelsScreen()),
+        child: const MaterialApp(home: FavouritesScreen()),
       );
     }
 
