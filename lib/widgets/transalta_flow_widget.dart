@@ -253,6 +253,7 @@ class TransAltaFlowWidget extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.lock, size: 32, color: Colors.blue[700]),
                   const SizedBox(height: 8),

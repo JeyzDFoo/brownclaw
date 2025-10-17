@@ -208,8 +208,8 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       List<Map<String, dynamic>> dataPoints = [];
 
-      // For very short ranges (7 days or less), use high-resolution real-time data
-      if (_selectedDays <= 7) {
+      // For very short ranges (14 days or less), use high-resolution real-time data
+      if (_selectedDays <= 14) {
         if (kDebugMode) {
           print(
             '📊 Using high-resolution real-time data for $_selectedDays days',
@@ -429,7 +429,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Use different data resolution based on time range
       Map<String, dynamic> flowStats;
 
-      if (_selectedDays <= 7) {
+      if (_selectedDays <= 14) {
         // For very short ranges, use high-resolution data for better statistics
         final highResData = await _fetchHighResolutionData(
           stationId,
@@ -551,7 +551,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               const SizedBox(height: 16),
               const Text('Premium features include:'),
               const SizedBox(height: 8),
-              _buildFeatureItem('📊 7-day historical view'),
+              _buildFeatureItem('📊 14-day historical view'),
               _buildFeatureItem('📈 30-day historical view'),
               _buildFeatureItem('📉 Full year (365-day) view'),
               _buildFeatureItem('🎯 Advanced analytics'),
@@ -1375,7 +1375,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                 const SizedBox(height: 12),
                 Wrap(
                   spacing: 8.0,
-                  children: [3, 7, 30, 365].map((days) {
+                  children: [3, 14, 30, 365].map((days) {
                     final isSelected = days == _selectedDays;
                     final label = days == 365 ? '2024' : '${days}d';
                     final isLocked = days != 3 && !premiumProvider.isPremium;
@@ -1414,7 +1414,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   Padding(
                     padding: const EdgeInsets.only(top: 12),
                     child: Text(
-                      '🔒 Unlock 7, 30, and 365-day views with Premium',
+                      '🔒 Unlock 14, 30, and yearly views with Premium',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.grey[600],

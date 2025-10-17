@@ -27,13 +27,16 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
   }
 
   // Check if favorites have changed and trigger reload if needed
-  void _checkAndReloadFavorites(Set<String> currentFavoriteIds) {
+  void _checkAndReloadFavorites(
+    Set<String> currentFavoriteIds,
+    RiverRunProvider riverRunProvider,
+    LiveWaterDataProvider liveDataProvider,
+  ) {
     if (_previousFavoriteIds.length != currentFavoriteIds.length ||
         !_previousFavoriteIds.containsAll(currentFavoriteIds)) {
       _previousFavoriteIds = Set.from(currentFavoriteIds);
 
       // Only reload if not already loading
-      final riverRunProvider = context.read<RiverRunProvider>();
       if (!riverRunProvider.isLoading && currentFavoriteIds.isNotEmpty) {
         Future.microtask(() async {
           if (mounted) {
@@ -48,9 +51,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
                 .toList();
 
             if (stationIds.isNotEmpty && mounted) {
-              await context.read<LiveWaterDataProvider>().fetchMultipleStations(
-                stationIds,
-              );
+              await liveDataProvider.fetchMultipleStations(stationIds);
             }
           }
         });
@@ -297,7 +298,11 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
             final error = riverRunProvider.error;
 
             // Check if favorites have changed and reload if needed
-            _checkAndReloadFavorites(favoriteIds);
+            _checkAndReloadFavorites(
+              favoriteIds,
+              riverRunProvider,
+              liveDataProvider,
+            );
 
             // Fetch TransAlta data if we have any Kananaskis rivers in favorites
             if (favoriteRuns.any((run) => _isKananaskis(run))) {
