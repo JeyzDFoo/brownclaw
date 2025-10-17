@@ -151,7 +151,26 @@ class RiverRunProvider extends ChangeNotifier {
       return;
     }
 
-    // 🔥 PERFORMANCE: Check cache first!
+    // 🔥 PERFORMANCE: Check if we can use the all-runs cache
+    if (_riverRuns.isNotEmpty && _isCacheValid) {
+      // We already have all runs loaded, just filter for favorites
+      final favoriteRuns = _riverRuns
+          .where((run) => favoriteRunIds.contains(run.run.id))
+          .toList();
+
+      if (favoriteRuns.length == favoriteRunIds.length) {
+        if (kDebugMode) {
+          print(
+            '⚡ CACHE HIT: Found all ${favoriteRunIds.length} favorites from all-runs cache',
+          );
+        }
+        _favoriteRuns = favoriteRuns;
+        notifyListeners();
+        return; // Done! No Firestore calls needed
+      }
+    }
+
+    // Check individual cache entries
     if (_isCacheValid) {
       final cached = favoriteRunIds
           .map((id) => _cache[id])
@@ -173,7 +192,9 @@ class RiverRunProvider extends ChangeNotifier {
 
     try {
       if (kDebugMode) {
-        print('🌊 Cache miss or expired, fetching from Firestore...');
+        print(
+          '🌊 Cache miss or expired, fetching favorite runs from Firestore...',
+        );
       }
 
       // 🚀 USE NEW BATCH METHOD - 90% fewer queries!
@@ -181,15 +202,14 @@ class RiverRunProvider extends ChangeNotifier {
         favoriteRunIds.toList(),
       );
 
-      // 🔥 UPDATE CACHE
-      _cache.clear(); // Clear old entries
+      // 🔥 UPDATE CACHE - merge with existing cache, don't clear it!
       for (final run in favoriteRuns) {
         _cache[run.run.id] = run;
       }
       _cacheTime = DateTime.now();
 
       if (kDebugMode) {
-        print('💾 Cached ${favoriteRuns.length} runs');
+        print('💾 Updated cache with ${favoriteRuns.length} favorite runs');
       }
       _favoriteRuns = favoriteRuns;
       notifyListeners();

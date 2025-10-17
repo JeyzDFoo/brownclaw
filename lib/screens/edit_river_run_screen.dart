@@ -83,47 +83,36 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
           ? section['difficulty']
           : widget.riverData['difficulty'];
 
-      // Get the station ID to find the run
+      // First, try to get run by runId if available
+      final runId = widget.riverData['runId'] as String?;
+
+      if (runId != null && runId.isNotEmpty) {
+        final run = await RiverRunService.getRunById(runId);
+
+        if (run != null) {
+          setState(() {
+            _riverRun = run;
+            _populateFormFields(run);
+            _isLoading = false;
+          });
+          return;
+        }
+      }
+
+      // Fallback: Get the station ID to find the run
       final stationId = widget.riverData['stationId'] as String?;
 
       if (stationId != null && stationId.isNotEmpty) {
         // Try to get run by station ID
-        final runId = await RiverRunService.getRunIdByStationId(stationId);
+        final foundRunId = await RiverRunService.getRunIdByStationId(stationId);
 
-        if (runId != null) {
-          final run = await RiverRunService.getRunById(runId);
+        if (foundRunId != null) {
+          final run = await RiverRunService.getRunById(foundRunId);
 
           if (run != null) {
             setState(() {
               _riverRun = run;
-              _runNameController.text = run.name;
-              _descriptionController.text = run.description ?? '';
-              _lengthController.text = run.length != null
-                  ? run.length.toString()
-                  : '';
-              _putInController.text = run.putIn ?? '';
-              _takeOutController.text = run.takeOut ?? '';
-              _gradientController.text = run.gradient != null
-                  ? run.gradient.toString()
-                  : '';
-              _seasonController.text = run.season ?? '';
-              _permitsController.text = run.permits ?? '';
-              _hazardsController.text = run.hazards != null
-                  ? run.hazards!.join(', ')
-                  : '';
-              _minFlowController.text = run.minRecommendedFlow != null
-                  ? run.minRecommendedFlow.toString()
-                  : '';
-              _maxFlowController.text = run.maxRecommendedFlow != null
-                  ? run.maxRecommendedFlow.toString()
-                  : '';
-              _optimalMinController.text = run.optimalFlowMin != null
-                  ? run.optimalFlowMin.toString()
-                  : '';
-              _optimalMaxController.text = run.optimalFlowMax != null
-                  ? run.optimalFlowMax.toString()
-                  : '';
-              _selectedDifficulty = run.difficultyClass;
+              _populateFormFields(run);
               _isLoading = false;
             });
             return;
@@ -131,7 +120,7 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
         }
       }
 
-      // Fallback: populate from riverData
+      // Fallback: populate from riverData only
       setState(() {
         _runNameController.text = sectionName?.toString() ?? '';
         _selectedDifficulty = difficulty?.toString();
@@ -150,6 +139,35 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
         );
       }
     }
+  }
+
+  void _populateFormFields(RiverRun run) {
+    _runNameController.text = run.name;
+    _descriptionController.text = run.description ?? '';
+    _lengthController.text = run.length != null ? run.length.toString() : '';
+    _putInController.text = run.putIn ?? '';
+    _takeOutController.text = run.takeOut ?? '';
+    _gradientController.text = run.gradient != null
+        ? run.gradient.toString()
+        : '';
+    _seasonController.text = run.season ?? '';
+    _permitsController.text = run.permits ?? '';
+    _hazardsController.text = run.hazards != null
+        ? run.hazards!.join(', ')
+        : '';
+    _minFlowController.text = run.minRecommendedFlow != null
+        ? run.minRecommendedFlow.toString()
+        : '';
+    _maxFlowController.text = run.maxRecommendedFlow != null
+        ? run.maxRecommendedFlow.toString()
+        : '';
+    _optimalMinController.text = run.optimalFlowMin != null
+        ? run.optimalFlowMin.toString()
+        : '';
+    _optimalMaxController.text = run.optimalFlowMax != null
+        ? run.optimalFlowMax.toString()
+        : '';
+    _selectedDifficulty = run.difficultyClass;
   }
 
   @override
@@ -264,7 +282,18 @@ class _EditRiverRunScreenState extends State<EditRiverRunScreen> {
   }
 
   Future<void> _deleteRun() async {
-    if (_riverRun == null) return;
+    if (_riverRun == null) {
+      // Show error if run data isn't loaded
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Cannot delete: Run data not loaded'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
     // Show confirmation dialog
     final shouldDelete = await showDialog<bool>(

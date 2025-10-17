@@ -431,9 +431,9 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                                   );
                                 },
                               ),
-                              onTap: () {
+                              onTap: () async {
                                 // Navigate to the same detail screen used in favorites
-                                Navigator.of(context).push(
+                                await Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => RiverDetailScreen(
                                       riverData: _convertRunToLegacyFormat(
@@ -442,6 +442,13 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                                     ),
                                   ),
                                 );
+
+                                // Refresh the list when returning in case run was edited or deleted
+                                if (mounted) {
+                                  context
+                                      .read<RiverRunProvider>()
+                                      .loadAllRuns();
+                                }
                               },
                             ),
                           );

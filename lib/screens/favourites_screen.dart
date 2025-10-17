@@ -514,13 +514,13 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                             bottom: 12,
                                           ),
                                           child: ListTile(
-                                            onTap: () {
+                                            onTap: () async {
                                               if (kDebugMode) {
                                                 print(
                                                   '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
                                                 );
                                               }
-                                              Navigator.of(context).push(
+                                              await Navigator.of(context).push(
                                                 MaterialPageRoute(
                                                   builder: (context) =>
                                                       RiverDetailScreen(
@@ -532,6 +532,52 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                                       ),
                                                 ),
                                               );
+
+                                              // Refresh favorites when returning in case run was edited or deleted
+                                              if (mounted) {
+                                                final favoritesProvider =
+                                                    context
+                                                        .read<
+                                                          FavoritesProvider
+                                                        >();
+                                                final riverRunProvider = context
+                                                    .read<RiverRunProvider>();
+                                                final liveDataProvider = context
+                                                    .read<
+                                                      LiveWaterDataProvider
+                                                    >();
+
+                                                // Reload favorites
+                                                final favoriteIds =
+                                                    favoritesProvider
+                                                        .favoriteRunIds;
+                                                if (favoriteIds.isNotEmpty) {
+                                                  await riverRunProvider
+                                                      .loadFavoriteRuns(
+                                                        favoriteIds,
+                                                      );
+
+                                                  // Refresh live data for stations
+                                                  final runs = riverRunProvider
+                                                      .favoriteRuns;
+                                                  final stationIds = runs
+                                                      .map(
+                                                        (r) => r.run.stationId,
+                                                      )
+                                                      .whereType<String>()
+                                                      .where(
+                                                        (id) => id.isNotEmpty,
+                                                      )
+                                                      .toList();
+
+                                                  if (stationIds.isNotEmpty) {
+                                                    await liveDataProvider
+                                                        .fetchMultipleStations(
+                                                          stationIds,
+                                                        );
+                                                  }
+                                                }
+                                              }
                                             },
                                             leading: IconButton(
                                               icon: const Icon(
