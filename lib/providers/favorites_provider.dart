@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/user_favorites_service.dart';
 
 class FavoritesProvider extends ChangeNotifier {
   Set<String> _favoriteRunIds = {};
   bool _isLoading = false;
   String? _error;
-
-  // Local caching for offline favorites access
-  static final Map<String, Set<String>> _userFavoritesCache = {};
-  static String? _lastUserId;
+  StreamSubscription<List<String>>? _favoritesSubscription;
+  StreamSubscription<User?>? _authSubscription;
 
   // Debouncing for rapid favorite toggles to reduce Firestore writes
   final Map<String, Timer> _debounceTimers = {};
@@ -21,7 +20,46 @@ class FavoritesProvider extends ChangeNotifier {
   String? get error => _error;
 
   FavoritesProvider() {
-    _loadFavorites();
+    // 🔥 CRITICAL FIX: Check if user is already logged in
+    // authStateChanges() only fires on CHANGES, not current state!
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser != null) {
+      if (kDebugMode) {
+        print(
+          '👤 FavoritesProvider: User already authenticated on init (${currentUser.uid}), loading favorites...',
+        );
+      }
+      _loadFavorites();
+    } else {
+      if (kDebugMode) {
+        print(
+          '👤 FavoritesProvider: No user logged in on init, waiting for auth...',
+        );
+      }
+    }
+
+    // 🔥 ALSO listen to auth state changes for future sign-ins/sign-outs
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((
+      User? user,
+    ) {
+      if (user != null) {
+        if (kDebugMode) {
+          print(
+            '👤 FavoritesProvider: Auth state changed - User signed in (${user.uid}), loading favorites...',
+          );
+        }
+        _loadFavorites();
+      } else {
+        if (kDebugMode) {
+          print(
+            '👤 FavoritesProvider: Auth state changed - User signed out, clearing favorites',
+          );
+        }
+        _favoriteRunIds.clear();
+        _favoritesSubscription?.cancel();
+        notifyListeners();
+      }
+    });
   }
 
   bool isFavorite(String runId) {
@@ -39,10 +77,27 @@ class FavoritesProvider extends ChangeNotifier {
   }
 
   void _loadFavorites() {
-    UserFavoritesService.getUserFavoriteRunIds().listen((favoriteIds) {
-      _favoriteRunIds = favoriteIds.toSet();
-      notifyListeners();
-    });
+    // Cancel existing subscription before creating a new one
+    _favoritesSubscription?.cancel();
+
+    _favoritesSubscription = UserFavoritesService.getUserFavoriteRunIds()
+        .listen(
+          (favoriteIds) {
+            if (kDebugMode) {
+              print(
+                '⭐ FavoritesProvider: Loaded ${favoriteIds.length} favorites',
+              );
+            }
+            _favoriteRunIds = favoriteIds.toSet();
+            notifyListeners();
+          },
+          onError: (error) {
+            if (kDebugMode) {
+              print('❌ FavoritesProvider: Error loading favorites: $error');
+            }
+            setError(error.toString());
+          },
+        );
   }
 
   Future<void> toggleFavorite(String runId) async {
@@ -109,6 +164,10 @@ class FavoritesProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    // Cancel subscriptions
+    _favoritesSubscription?.cancel();
+    _authSubscription?.cancel();
+
     // Cancel all pending timers
     for (final timer in _debounceTimers.values) {
       timer.cancel();

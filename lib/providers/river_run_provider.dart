@@ -8,6 +8,7 @@ class RiverRunProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _isInitialized = false;
+  Future<void>? _initializationFuture;
 
   // 🔥 PERFORMANCE: Simple but effective memory cache
   // Static so cache persists across provider instances
@@ -30,7 +31,7 @@ class RiverRunProvider extends ChangeNotifier {
 
   RiverRunProvider() {
     // Load all runs when provider is created
-    _initializeData();
+    _initializationFuture = _initializeData();
   }
 
   Future<void> _initializeData() async {
@@ -44,10 +45,18 @@ class RiverRunProvider extends ChangeNotifier {
     await loadAllRuns();
   }
 
+  /// Wait for the provider to finish initializing
+  Future<void> ensureInitialized() async {
+    if (_initializationFuture != null) {
+      await _initializationFuture;
+    }
+  }
+
   List<RiverRunWithStations> get riverRuns => _riverRuns;
   List<RiverRunWithStations> get favoriteRuns => _favoriteRuns;
   bool get isLoading => _isLoading;
   String? get error => _error;
+  bool get isInitialized => _isInitialized;
 
   void setLoading(bool loading) {
     _isLoading = loading;
@@ -150,6 +159,10 @@ class RiverRunProvider extends ChangeNotifier {
       notifyListeners();
       return;
     }
+
+    // 🔥 CRITICAL FIX: Wait for initialization to complete before loading favorites
+    // This ensures the cache is populated on initial app launch
+    await ensureInitialized();
 
     // 🔥 PERFORMANCE: Check if we can use the all-runs cache
     if (_riverRuns.isNotEmpty && _isCacheValid) {

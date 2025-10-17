@@ -49,11 +49,30 @@ class UserFavoritesService {
   // Get user's favorite river run IDs
   static Stream<List<String>> getUserFavoriteRunIds() {
     final user = _auth.currentUser;
-    if (user == null) return Stream.value([]);
+
+    if (kDebugMode) {
+      print(
+        '🔍 UserFavoritesService.getUserFavoriteRunIds: currentUser = ${user?.uid ?? "NULL"}',
+      );
+    }
+
+    if (user == null) {
+      if (kDebugMode) {
+        print(
+          '❌ UserFavoritesService: No user logged in, returning empty stream',
+        );
+      }
+      return Stream.value([]);
+    }
 
     // Check cache first to reduce Firestore reads
     if (_cachedFavoriteRunIds.containsKey(user.uid) &&
         _isCacheValid(user.uid, _cacheTimestamps)) {
+      if (kDebugMode) {
+        print(
+          '⚡ UserFavoritesService: Cache hit! Returning ${_cachedFavoriteRunIds[user.uid]!.length} favorites',
+        );
+      }
       // Return cached data as stream, but also listen for updates
       if (!_isOffline) {
         // Start listening for updates in background
@@ -64,14 +83,32 @@ class UserFavoritesService {
             final result = favoriteRuns?.cast<String>() ?? <String>[];
             _cachedFavoriteRunIds[user.uid] = result;
             _cacheTimestamps[user.uid] = DateTime.now();
+            if (kDebugMode) {
+              print(
+                '🔄 UserFavoritesService: Cache updated from Firestore - ${result.length} favorites',
+              );
+            }
           }
         });
       }
       return Stream.value(_cachedFavoriteRunIds[user.uid]!);
     }
 
+    if (kDebugMode) {
+      print(
+        '🌊 UserFavoritesService: Cache miss, fetching from Firestore for user ${user.uid}',
+      );
+    }
+
     return _favoritesCollection.doc(user.uid).snapshots().map((doc) {
-      if (!doc.exists) return <String>[];
+      if (!doc.exists) {
+        if (kDebugMode) {
+          print(
+            '⚠️  UserFavoritesService: No favorites document exists for user ${user.uid}',
+          );
+        }
+        return <String>[];
+      }
       final data = doc.data() as Map<String, dynamic>?;
       final favoriteRuns = data?['riverRuns'] as List?;
       final result = favoriteRuns?.cast<String>() ?? <String>[];
@@ -79,6 +116,12 @@ class UserFavoritesService {
       // Cache the result for future use
       _cachedFavoriteRunIds[user.uid] = result;
       _cacheTimestamps[user.uid] = DateTime.now();
+
+      if (kDebugMode) {
+        print(
+          '📊 UserFavoritesService: Loaded ${result.length} favorite IDs from Firestore',
+        );
+      }
 
       return result;
     });

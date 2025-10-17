@@ -36,14 +36,31 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     RiverRunProvider riverRunProvider,
     LiveWaterDataProvider liveDataProvider,
   ) {
+    if (kDebugMode) {
+      print(
+        '🔍 FavouritesScreen: Checking favorites - current: ${currentFavoriteIds.length}, previous: ${_previousFavoriteIds.length}',
+      );
+    }
+
     if (_previousFavoriteIds.length != currentFavoriteIds.length ||
         !_previousFavoriteIds.containsAll(currentFavoriteIds)) {
+      if (kDebugMode) {
+        print(
+          '🔄 FavouritesScreen: Favorites changed! Loading ${currentFavoriteIds.length} favorites...',
+        );
+      }
       _previousFavoriteIds = Set.from(currentFavoriteIds);
 
-      // Only reload if not already loading
-      if (!riverRunProvider.isLoading && currentFavoriteIds.isNotEmpty) {
+      // 🔥 FIX: Always reload if we have favorites, even if provider is loading
+      // The provider will handle the initialization wait internally
+      if (currentFavoriteIds.isNotEmpty) {
         Future.microtask(() async {
           if (mounted) {
+            if (kDebugMode) {
+              print(
+                '📥 FavouritesScreen: Calling loadFavoriteRuns with ${currentFavoriteIds.length} IDs',
+              );
+            }
             await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
 
             // After loading runs, fetch live data for the stations
@@ -59,6 +76,10 @@ class _FavouritesScreenState extends State<FavouritesScreen>
             }
           }
         });
+      } else {
+        if (kDebugMode) {
+          print('ℹ️ FavouritesScreen: No favorites to load (empty)');
+        }
       }
     }
   }
