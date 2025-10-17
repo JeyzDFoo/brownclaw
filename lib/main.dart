@@ -22,6 +22,12 @@ void main() async {
 
   // #todo: Add Firebase performance monitoring and analytics for production
   // #todo: Implement error reporting (Crashlytics) for production monitoring
+
+  // #todo: STRIPE INTEGRATION - Add Stripe publishable key here
+  // Uncomment and add your key from https://dashboard.stripe.com/apikeys
+  // import 'package:flutter_stripe/flutter_stripe.dart';
+  // Stripe.publishableKey = 'pk_test_YOUR_PUBLISHABLE_KEY_HERE';
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (kDebugMode) {
@@ -48,6 +54,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
         ChangeNotifierProvider(create: (_) => LiveWaterDataProvider()),
         ChangeNotifierProvider(create: (_) => LogbookProvider()),
+        ChangeNotifierProvider(create: (_) => PremiumProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

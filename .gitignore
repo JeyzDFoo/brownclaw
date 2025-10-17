@@ -48,3 +48,10 @@ app.*.map.json
 admin_scripts/service_account_key.json
 **/*service_account*.json
 **/*firebase_service_account*.json
+
+# Environment variables (Stripe keys, etc.)
+.env
+.env.local
+.env.*.local
+functions/.env
+functions/.env.local

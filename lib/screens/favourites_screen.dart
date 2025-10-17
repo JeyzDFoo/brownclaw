@@ -625,7 +625,7 @@ class _FavouritesScreenState extends State<FavouritesScreen> {
               }
             },
             icon: const Icon(Icons.add),
-            label: const Text('Add Run to Favourites'),
+            label: const Text('Add Favourite'),
             backgroundColor: Colors.teal,
             foregroundColor: Colors.white,
           ),

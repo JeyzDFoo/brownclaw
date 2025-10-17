@@ -11,6 +11,7 @@ import '../services/river_run_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import 'edit_river_run_screen.dart';
+import 'premium_purchase_screen.dart';
 
 class RiverDetailScreen extends StatefulWidget {
   final Map<String, dynamic> riverData;
@@ -31,7 +32,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingStats = true;
   String? _error;
   String? _chartError;
-  int _selectedDays = 30; // Default to 30 days of historical data
+  int _selectedDays = 3; // Default to 3 days of historical data
 
   // Stream subscription for real-time river run updates
   StreamSubscription<RiverRun?>? _runSubscription;
@@ -523,6 +524,74 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
 
     await Future.wait([_loadHistoricalData(), _loadStatisticsData()]);
+  }
+
+  void _showPremiumDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.workspace_premium, color: Colors.amber),
+              SizedBox(width: 8),
+              Text('Premium Feature'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Unlock extended historical data views with Premium!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              const Text('Premium features include:'),
+              const SizedBox(height: 8),
+              _buildFeatureItem('📊 7-day historical view'),
+              _buildFeatureItem('📈 30-day historical view'),
+              _buildFeatureItem('📉 Full year (365-day) view'),
+              _buildFeatureItem('🎯 Advanced analytics'),
+              const SizedBox(height: 16),
+              const Text(
+                'Free users get 3-day historical data.',
+                style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Maybe Later'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Navigate to premium purchase page
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const PremiumPurchaseScreen(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.amber,
+                foregroundColor: Colors.black,
+              ),
+              child: const Text('Upgrade to Premium'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildFeatureItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 4),
+      child: Text(text, style: const TextStyle(fontSize: 14)),
+    );
   }
 
   Color _getStatusColor(String status) {
@@ -1275,38 +1344,73 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Widget _buildDayRangeSelector() {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Historical Data Range',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+    return Consumer<PremiumProvider>(
+      builder: (context, premiumProvider, child) {
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Historical Data Range',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8.0,
+                  children: [3, 7, 30, 365].map((days) {
+                    final isSelected = days == _selectedDays;
+                    final label = days == 365 ? '2024' : '${days}d';
+                    final isLocked = days != 3 && !premiumProvider.isPremium;
+
+                    return FilterChip(
+                      label: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(label),
+                          if (isLocked) ...[
+                            const SizedBox(width: 4),
+                            const Icon(Icons.lock, size: 14),
+                          ],
+                        ],
+                      ),
+                      selected: isSelected,
+                      onSelected: isLocked
+                          ? (selected) {
+                              if (selected) {
+                                _showPremiumDialog(context);
+                              }
+                            }
+                          : (selected) {
+                              if (selected) {
+                                _changeDaysRange(days);
+                              }
+                            },
+                      selectedColor: Colors.teal.withOpacity(0.3),
+                      backgroundColor: isLocked
+                          ? Colors.grey.withOpacity(0.2)
+                          : Colors.grey.withOpacity(0.1),
+                    );
+                  }).toList(),
+                ),
+                if (!premiumProvider.isPremium)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: Text(
+                      '🔒 Unlock 7, 30, and 365-day views with Premium',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8.0,
-              children: [3, 7, 30, 365].map((days) {
-                final isSelected = days == _selectedDays;
-                final label = days == 365 ? '2024' : '${days}d';
-                return FilterChip(
-                  label: Text(label),
-                  selected: isSelected,
-                  onSelected: (selected) {
-                    if (selected) {
-                      _changeDaysRange(days);
-                    }
-                  },
-                  selectedColor: Colors.teal.withOpacity(0.3),
-                  backgroundColor: Colors.grey.withOpacity(0.1),
-                );
-              }).toList(),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 

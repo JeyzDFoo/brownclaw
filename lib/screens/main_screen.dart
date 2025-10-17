@@ -7,6 +7,7 @@ import '../utils/test_live_data_simple.dart';
 import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
+import 'premium_settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -70,6 +71,12 @@ class _MainScreenState extends State<MainScreen> {
                 onSelected: (value) async {
                   if (value == 'theme') {
                     context.read<ThemeProvider>().toggleTheme();
+                  } else if (value == 'premium') {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const PremiumSettingsScreen(),
+                      ),
+                    );
                   } else if (value == 'logout') {
                     await userProvider.signOut();
                     if (context.mounted) {
@@ -128,6 +135,31 @@ class _MainScreenState extends State<MainScreen> {
                               themeProvider.isDarkMode
                                   ? 'Light Mode'
                                   : 'Dark Mode',
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'premium',
+                    child: Consumer<PremiumProvider>(
+                      builder: (context, premiumProvider, child) {
+                        return Row(
+                          children: [
+                            Icon(
+                              premiumProvider.isPremium
+                                  ? Icons.workspace_premium
+                                  : Icons.lock,
+                              color: premiumProvider.isPremium
+                                  ? Colors.amber
+                                  : null,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              premiumProvider.isPremium
+                                  ? 'Premium Active'
+                                  : 'Premium Settings',
                             ),
                           ],
                         );
