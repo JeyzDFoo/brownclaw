@@ -5,9 +5,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class PremiumProvider extends ChangeNotifier {
   bool _isPremium = false;
   bool _isLoading = false;
+  bool _cancelAtPeriodEnd = false;
+  DateTime? _currentPeriodEnd;
 
   bool get isPremium => _isPremium;
   bool get isLoading => _isLoading;
+  bool get cancelAtPeriodEnd => _cancelAtPeriodEnd;
+  DateTime? get currentPeriodEnd => _currentPeriodEnd;
 
   PremiumProvider() {
     // Listen to auth state changes and check premium status
@@ -34,8 +38,29 @@ class PremiumProvider extends ChangeNotifier {
       if (doc.exists) {
         final data = doc.data();
         _isPremium = data?['isPremium'] == true;
+        _cancelAtPeriodEnd = data?['cancelAtPeriodEnd'] == true;
+
+        // Parse currentPeriodEnd if it exists (Firestore timestamp)
+        final periodEndTimestamp = data?['currentPeriodEnd'];
+        if (periodEndTimestamp != null) {
+          if (periodEndTimestamp is int) {
+            // Unix timestamp in seconds
+            _currentPeriodEnd = DateTime.fromMillisecondsSinceEpoch(
+              periodEndTimestamp * 1000,
+            );
+          } else if (periodEndTimestamp is double) {
+            // Unix timestamp in seconds as double
+            _currentPeriodEnd = DateTime.fromMillisecondsSinceEpoch(
+              (periodEndTimestamp * 1000).toInt(),
+            );
+          }
+        } else {
+          _currentPeriodEnd = null;
+        }
       } else {
         _isPremium = false;
+        _cancelAtPeriodEnd = false;
+        _currentPeriodEnd = null;
       }
     } catch (e) {
       if (kDebugMode) {

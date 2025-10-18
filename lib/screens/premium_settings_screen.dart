@@ -1,10 +1,102 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
+import '../services/stripe_service.dart';
 import 'premium_purchase_screen.dart';
 
-class PremiumSettingsScreen extends StatelessWidget {
+class PremiumSettingsScreen extends StatefulWidget {
   const PremiumSettingsScreen({super.key});
+
+  @override
+  State<PremiumSettingsScreen> createState() => _PremiumSettingsScreenState();
+}
+
+class _PremiumSettingsScreenState extends State<PremiumSettingsScreen> {
+  bool _isCancelling = false;
+
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'the end of your billing period';
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return '${months[date.month - 1]} ${date.day}, ${date.year}';
+  }
+
+  Future<void> _showCancelConfirmation(
+    BuildContext context,
+    PremiumProvider premiumProvider,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Subscription?'),
+        content: const Text(
+          'Your premium features will remain active until the end of your current billing period. You can resubscribe at any time.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Keep Subscription'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Cancel Subscription'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      setState(() {
+        _isCancelling = true;
+      });
+
+      try {
+        await StripeService().cancelSubscription();
+
+        if (mounted) {
+          // Refresh premium status
+          await premiumProvider.refreshPremiumStatus();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Subscription cancelled.'),
+              backgroundColor: Colors.orange,
+              duration: Duration(seconds: 5),
+            ),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error cancelling subscription: $e'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isCancelling = false;
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +173,7 @@ class PremiumSettingsScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       _buildFeatureItem(
-                        '7-day historical data',
+                        '14-day historical data',
                         premiumProvider.isPremium,
                       ),
                       _buildFeatureItem(
@@ -93,70 +185,167 @@ class PremiumSettingsScreen extends StatelessWidget {
                         premiumProvider.isPremium,
                       ),
                       _buildFeatureItem(
-                        'Advanced analytics',
+                        'Advanced Brown',
                         premiumProvider.isPremium,
                       ),
-                      const SizedBox(height: 16),
-                      const Divider(),
-                      const SizedBox(height: 16),
-                      // Testing toggle (for development)
-                      const Text(
-                        'Developer Testing:',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.orange,
+                      // Developer Testing Toggle (only visible in debug mode)
+                      if (kDebugMode) ...[
+                        const SizedBox(height: 16),
+                        const Divider(),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Developer Testing:',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.orange,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      SwitchListTile(
-                        title: const Text('Toggle Premium Status (Dev Only)'),
-                        subtitle: const Text(
-                          'This is for testing purposes only',
-                          style: TextStyle(fontSize: 12),
-                        ),
-                        value: premiumProvider.isPremium,
-                        onChanged: (value) async {
-                          await premiumProvider.setPremiumStatus(value);
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  value
-                                      ? 'Premium activated!'
-                                      : 'Premium deactivated',
+                        const SizedBox(height: 8),
+                        SwitchListTile(
+                          title: const Text('Toggle Premium Status (Dev Only)'),
+                          subtitle: const Text(
+                            'This is for testing purposes only',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          value: premiumProvider.isPremium,
+                          onChanged: (value) async {
+                            await premiumProvider.setPremiumStatus(value);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    value
+                                        ? 'Premium activated!'
+                                        : 'Premium deactivated',
+                                  ),
+                                  backgroundColor: value
+                                      ? Colors.green
+                                      : Colors.orange,
                                 ),
-                                backgroundColor: value
-                                    ? Colors.green
-                                    : Colors.orange,
-                              ),
-                            );
-                          }
-                        },
-                        activeColor: Colors.amber,
-                      ),
+                              );
+                            }
+                          },
+                          activeColor: Colors.amber,
+                        ),
+                      ],
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-              if (!premiumProvider.isPremium)
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PremiumPurchaseScreen(),
+              // Subscription Management Card - for both premium and non-premium users
+              Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        premiumProvider.isPremium
+                            ? 'Manage Subscription'
+                            : 'Get Premium',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    );
-                  },
-                  icon: const Icon(Icons.workspace_premium),
-                  label: const Text('Upgrade to Premium'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amber,
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.all(16),
+                      const SizedBox(height: 12),
+                      Text(
+                        premiumProvider.isPremium
+                            ? (premiumProvider.cancelAtPeriodEnd
+                                  ? 'Your subscription has been cancelled and will end on ${_formatDate(premiumProvider.currentPeriodEnd)}. You can resubscribe at any time.'
+                                  : 'Need to cancel? Your premium features will remain active until the end of your current billing period.')
+                            : 'Unlock extended historical data and advanced features with Premium.',
+                        style: TextStyle(fontSize: 14, color: Colors.grey[700]),
+                      ),
+                      const SizedBox(height: 16),
+                      if (premiumProvider.isPremium &&
+                          !premiumProvider.cancelAtPeriodEnd)
+                        OutlinedButton.icon(
+                          onPressed: _isCancelling
+                              ? null
+                              : () => _showCancelConfirmation(
+                                  context,
+                                  premiumProvider,
+                                ),
+                          icon: _isCancelling
+                              ? const SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.cancel_outlined),
+                          label: Text(
+                            _isCancelling
+                                ? 'Cancelling...'
+                                : 'Cancel Subscription',
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        )
+                      else if (premiumProvider.isPremium &&
+                          premiumProvider.cancelAtPeriodEnd)
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: Colors.orange.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.orange.shade700,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'Cancellation scheduled',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.orange.shade900,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      else
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const PremiumPurchaseScreen(),
+                              ),
+                            );
+                          },
+                          icon: const Icon(Icons.workspace_premium),
+                          label: const Text('Subscribe to Premium'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.amber,
+                            foregroundColor: Colors.black,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
+              ),
             ],
           );
         },
@@ -180,7 +369,7 @@ class PremiumSettingsScreen extends StatelessWidget {
               text,
               style: TextStyle(
                 fontSize: 14,
-                color: isPremium ? Colors.black : Colors.grey[600],
+                color: isPremium ? null : Colors.grey[600],
               ),
             ),
           ),

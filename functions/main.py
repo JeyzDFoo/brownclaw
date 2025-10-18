@@ -342,12 +342,15 @@ def cancelSubscription(req: https_fn.CallableRequest) -> dict[str, Any]:
         
         # Update user status
         user_ref.set({
-            'subscriptionStatus': subscription.status
+            'subscriptionStatus': subscription.status,
+            'cancelAtPeriodEnd': subscription.cancel_at_period_end,
+            'currentPeriodEnd': subscription.current_period_end
         }, merge=True)
         
         return {
             'success': True,
-            'message': 'Subscription will be cancelled at period end'
+            'message': 'Subscription will be cancelled at period end',
+            'currentPeriodEnd': subscription.current_period_end
         }
         
     except stripe.StripeError as e:
@@ -405,12 +408,15 @@ def getSubscriptionStatus(req: https_fn.CallableRequest) -> dict[str, Any]:
                 # Update Firestore with latest status
                 user_ref.set({
                     'subscriptionStatus': subscription.status,
-                    'isPremium': subscription.status in ['active', 'trialing']
+                    'isPremium': subscription.status in ['active', 'trialing'],
+                    'cancelAtPeriodEnd': subscription.cancel_at_period_end,
+                    'currentPeriodEnd': subscription.current_period_end
                 }, merge=True)
                 
                 return {
                     'isPremium': subscription.status in ['active', 'trialing'],
                     'subscriptionStatus': subscription.status,
+                    'cancelAtPeriodEnd': subscription.cancel_at_period_end,
                     'currentPeriodEnd': subscription.current_period_end
                 }
             except stripe.StripeError:

@@ -14,9 +14,9 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
 
-  // Stripe Price ID for $2.00/month subscription
+  // Stripe Price ID for $2.29/month subscription
   static const String monthlyPriceId =
-      'price_1SJefYAdlcDQOrDh1BdYTe8U'; // Premium Monthly - $2.00/month
+      'price_1SJfs2AdlcDQOrDhClFs3rTf'; // Premium Monthly - $2.29/month
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
             // Monthly Plan - Only option
             _buildPricingCard(
               title: 'Premium Monthly',
-              price: '\$2.00',
+              price: '\$2.29',
               period: '/month',
               description: 'Cancel anytime. No questions asked.',
               isPopular: true,
