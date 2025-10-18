@@ -1,0 +1,126 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isValidString(field) {
+      return request.resource.data[field] is string 
+        && request.resource.data[field].size() > 0;
+    }
+    
+    function isValidTimestamp(field) {
+      return request.resource.data[field] is timestamp;
+    }
+    
+    // Rivers collection - open for authenticated users
+    match /rivers/{riverId} {
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to create/update/delete rivers
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // River runs collection - open for authenticated users
+    match /river_runs/{runId} {
+      allow read: if isAuthenticated();
+      
+      // Allow authenticated users to create/update/delete river runs
+      allow create, update, delete: if isAuthenticated();
+    }
+    
+    // Gauge stations collection - read-only for authenticated users
+    match /gauge_stations/{stationId} {
+      allow read: if isAuthenticated();
+      
+      // Only backend should write station data
+      allow create, update, delete: if false;
+    }
+    
+    // User favorites collection - strict user ownership
+    match /user_favorites/{userId} {
+      allow read: if isOwner(userId);
+      
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['rivers', 'lastUpdated'])
+        && request.resource.data.rivers is list;
+      
+      allow update: if isOwner(userId)
+        && request.resource.data.rivers is list;
+      
+      allow delete: if isOwner(userId);
+      
+      // Subcollection for river details
+      match /river_details/{detailId} {
+        allow read: if isOwner(userId);
+        
+        allow create: if isOwner(userId)
+          && isValidString('stationId')
+          && isValidTimestamp('addedAt');
+        
+        allow update: if isOwner(userId);
+        
+        allow delete: if isOwner(userId);
+      }
+    }
+    
+    // River descents (logbook entries) - user-owned data
+    match /river_descents/{descentId} {
+      allow read: if isAuthenticated()
+        && (isOwner(resource.data.userId) || request.auth.uid == resource.data.userId);
+      
+      allow create: if isAuthenticated()
+        && isValidString('riverRunId')
+        && isValidString('userId')
+        && request.resource.data.userId == request.auth.uid
+        && isValidString('waterLevel')
+        && isValidString('notes')
+        && isValidTimestamp('timestamp');
+      
+      allow update: if isAuthenticated()
+        && isOwner(resource.data.userId)
+        && request.resource.data.userId == resource.data.userId; // Prevent changing ownership
+      
+      allow delete: if isAuthenticated()
+        && isOwner(resource.data.userId);
+    }
+    
+    // Users collection - for premium status and user profiles
+    match /users/{userId} {
+      // Users can read their own data
+      allow read: if isOwner(userId);
+      
+      // Users can create their own profile
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['email'])
+        && (!request.resource.data.keys().hasAny(['isPremium', 'subscriptionStatus', 'subscriptionId', 'stripeCustomerId'])
+            || request.resource.data.isPremium == false); // Prevent setting premium on creation
+      
+      // Users can update their own data, but NOT premium status fields
+      // Premium status can only be set by Cloud Functions (admin)
+      allow update: if isOwner(userId)
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'isPremium', 
+          'subscriptionStatus', 
+          'subscriptionId', 
+          'subscriptionType',
+          'stripeCustomerId'
+        ]));
+      
+      // Prevent deletion of user documents
+      allow delete: if false;
+    }
+    
+    // Catch-all rule - deny access to any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

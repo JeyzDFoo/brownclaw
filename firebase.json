@@ -12,22 +12,8 @@
     }
   },
   "firestore": {
-    "indexes": [
-      {
-        "collectionGroup": "river_descents",
-        "queryScope": "COLLECTION",
-        "fields": [
-          {
-            "fieldPath": "userId",
-            "order": "ASCENDING"
-          },
-          {
-            "fieldPath": "timestamp",
-            "order": "DESCENDING"
-          }
-        ]
-      }
-    ]
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
   },
   "hosting": {
     "public": "build/web",
