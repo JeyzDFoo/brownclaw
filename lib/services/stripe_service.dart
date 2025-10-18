@@ -1,38 +1,20 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:html' as html;
 
+/// Stripe Service for Web
+/// Uses Stripe Checkout (hosted payment page) instead of native SDK
 class StripeService {
   static final StripeService _instance = StripeService._internal();
   factory StripeService() => _instance;
   StripeService._internal();
 
-  bool _initialized = false;
-
-  /// Initialize Stripe with your publishable key
-  /// Call this in main.dart before runApp()
-  Future<void> initialize(String publishableKey) async {
-    if (_initialized) return;
-
-    try {
-      Stripe.publishableKey = publishableKey;
-      await Stripe.instance.applySettings();
-      _initialized = true;
-      if (kDebugMode) {
-        print('✅ Stripe initialized successfully');
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error initializing Stripe: $e');
-      }
-      rethrow;
-    }
-  }
+  static const String publishableKey =
+      'pk_live_51SJ0MEAdlcDQOrDhhUZHnuVr7lzgZxeY4gQ2TyzDjtWv4li2XBGtgTpRFlkOHi2BQYTv3Uoey8IliofMrUvYwNyY00zsQfET3S';
 
   /// Create a subscription for the current user
-  /// Returns true if successful, false otherwise
+  /// Redirects to Stripe Checkout page
   Future<bool> createSubscription({required String priceId}) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -41,50 +23,39 @@ class StripeService {
       }
 
       if (kDebugMode) {
-        print('🔄 Creating subscription for user: ${user.uid}');
+        print('🔄 Creating Stripe Checkout session for user: ${user.uid}');
         print('   Price ID: $priceId');
       }
 
-      // Call Cloud Function to create subscription
+      // Call Cloud Function to create Stripe Checkout session
       final functions = FirebaseFunctions.instance;
-      final createSubscription = functions.httpsCallable('createSubscription');
+      final createCheckoutSession = functions.httpsCallable(
+        'createCheckoutSession',
+      );
 
-      final result = await createSubscription.call({
+      final result = await createCheckoutSession.call({
         'priceId': priceId,
         'userId': user.uid,
         'email': user.email,
+        'successUrl': html.window.location.href,
+        'cancelUrl': html.window.location.href,
       });
 
       final data = result.data as Map<String, dynamic>;
-      final clientSecret = data['clientSecret'] as String?;
+      final checkoutUrl = data['url'] as String?;
 
-      if (clientSecret == null) {
-        throw Exception('Failed to get payment client secret');
+      if (checkoutUrl == null) {
+        throw Exception('Failed to get checkout URL');
       }
-
-      // Present payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          merchantDisplayName: 'Brown Claw',
-          paymentIntentClientSecret: clientSecret,
-          customerEphemeralKeySecret: data['ephemeralKey'] as String?,
-          customerId: data['customerId'] as String?,
-          style: ThemeMode.system,
-        ),
-      );
-
-      await Stripe.instance.presentPaymentSheet();
 
       if (kDebugMode) {
-        print('✅ Subscription created successfully');
+        print('✅ Checkout session created, redirecting to Stripe...');
       }
+
+      // Redirect to Stripe Checkout
+      html.window.location.href = checkoutUrl;
 
       return true;
-    } on StripeException catch (e) {
-      if (kDebugMode) {
-        print('❌ Stripe error: ${e.error.localizedMessage}');
-      }
-      rethrow;
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error creating subscription: $e');
@@ -105,53 +76,13 @@ class StripeService {
       }
 
       if (kDebugMode) {
-        print('🔄 Creating one-time payment for user: ${user.uid}');
+        print('🔄 Creating checkout session for user: ${user.uid}');
         print('   Amount: $amountCents cents ($currency)');
       }
 
-      // Call Cloud Function to create payment intent
-      final functions = FirebaseFunctions.instance;
-      final createPaymentIntent = functions.httpsCallable(
-        'createPaymentIntent',
-      );
-
-      final result = await createPaymentIntent.call({
-        'amount': amountCents,
-        'currency': currency,
-        'userId': user.uid,
-        'email': user.email,
-      });
-
-      final data = result.data as Map<String, dynamic>;
-      final clientSecret = data['clientSecret'] as String?;
-
-      if (clientSecret == null) {
-        throw Exception('Failed to get payment client secret');
-      }
-
-      // Present payment sheet
-      await Stripe.instance.initPaymentSheet(
-        paymentSheetParameters: SetupPaymentSheetParameters(
-          merchantDisplayName: 'Brown Claw',
-          paymentIntentClientSecret: clientSecret,
-          customerEphemeralKeySecret: data['ephemeralKey'] as String?,
-          customerId: data['customerId'] as String?,
-          style: ThemeMode.system,
-        ),
-      );
-
-      await Stripe.instance.presentPaymentSheet();
-
-      if (kDebugMode) {
-        print('✅ Payment completed successfully');
-      }
-
-      return true;
-    } on StripeException catch (e) {
-      if (kDebugMode) {
-        print('❌ Stripe error: ${e.error.localizedMessage}');
-      }
-      rethrow;
+      // For now, we'll use subscription flow only
+      // You can implement one-time payments later if needed
+      throw UnimplementedError('One-time payments not yet implemented for web');
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error creating payment: $e');

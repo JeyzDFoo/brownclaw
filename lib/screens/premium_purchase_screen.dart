@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_stripe/flutter_stripe.dart' hide Card;
 import '../services/stripe_service.dart';
 import '../providers/providers.dart';
 
@@ -15,12 +14,9 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
 
-  // #todo: STRIPE INTEGRATION - Add your Stripe Price ID here
-  // 1. Go to https://dashboard.stripe.com/test/products
-  // 2. Create a product: "Premium Monthly" at $2.00/month
-  // 3. Copy the Price ID (starts with price_) and paste below
+  // Stripe Price ID for $2.00/month subscription
   static const String monthlyPriceId =
-      'price_XXXXXXXXXXXXX'; // Replace with your price_xxx ID
+      'price_1SJefYAdlcDQOrDh1BdYTe8U'; // Premium Monthly - $2.00/month
 
   @override
   Widget build(BuildContext context) {
@@ -267,10 +263,6 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
           Navigator.of(context).pop(); // Return to previous screen
         }
       }
-    } on StripeException catch (e) {
-      setState(() {
-        _errorMessage = e.error.localizedMessage ?? 'Payment failed';
-      });
     } catch (e) {
       setState(() {
         _errorMessage = 'Error: ${e.toString()}';

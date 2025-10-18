@@ -1,0 +1,4 @@
+firebase_functions~=0.1.0
+stripe>=7.0.0
+firebase-admin>=6.0.0
+python-dotenv>=1.0.0
