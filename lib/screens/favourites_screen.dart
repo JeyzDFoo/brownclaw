@@ -84,27 +84,13 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     }
   }
 
-  // #todo: MAJOR REFACTOR NEEDED - Move all live data management to LiveWaterDataProvider
-  // Currently this screen is doing too much:
-  // 1. Managing API calls directly (should be in provider)
-  // 2. Caching live data locally (should be in provider)
-  // 3. Rate limiting logic (should be in provider)
-  // 4. Deduplication logic (partially moved to service, should be fully in provider)
-  // 5. Multiple concurrent refresh triggers causing API spam
-  //
-  // SOLUTION: Complete migration to use LiveWaterDataProvider for:
-  // - Centralized caching across app
-  // - Automatic deduplication of requests
-  // - Rate limiting per station
-  // - Reactive UI updates via ChangeNotifier
-  // - Proper error state management
-  //
-  // This will eliminate the repeated API calls and improve performance significantly.
-
-  // 🔥 REMOVED: No more local caches or lifecycle management - providers handle everything!
-  // The screen is now PURE UI - just displays what providers give us
-
-  // 🔥 REMOVED: Old cache-based helpers - now using provider directly in build()
+  // ✅ REFACTOR COMPLETE: All live data management now handled by LiveWaterDataProvider
+  // This screen is now a pure UI layer that:
+  // - Uses Consumer4 to reactively get data from providers
+  // - Gets cached live data via liveDataProvider.getLiveData()
+  // - Triggers fetches via liveDataProvider.fetchStationData()
+  // - No local state for API management, caching, or rate limiting
+  // All data logic properly separated into provider layer for better testability and reuse.
 
   /// Helper to get flow status from live data
   String _getFlowStatus(
@@ -414,14 +400,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                 ),
                                 const SizedBox(height: 24),
                                 ElevatedButton.icon(
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            const RiverRunSearchScreen(),
-                                      ),
-                                    );
-                                  },
+                                  onPressed: widget.onNavigateToSearch,
                                   icon: const Icon(Icons.search),
                                   label: const Text('Find River Runs'),
                                   style: ElevatedButton.styleFrom(
