@@ -11,6 +11,7 @@ class TransAltaProvider extends ChangeNotifier {
   DateTime? _lastFetchTime;
   bool _isLoading = false;
   String? _error;
+  bool _isFetching = false; // Guard against concurrent fetch calls
 
   // Cache duration - matches service cache
   static const Duration _cacheDuration = Duration(minutes: 15);
@@ -37,6 +38,14 @@ class TransAltaProvider extends ChangeNotifier {
   ///
   /// [forceRefresh] - Bypass cache and fetch fresh data
   Future<void> fetchFlowData({bool forceRefresh = false}) async {
+    // Guard against concurrent fetch calls
+    if (_isFetching) {
+      debugPrint(
+        'TransAltaProvider: Already fetching, skipping duplicate call',
+      );
+      return;
+    }
+
     // Return cached data if valid and not forcing refresh
     if (!forceRefresh && isCacheValid) {
       debugPrint(
@@ -45,6 +54,7 @@ class TransAltaProvider extends ChangeNotifier {
       return;
     }
 
+    _isFetching = true;
     _isLoading = true;
     _error = null;
     notifyListeners();
@@ -71,6 +81,7 @@ class TransAltaProvider extends ChangeNotifier {
       debugPrint('TransAltaProvider: Error - $e');
     } finally {
       _isLoading = false;
+      _isFetching = false;
       notifyListeners();
     }
   }

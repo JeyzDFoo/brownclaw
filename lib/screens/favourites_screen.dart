@@ -20,6 +20,7 @@ class FavouritesScreen extends StatefulWidget {
 class _FavouritesScreenState extends State<FavouritesScreen>
     with AutomaticKeepAliveClientMixin {
   Set<String> _previousFavoriteIds = {};
+  bool _hasInitializedTransAlta = false;
 
   @override
   bool get wantKeepAlive => true; // Keep state alive when navigating away
@@ -316,9 +317,11 @@ class _FavouritesScreenState extends State<FavouritesScreen>
               liveDataProvider,
             );
 
-            // Fetch TransAlta data if we have any Kananaskis rivers in favorites
-            if (favoriteRuns.any((run) => _isKananaskis(run))) {
+            // Fetch TransAlta data once if we have any Kananaskis rivers in favorites
+            if (!_hasInitializedTransAlta &&
+                favoriteRuns.any((run) => _isKananaskis(run))) {
               if (!transAltaProvider.hasData && !transAltaProvider.isLoading) {
+                _hasInitializedTransAlta = true;
                 Future.microtask(() => transAltaProvider.fetchFlowData());
               }
             }

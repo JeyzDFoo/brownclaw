@@ -9,19 +9,28 @@ import '../screens/premium_purchase_screen.dart';
 ///
 /// Uses TransAltaProvider for centralized state management
 /// Days beyond tomorrow require premium subscription
-class TransAltaFlowWidget extends StatelessWidget {
+class TransAltaFlowWidget extends StatefulWidget {
   final double threshold;
 
   const TransAltaFlowWidget({super.key, this.threshold = 20.0});
 
   @override
+  State<TransAltaFlowWidget> createState() => _TransAltaFlowWidgetState();
+}
+
+class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
+  bool _hasInitialized = false;
+
+  @override
   Widget build(BuildContext context) {
     return Consumer2<TransAltaProvider, PremiumProvider>(
       builder: (context, transAltaProvider, premiumProvider, child) {
-        // Fetch data if not already loaded
-        if (!transAltaProvider.hasData &&
+        // Fetch data once on first build if not already loaded
+        if (!_hasInitialized &&
+            !transAltaProvider.hasData &&
             !transAltaProvider.isLoading &&
             transAltaProvider.error == null) {
+          _hasInitialized = true;
           Future.microtask(() => transAltaProvider.fetchFlowData());
         }
 
@@ -54,7 +63,7 @@ class TransAltaFlowWidget extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Barrier Dam (≥${threshold.toStringAsFixed(0)} m³/s)',
+                  'Barrier Dam (≥${widget.threshold.toStringAsFixed(0)} m³/s)',
                   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const Divider(height: 24),
@@ -107,7 +116,9 @@ class TransAltaFlowWidget extends StatelessWidget {
     final flowData = provider.flowData;
     if (flowData == null) return const SizedBox();
 
-    final highFlowPeriods = provider.getAllFlowPeriods(threshold: threshold);
+    final highFlowPeriods = provider.getAllFlowPeriods(
+      threshold: widget.threshold,
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,14 +194,12 @@ class TransAltaFlowWidget extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'No flow periods ≥${threshold.toStringAsFixed(0)} m³/s in the forecast',
+            'No flow periods ≥${widget.threshold.toStringAsFixed(0)} m³/s in the forecast',
             style: TextStyle(color: Colors.grey[600]),
           ),
         ],
       );
-    }
-
-    // Group periods by day
+    } // Group periods by day
     final Map<int, List<HighFlowPeriod>> periodsByDay = {};
     for (final period in highFlowPeriods) {
       periodsByDay.putIfAbsent(period.dayNumber, () => []).add(period);
@@ -205,7 +214,7 @@ class TransAltaFlowWidget extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Flow Schedule (≥${threshold.toStringAsFixed(0)} m³/s)',
+          'Flow Schedule (≥${widget.threshold.toStringAsFixed(0)} m³/s)',
           style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
