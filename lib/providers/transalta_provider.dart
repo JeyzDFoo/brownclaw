@@ -73,11 +73,22 @@ class TransAltaProvider extends ChangeNotifier {
           'TransAltaProvider: Successfully fetched ${data.forecasts.length} days of data',
         );
       } else {
-        _error = 'Unable to fetch flow data';
-        debugPrint('TransAltaProvider: API returned null');
+        // Check if we have cached data to fall back on
+        if (_flowData != null && _lastFetchTime != null) {
+          final age = DateTime.now().difference(_lastFetchTime!);
+          _error =
+              'Using cached data (${age.inHours}h old). Unable to fetch updates.';
+          debugPrint('TransAltaProvider: API failed but using cached data');
+        } else {
+          _error =
+              'TransAlta service temporarily unavailable. Please try again later.';
+          debugPrint(
+            'TransAltaProvider: API returned null, no cache available',
+          );
+        }
       }
     } catch (e) {
-      _error = 'Error fetching flow data: $e';
+      _error = 'Connection error. Please check your internet connection.';
       debugPrint('TransAltaProvider: Error - $e');
     } finally {
       _isLoading = false;
