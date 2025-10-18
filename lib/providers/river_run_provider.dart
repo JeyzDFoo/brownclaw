@@ -68,9 +68,9 @@ class RiverRunProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> loadAllRuns() async {
-    // Check cache first before making Firestore call
-    if (_cache.isNotEmpty && _isCacheValid) {
+  Future<void> loadAllRuns({bool forceRefresh = false}) async {
+    // Check cache first before making Firestore call (unless force refresh)
+    if (!forceRefresh && _cache.isNotEmpty && _isCacheValid) {
       _riverRuns = _cache.values.toList();
       if (kDebugMode) {
         print('⚡ CACHE HIT: Loaded ${_riverRuns.length} runs from cache');
@@ -115,13 +115,22 @@ class RiverRunProvider extends ChangeNotifier {
   Future<String> addRiverRun(RiverRun run) async {
     try {
       final runId = await RiverRunService.addRun(run);
+
+      // Clear cache to force fresh reload
+      clearCache();
+
       // Reload data after adding
       await loadAllRuns();
+
+      if (kDebugMode) {
+        print('✅ Added river run $runId and reloaded all runs');
+      }
+
       return runId;
     } catch (e) {
       setError(e.toString());
       if (kDebugMode) {
-        print('Error loading river runs: $e');
+        print('Error adding river run: $e');
       }
       rethrow;
     }

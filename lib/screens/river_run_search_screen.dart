@@ -513,7 +513,7 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
 
               // If a new run was created, refresh the data from provider
               if (result == true) {
-                riverRunProvider.loadAllRuns();
+                riverRunProvider.loadAllRuns(forceRefresh: true);
               }
             },
             icon: const Icon(Icons.add),

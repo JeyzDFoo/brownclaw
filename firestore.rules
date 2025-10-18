@@ -36,9 +36,17 @@ service cloud.firestore {
       allow create, update, delete: if isAuthenticated();
     }
     
-    // Gauge stations collection - read-only for authenticated users
+    // Gauge stations collection - publicly readable
     match /gauge_stations/{stationId} {
-      allow read: if isAuthenticated();
+      allow read: if true;
+      
+      // Only backend should write station data
+      allow create, update, delete: if false;
+    }
+    
+    // Water stations collection - publicly readable
+    match /water_stations/{stationId} {
+      allow read: if true;
       
       // Only backend should write station data
       allow create, update, delete: if false;
