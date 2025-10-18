@@ -97,5 +97,9 @@ class VersionCheckerService {
   }
 }
 
-/// Singleton instance
-final versionCheckerService = VersionCheckerService();
+/// Singleton instance - lazy initialization
+VersionCheckerService? _versionCheckerServiceInstance;
+VersionCheckerService get versionCheckerService {
+  _versionCheckerServiceInstance ??= VersionCheckerService();
+  return _versionCheckerServiceInstance!;
+}

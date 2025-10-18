@@ -3,10 +3,15 @@ import '../services/version_checker_service.dart';
 
 /// Provider for managing app version checking
 class VersionProvider extends ChangeNotifier {
-  final VersionCheckerService _versionChecker = versionCheckerService;
+  late final VersionCheckerService _versionChecker;
 
   bool _showUpdateBanner = false;
   bool _isChecking = false;
+
+  VersionProvider() {
+    // Initialize the version checker lazily
+    _versionChecker = versionCheckerService;
+  }
 
   bool get showUpdateBanner => _showUpdateBanner;
   bool get isChecking => _isChecking;
