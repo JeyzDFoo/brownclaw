@@ -72,7 +72,7 @@ def createCheckoutSession(req: https_fn.CallableRequest) -> dict[str, Any]:
         if customer_id:
             try:
                 customer = stripe.Customer.retrieve(customer_id)
-            except stripe.error.StripeError:
+            except stripe.StripeError:
                 customer = None
         else:
             customer = None
@@ -106,7 +106,7 @@ def createCheckoutSession(req: https_fn.CallableRequest) -> dict[str, Any]:
             'sessionId': checkout_session.id
         }
         
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"Stripe error: {str(e)}"
@@ -157,7 +157,7 @@ def createSubscription(req: https_fn.CallableRequest) -> dict[str, Any]:
         if customer_id:
             try:
                 customer = stripe.Customer.retrieve(customer_id)
-            except stripe.error.StripeError:
+            except stripe.StripeError:
                 customer = None
         else:
             customer = None
@@ -197,7 +197,7 @@ def createSubscription(req: https_fn.CallableRequest) -> dict[str, Any]:
             'subscriptionId': subscription.id
         }
         
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"Stripe error: {str(e)}"
@@ -249,7 +249,7 @@ def createPaymentIntent(req: https_fn.CallableRequest) -> dict[str, Any]:
         if customer_id:
             try:
                 customer = stripe.Customer.retrieve(customer_id)
-            except stripe.error.StripeError:
+            except stripe.StripeError:
                 customer = None
         else:
             customer = None
@@ -280,7 +280,7 @@ def createPaymentIntent(req: https_fn.CallableRequest) -> dict[str, Any]:
             'customerId': customer.id
         }
         
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"Stripe error: {str(e)}"
@@ -350,7 +350,7 @@ def cancelSubscription(req: https_fn.CallableRequest) -> dict[str, Any]:
             'message': 'Subscription will be cancelled at period end'
         }
         
-    except stripe.error.StripeError as e:
+    except stripe.StripeError as e:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INTERNAL,
             message=f"Stripe error: {str(e)}"
@@ -413,7 +413,7 @@ def getSubscriptionStatus(req: https_fn.CallableRequest) -> dict[str, Any]:
                     'subscriptionStatus': subscription.status,
                     'currentPeriodEnd': subscription.current_period_end
                 }
-            except stripe.error.StripeError:
+            except stripe.StripeError:
                 pass
         
         return {
