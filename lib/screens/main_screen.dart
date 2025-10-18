@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
+import '../widgets/update_banner.dart';
 import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
@@ -21,6 +22,13 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _selectedIndex);
+
+    // Check for app updates on startup (web only)
+    Future.microtask(() {
+      if (mounted) {
+        context.read<VersionProvider>().checkForUpdate();
+      }
+    });
   }
 
   @override
@@ -56,126 +64,149 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_pageNames[_selectedIndex]),
-        actions: [
-          Consumer<UserProvider>(
-            builder: (context, userProvider, child) {
-              final user = userProvider.user;
-              return PopupMenuButton<String>(
-                onSelected: (value) async {
-                  if (value == 'theme') {
-                    context.read<ThemeProvider>().toggleTheme();
-                  } else if (value == 'premium') {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const PremiumSettingsScreen(),
+    return Consumer<VersionProvider>(
+      builder: (context, versionProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(_pageNames[_selectedIndex]),
+            actions: [
+              Consumer<UserProvider>(
+                builder: (context, userProvider, child) {
+                  final user = userProvider.user;
+                  return PopupMenuButton<String>(
+                    onSelected: (value) async {
+                      if (value == 'theme') {
+                        context.read<ThemeProvider>().toggleTheme();
+                      } else if (value == 'premium') {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const PremiumSettingsScreen(),
+                          ),
+                        );
+                      } else if (value == 'logout') {
+                        await userProvider.signOut();
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(context, '/');
+                        }
+                      }
+                    },
+                    itemBuilder: (context) => [
+                      PopupMenuItem(
+                        value: 'theme',
+                        child: Consumer<ThemeProvider>(
+                          builder: (context, themeProvider, child) {
+                            return Row(
+                              children: [
+                                Icon(
+                                  themeProvider.isDarkMode
+                                      ? Icons.light_mode
+                                      : Icons.dark_mode,
+                                ),
+                                SizedBox(width: 8),
+                                Text(
+                                  themeProvider.isDarkMode
+                                      ? 'Light Mode'
+                                      : 'Dark Mode',
+                                ),
+                              ],
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  } else if (value == 'logout') {
-                    await userProvider.signOut();
-                    if (context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/');
-                    }
-                  }
-                },
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    value: 'theme',
-                    child: Consumer<ThemeProvider>(
-                      builder: (context, themeProvider, child) {
-                        return Row(
+                      PopupMenuItem(
+                        value: 'premium',
+                        child: Consumer<PremiumProvider>(
+                          builder: (context, premiumProvider, child) {
+                            return Row(
+                              children: [
+                                Icon(
+                                  premiumProvider.isPremium
+                                      ? Icons.workspace_premium
+                                      : Icons.lock,
+                                  color: premiumProvider.isPremium
+                                      ? Colors.amber
+                                      : null,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  premiumProvider.isPremium
+                                      ? 'Premium Active'
+                                      : 'Premium Settings',
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'logout',
+                        child: Row(
                           children: [
-                            Icon(
-                              themeProvider.isDarkMode
-                                  ? Icons.light_mode
-                                  : Icons.dark_mode,
-                            ),
+                            Icon(Icons.logout),
                             SizedBox(width: 8),
-                            Text(
-                              themeProvider.isDarkMode
-                                  ? 'Light Mode'
-                                  : 'Dark Mode',
-                            ),
+                            Text('Sign Out'),
                           ],
-                        );
-                      },
+                        ),
+                      ),
+                    ],
+                    child: CircleAvatar(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: Text(
+                        (user?.displayName?.isNotEmpty == true)
+                            ? user!.displayName![0].toUpperCase()
+                            : (user?.email?.isNotEmpty == true)
+                            ? user!.email![0].toUpperCase()
+                            : 'U',
+                        style: const TextStyle(color: Colors.white),
+                      ),
                     ),
-                  ),
-                  PopupMenuItem(
-                    value: 'premium',
-                    child: Consumer<PremiumProvider>(
-                      builder: (context, premiumProvider, child) {
-                        return Row(
-                          children: [
-                            Icon(
-                              premiumProvider.isPremium
-                                  ? Icons.workspace_premium
-                                  : Icons.lock,
-                              color: premiumProvider.isPremium
-                                  ? Colors.amber
-                                  : null,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              premiumProvider.isPremium
-                                  ? 'Premium Active'
-                                  : 'Premium Settings',
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'logout',
-                    child: Row(
-                      children: [
-                        Icon(Icons.logout),
-                        SizedBox(width: 8),
-                        Text('Sign Out'),
-                      ],
-                    ),
-                  ),
-                ],
-                child: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  child: Text(
-                    (user?.displayName?.isNotEmpty == true)
-                        ? user!.displayName![0].toUpperCase()
-                        : (user?.email?.isNotEmpty == true)
-                        ? user!.email![0].toUpperCase()
-                        : 'U',
-                    style: const TextStyle(color: Colors.white),
-                  ),
+                  );
+                },
+              ),
+              const SizedBox(width: 16),
+            ],
+          ),
+          body: Column(
+            children: [
+              // Show update banner if update is available
+              if (versionProvider.showUpdateBanner)
+                UpdateBanner(
+                  message: versionProvider.updateMessage,
+                  onDismiss: () => versionProvider.dismissUpdateBanner(),
                 ),
-              );
-            },
+              // Main content
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: _onPageChanged,
+                  children: _screens,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-        ],
-      ),
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: _onPageChanged,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite),
-            label: 'Favourites',
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            type: BottomNavigationBarType.fixed,
+            selectedItemColor: Colors.blue,
+            unselectedItemColor: Colors.grey,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.favorite),
+                label: 'Favourites',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.kayaking),
+                label: 'Logbook',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.search),
+                label: 'Find Runs',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.kayaking), label: 'Logbook'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Find Runs'),
-        ],
-      ),
+        );
+      },
     );
   }
 }

@@ -1,0 +1,55 @@
+import 'package:flutter/foundation.dart';
+import '../services/version_checker_service.dart';
+
+/// Provider for managing app version checking
+class VersionProvider extends ChangeNotifier {
+  final VersionCheckerService _versionChecker = versionCheckerService;
+
+  bool _showUpdateBanner = false;
+  bool _isChecking = false;
+
+  bool get showUpdateBanner => _showUpdateBanner;
+  bool get isChecking => _isChecking;
+  bool get updateAvailable => _versionChecker.updateAvailable;
+  String get updateMessage => _versionChecker.updateMessage;
+  int? get latestBuildNumber => _versionChecker.latestBuildNumber;
+
+  /// Check for updates
+  Future<void> checkForUpdate() async {
+    if (_isChecking) return;
+
+    _isChecking = true;
+    notifyListeners();
+
+    try {
+      final hasUpdate = await _versionChecker.checkForUpdate();
+      _showUpdateBanner = hasUpdate;
+    } finally {
+      _isChecking = false;
+      notifyListeners();
+    }
+  }
+
+  /// Force check (ignores rate limiting)
+  Future<void> forceCheck() async {
+    if (_isChecking) return;
+
+    _isChecking = true;
+    notifyListeners();
+
+    try {
+      final hasUpdate = await _versionChecker.forceCheck();
+      _showUpdateBanner = hasUpdate;
+    } finally {
+      _isChecking = false;
+      notifyListeners();
+    }
+  }
+
+  /// Dismiss the update banner
+  void dismissUpdateBanner() {
+    _showUpdateBanner = false;
+    _versionChecker.clearUpdateFlag();
+    notifyListeners();
+  }
+}

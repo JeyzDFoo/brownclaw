@@ -56,6 +56,7 @@ class MainApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => LogbookProvider()),
         ChangeNotifierProvider(create: (_) => PremiumProvider()),
         ChangeNotifierProvider(create: (_) => TransAltaProvider()),
+        ChangeNotifierProvider(create: (_) => VersionProvider()),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
