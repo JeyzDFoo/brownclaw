@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/stripe_service.dart';
+import '../services/analytics_service.dart';
 import '../providers/providers.dart';
 
 class PremiumPurchaseScreen extends StatefulWidget {
@@ -243,12 +244,18 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
       _errorMessage = null;
     });
 
+    // Log purchase initiation
+    await AnalyticsService.logPurchaseInitiated(priceId, 2.29);
+
     try {
       final success = await StripeService().createSubscription(
         priceId: priceId,
       );
 
       if (success && mounted) {
+        // Log successful purchase
+        await AnalyticsService.logPurchaseCompleted(priceId, 2.29);
+
         // Refresh premium status
         await context.read<PremiumProvider>().refreshPremiumStatus();
 
@@ -264,6 +271,9 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
         }
       }
     } catch (e) {
+      // Log purchase failure
+      await AnalyticsService.logError('Purchase failed: ${e.toString()}');
+
       setState(() {
         _errorMessage = 'Error: ${e.toString()}';
       });

@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import '../services/live_water_data_service.dart';
 import '../services/historical_water_data_service.dart';
 import '../services/river_run_service.dart';
+import '../services/analytics_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import '../widgets/transalta_flow_widget.dart';
@@ -519,6 +520,10 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   Future<void> _changeDaysRange(int newDays) async {
     if (newDays == _selectedDays) return;
 
+    // Log chart time range change
+    final runId = widget.riverData['runId'] as String? ?? 'unknown';
+    await AnalyticsService.logChartTimeRangeChanged(newDays, runId);
+
     setState(() {
       _selectedDays = newDays;
       _isLoadingChart = true;
@@ -529,6 +534,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   void _showPremiumDialog(BuildContext context) {
+    // Log premium paywall view
+    AnalyticsService.logPremiumPaywallViewed(
+      'historical_data_${_selectedDays}_days',
+    );
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -569,6 +579,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
             ),
             ElevatedButton(
               onPressed: () {
+                // Log premium purchase initiated from paywall
+                AnalyticsService.logPurchaseInitiated('monthly_premium', 2.29);
+
                 Navigator.of(context).pop();
                 // Navigate to premium purchase page
                 Navigator.of(context).push(
@@ -710,6 +723,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                 icon: const Icon(Icons.edit),
                 tooltip: 'Edit Run Details',
                 onPressed: () async {
+                  // Log river run edit action
+                  final runId =
+                      widget.riverData['runId'] as String? ?? 'unknown';
+                  await AnalyticsService.logRiverRunEdited(runId);
+
                   final result = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
                       builder: (context) =>

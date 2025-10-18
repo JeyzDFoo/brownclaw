@@ -7,6 +7,7 @@ import 'firebase_options.dart';
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
 import 'providers/providers.dart';
+import 'services/analytics_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +21,10 @@ void main() async {
   //   // Silent - no more spam! 😄
   // };
 
-  // #todo: Add Firebase performance monitoring and analytics for production
-  // #todo: Implement error reporting (Crashlytics) for production monitoring
-
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Log app open event
+  await AnalyticsService.logAppOpen();
 
   if (kDebugMode) {
     final loadTime = DateTime.now().difference(startTime);
@@ -60,6 +61,7 @@ class MainApp extends StatelessWidget {
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
             themeMode: themeProvider.themeMode,
+            navigatorObservers: [AnalyticsService.observer],
             // #todo: Remove artificial width constraint for mobile-first design
             builder: (context, child) {
               return Center(

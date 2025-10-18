@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_sign_in_service.dart';
+import '../services/analytics_service.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -17,14 +18,23 @@ class _AuthScreenState extends State<AuthScreen> {
       _isLoading = true;
     });
 
+    // Log sign-in attempt
+    await AnalyticsService.logSignInAttempt('google');
+
     try {
       final userCredential = await GoogleSignInService.signInWithGoogle();
 
       if (userCredential == null && mounted) {
+        // User cancelled sign-in
+        await AnalyticsService.logSignInFailure('google', 'cancelled');
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Sign in cancelled')));
       } else if (userCredential != null && mounted) {
+        // Sign-in successful
+        await AnalyticsService.logLogin('google');
+        await AnalyticsService.setUserId(userCredential.user!.uid);
+
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -40,6 +50,9 @@ class _AuthScreenState extends State<AuthScreen> {
         }
       }
     } on FirebaseAuthException catch (e) {
+      // Log specific Firebase auth errors
+      await AnalyticsService.logSignInFailure('google', e.code);
+
       if (mounted) {
         String errorMessage = 'Authentication failed';
         switch (e.code) {
@@ -64,6 +77,10 @@ class _AuthScreenState extends State<AuthScreen> {
         );
       }
     } catch (e) {
+      // Log general errors
+      await AnalyticsService.logSignInFailure('google', 'unknown_error');
+      await AnalyticsService.logError('Sign-in error: $e');
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

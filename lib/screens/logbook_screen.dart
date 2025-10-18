@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../providers/logbook_provider.dart';
+import '../services/analytics_service.dart';
 import 'logbook_entry_screen.dart';
 
 class LogBookScreen extends StatefulWidget {
@@ -19,9 +20,13 @@ class _LogBookScreenState extends State<LogBookScreen>
   @override
   bool get wantKeepAlive => true; // Keep state alive when navigating away
 
-  Future<void> _deleteLogEntry(String entryId) async {
+  Future<void> _deleteLogEntry(String entryId, String riverName) async {
     try {
       await _firestore.collection('river_descents').doc(entryId).delete();
+
+      // Log deletion
+      await AnalyticsService.logLogbookEntryDeleted(riverName);
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('River descent deleted successfully')),
@@ -224,7 +229,10 @@ class _LogBookScreenState extends State<LogBookScreen>
                                               // Entry was edited successfully
                                             }
                                           } else if (value == 'delete') {
-                                            _deleteLogEntry(doc.id);
+                                            _deleteLogEntry(
+                                              doc.id,
+                                              data['riverName'] ?? 'Unknown',
+                                            );
                                           }
                                         },
                                         itemBuilder: (context) => [
@@ -403,6 +411,9 @@ class _LogBookScreenState extends State<LogBookScreen>
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
+          // Log logbook entry creation intent
+          await AnalyticsService.logCustomEvent('logbook_fab_clicked');
+
           final result = await Navigator.of(context).push(
             MaterialPageRoute(builder: (context) => const LogbookEntryScreen()),
           );

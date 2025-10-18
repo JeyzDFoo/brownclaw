@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/river_run_service.dart';
+import '../services/analytics_service.dart';
 import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
 import 'logbook_entry_screen.dart';
@@ -258,6 +259,12 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     try {
       await context.read<FavoritesProvider>().toggleFavorite(
         runWithStations.run.id,
+      );
+
+      // Log favorite removal
+      await AnalyticsService.logFavoriteRemoved(
+        runWithStations.run.id,
+        runWithStations.run.displayName,
       );
 
       // Reload favorites list after toggling
@@ -518,6 +525,12 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                           ),
                                           child: ListTile(
                                             onTap: () async {
+                                              // Log river detail view from favorites
+                                              await AnalyticsService.logRiverRunViewed(
+                                                runWithStations.run.id,
+                                                runWithStations.run.displayName,
+                                              );
+
                                               if (kDebugMode) {
                                                 print(
                                                   '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
@@ -588,6 +601,13 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                                 color: Colors.blue,
                                               ),
                                               onPressed: () {
+                                                // Log logbook entry creation from favorites
+                                                AnalyticsService.logLogbookEntryCreated(
+                                                  currentRunWithStations
+                                                      .run
+                                                      .displayName,
+                                                );
+
                                                 Navigator.of(context).push(
                                                   MaterialPageRoute(
                                                     builder: (context) =>
@@ -747,6 +767,11 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                                       size: 20,
                                                     ),
                                                     onPressed: () async {
+                                                      // Log refresh action
+                                                      await AnalyticsService.logRefreshAction(
+                                                        'favorites',
+                                                      );
+
                                                       if (kDebugMode) {
                                                         print(
                                                           '🔄 Manual refresh for station: $stationId',

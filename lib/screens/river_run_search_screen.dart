@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/river_run_service.dart';
+import '../services/analytics_service.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
 import 'create_river_run_screen.dart';
@@ -127,6 +128,19 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
 
       final isFavorite = favoritesProvider.isFavorite(runWithStations.run.id);
 
+      // Log favorite toggle
+      if (isFavorite) {
+        await AnalyticsService.logFavoriteAdded(
+          runWithStations.run.id,
+          runWithStations.run.displayName,
+        );
+      } else {
+        await AnalyticsService.logFavoriteRemoved(
+          runWithStations.run.id,
+          runWithStations.run.displayName,
+        );
+      }
+
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: Text(
@@ -179,7 +193,16 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                         prefixIcon: Icon(Icons.search),
                         border: OutlineInputBorder(),
                       ),
-                      onChanged: (_) => _filterRuns(allRuns),
+                      onChanged: (query) {
+                        _filterRuns(allRuns);
+                        // Log search after user stops typing (debounced in practice)
+                        if (query.isNotEmpty && query.length >= 3) {
+                          AnalyticsService.logRiverSearch(
+                            query,
+                            resultCount: _filteredRuns.length,
+                          );
+                        }
+                      },
                     ),
                     const SizedBox(height: 12),
 
@@ -204,6 +227,12 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                               );
                             }).toList(),
                             onChanged: (value) {
+                              // Log filter application
+                              AnalyticsService.logSearchFilterApplied(
+                                'difficulty',
+                                value ?? 'All Difficulties',
+                              );
+
                               setState(() {
                                 _selectedDifficulty =
                                     value ?? 'All Difficulties';
@@ -231,6 +260,12 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                               );
                             }).toList(),
                             onChanged: (value) {
+                              // Log filter application
+                              AnalyticsService.logSearchFilterApplied(
+                                'region',
+                                value ?? 'All Regions',
+                              );
+
                               setState(() {
                                 _selectedRegion = value ?? 'All Regions';
                               });
@@ -328,6 +363,11 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                               leading: IconButton(
                                 icon: const Icon(Icons.add, color: Colors.blue),
                                 onPressed: () {
+                                  // Log logbook entry creation from search
+                                  AnalyticsService.logLogbookEntryCreated(
+                                    runWithStations.run.displayName,
+                                  );
+
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (context) => LogbookEntryScreen(
@@ -432,6 +472,12 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
                                 },
                               ),
                               onTap: () async {
+                                // Log river run view from search
+                                await AnalyticsService.logRiverRunViewed(
+                                  runWithStations.run.id,
+                                  runWithStations.run.displayName,
+                                );
+
                                 // Navigate to the same detail screen used in favorites
                                 await Navigator.of(context).push(
                                   MaterialPageRoute(

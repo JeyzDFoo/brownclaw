@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../widgets/update_banner.dart';
+import '../services/analytics_service.dart';
 import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
@@ -49,6 +50,9 @@ class _MainScreenState extends State<MainScreen> {
   final List<String> _pageNames = ['Favourites', 'Logbook', 'Find Runs'];
 
   void _onItemTapped(int index) {
+    // Log tab navigation
+    AnalyticsService.logTabNavigation(_pageNames[index], index);
+
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 300),
@@ -76,14 +80,26 @@ class _MainScreenState extends State<MainScreen> {
                   return PopupMenuButton<String>(
                     onSelected: (value) async {
                       if (value == 'theme') {
-                        context.read<ThemeProvider>().toggleTheme();
+                        final themeProvider = context.read<ThemeProvider>();
+                        themeProvider.toggleTheme();
+                        // Log theme change
+                        await AnalyticsService.logThemeToggle(
+                          themeProvider.isDarkMode ? 'dark' : 'light',
+                        );
+                        await AnalyticsService.logMenuAction('theme_toggle');
                       } else if (value == 'premium') {
+                        await AnalyticsService.logMenuAction(
+                          'premium_settings',
+                        );
+                        await AnalyticsService.logPremiumSettingsViewed();
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const PremiumSettingsScreen(),
                           ),
                         );
                       } else if (value == 'logout') {
+                        await AnalyticsService.logMenuAction('logout');
+                        await AnalyticsService.logSignOut();
                         await userProvider.signOut();
                         if (context.mounted) {
                           Navigator.pushReplacementNamed(context, '/');
