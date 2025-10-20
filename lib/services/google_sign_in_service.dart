@@ -1,20 +1,53 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class GoogleSignInService {
-  static final GoogleSignIn _googleSignIn = GoogleSignIn(
-    clientId:
-        '1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com',
-    scopes: ['email', 'profile'],
-  );
+  static GoogleSignIn? _googleSignInInstance;
+
+  static GoogleSignIn get _googleSignIn {
+    _googleSignInInstance ??= GoogleSignIn(
+      clientId:
+          '1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com',
+      scopes: ['email', 'profile'],
+    );
+    return _googleSignInInstance!;
+  }
 
   static Future<UserCredential?> signInWithGoogle() async {
     try {
       print('🟦 GoogleSignInService: Starting Google Sign-In process...');
 
-      // Trigger the authentication flow
-      print('🟦 GoogleSignInService: Calling _googleSignIn.signIn()...');
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // For web, try silent sign-in first (recommended approach)
+      GoogleSignInAccount? googleUser;
+
+      if (kIsWeb) {
+        print(
+          '🟦 GoogleSignInService: Web platform - trying silent sign-in first...',
+        );
+        try {
+          googleUser = await _googleSignIn.signInSilently();
+          if (googleUser == null) {
+            print(
+              '🟦 GoogleSignInService: Silent sign-in returned null, using interactive sign-in...',
+            );
+            googleUser = await _googleSignIn.signIn();
+          } else {
+            print('🟦 GoogleSignInService: Silent sign-in successful!');
+          }
+        } catch (e) {
+          print(
+            '🟠 GoogleSignInService: Silent sign-in failed, falling back to interactive: $e',
+          );
+          googleUser = await _googleSignIn.signIn();
+        }
+      } else {
+        // For mobile/desktop, use the standard sign-in
+        print(
+          '🟦 GoogleSignInService: Mobile/Desktop platform - using standard sign-in...',
+        );
+        googleUser = await _googleSignIn.signIn();
+      }
 
       print(
         '🟦 GoogleSignInService: GoogleSignInAccount result: ${googleUser != null ? "SUCCESS" : "NULL"}',

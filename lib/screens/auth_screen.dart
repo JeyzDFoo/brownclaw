@@ -160,7 +160,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ],
                     ).createShader(bounds),
                     child: const Text(
-                      'BrownClaw',
+                      'Brown Paw',
                       style: TextStyle(
                         fontSize: 42,
                         fontWeight: FontWeight.bold,
@@ -220,7 +220,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       ),
                     ),
                     child: Text(
-                      'Track your descents, discover new rivers,\nand share your paddling adventures.',
+                      'Track your descents, watch water levels, discover new runs.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
@@ -282,16 +282,10 @@ class _AuthScreenState extends State<AuthScreen> {
                           : Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(
-                                  'assets/google_logo.png',
-                                  height: 24,
-                                  width: 24,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      const Icon(
-                                        Icons.login,
-                                        size: 24,
-                                        color: Color(0xFF4285F4),
-                                      ),
+                                const Icon(
+                                  Icons.account_circle,
+                                  size: 24,
+                                  color: Color(0xFF4285F4),
                                 ),
                                 const SizedBox(width: 16),
                                 const Text(
