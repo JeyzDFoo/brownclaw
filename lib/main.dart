@@ -57,7 +57,7 @@ class MainApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
           return MaterialApp(
-            title: 'Brown Claw - Whitewater Logbook',
+            title: 'Brown Paw - Whitewater Logbook',
             theme: themeProvider.lightTheme,
             darkTheme: themeProvider.darkTheme,
             themeMode: themeProvider.themeMode,
