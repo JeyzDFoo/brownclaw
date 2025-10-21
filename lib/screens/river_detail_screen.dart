@@ -36,6 +36,8 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   String? _error;
   String? _chartError;
   int _selectedDays = 3; // Default to 3 days of historical data
+  int?
+  _selectedYear; // null means current/combined data, otherwise specific year
 
   // Stream subscription for real-time river run updates
   StreamSubscription<RiverRun?>? _runSubscription;
@@ -185,6 +187,12 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       final stationId = widget.riverData['stationId'] as String;
       final historicalData = await _fetchHistoricalData(stationId);
 
+      if (kDebugMode) {
+        print(
+          '✅ _loadHistoricalData completed: ${historicalData.length} data points',
+        );
+      }
+
       if (mounted) {
         setState(() {
           _historicalData = historicalData;
@@ -192,6 +200,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         });
       }
     } catch (e) {
+      if (kDebugMode) {
+        print('❌ _loadHistoricalData error: $e');
+      }
       if (mounted) {
         setState(() {
           _chartError = e.toString();
@@ -204,7 +215,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   Future<List<FlSpot>> _fetchHistoricalData(String stationId) async {
     try {
       if (kDebugMode) {
-        print('🔍 Fetching data for station: $stationId, days: $_selectedDays');
+        print(
+          '🔍 Fetching data for station: $stationId, days: $_selectedDays, year: $_selectedYear',
+        );
       }
 
       List<Map<String, dynamic>> dataPoints = [];
@@ -249,14 +262,54 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         }
       } else {
         if (kDebugMode) {
-          print('📊 Using historical data only for $_selectedDays days');
+          print(
+            '📊 Fetching data for $_selectedDays days, year: $_selectedYear (null means current/2024)',
+          );
         }
 
-        // For longer periods, use historical data only (more efficient)
-        dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
-          stationId,
-          daysBack: _selectedDays,
-        );
+        // Check if viewing a specific historical year
+        if (_selectedYear != null) {
+          if (kDebugMode) {
+            print('📅 Fetching historical year data for $_selectedYear');
+          }
+          // Fetch specific year from historical API
+          dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
+            stationId,
+            year: _selectedYear,
+          );
+
+          if (kDebugMode) {
+            print(
+              '📅 Got ${dataPoints.length} data points for year $_selectedYear',
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print('📅 Fetching combined timeline for current data');
+          }
+          // Default: use combined timeline for current data
+          final combinedResult =
+              await HistoricalWaterDataService.getCombinedTimeline(
+                stationId,
+                includeRealtimeData: true,
+              );
+
+          final combined =
+              combinedResult['combined'] as List<Map<String, dynamic>>;
+
+          if (combined.isNotEmpty) {
+            // Sort by date (most recent first)
+            combined.sort(
+              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+            );
+
+            // Take only the last N days
+            dataPoints = combined.take(_selectedDays).toList();
+
+            // Reverse for charting (oldest first)
+            dataPoints = dataPoints.reversed.toList();
+          }
+        }
       }
 
       if (kDebugMode) {
@@ -285,6 +338,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           final date = DateTime.parse(dateStr);
           final timestamp = date.millisecondsSinceEpoch.toDouble();
           spots.add(FlSpot(timestamp, discharge));
+        } else if (kDebugMode && dataPoints.length < 10) {
+          // Debug: show why data points are being skipped (only for small datasets)
+          print(
+            '⚠️ Skipping data point: dateStr=$dateStr, discharge=$discharge',
+          );
         }
       }
 
@@ -292,7 +350,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       spots.sort((a, b) => a.x.compareTo(b.x));
 
       if (kDebugMode) {
-        print('✅ Created ${spots.length} chart data points');
+        print(
+          '✅ Created ${spots.length} chart data points from ${dataPoints.length} raw data points',
+        );
+        if (spots.isEmpty && dataPoints.isNotEmpty) {
+          print('⚠️ WARNING: Had data points but created 0 chart spots!');
+          print('   First data point keys: ${dataPoints.first.keys.toList()}');
+          print('   First data point: ${dataPoints.first}');
+        }
       }
 
       return spots;
@@ -481,11 +546,35 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           flowStats = {'error': 'No data available', 'count': 0};
         }
       } else {
-        // Use historical statistics for longer periods (more efficient)
-        flowStats = await HistoricalWaterDataService.getFlowStatistics(
-          stationId,
-          daysBack: _selectedDays,
-        );
+        // Check if viewing a specific historical year
+        if (_selectedYear != null) {
+          // Use historical API for specific year
+          flowStats = await HistoricalWaterDataService.getFlowStatistics(
+            stationId,
+            year: _selectedYear,
+          );
+        } else {
+          // Default: use combined timeline
+          final combinedResult =
+              await HistoricalWaterDataService.getCombinedTimeline(
+                stationId,
+                includeRealtimeData: true,
+              );
+          final combined =
+              combinedResult['combined'] as List<Map<String, dynamic>>;
+
+          if (combined.isNotEmpty) {
+            // Take last N days
+            combined.sort(
+              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+            );
+            final recentData = combined.take(_selectedDays).toList();
+
+            flowStats = _calculateStatsFromData(recentData);
+          } else {
+            flowStats = {'error': 'No data available', 'count': 0};
+          }
+        }
       }
 
       // Load recent trend (always use historical service for this)
@@ -526,6 +615,18 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
     setState(() {
       _selectedDays = newDays;
+      _isLoadingChart = true;
+      _isLoadingStats = true;
+    });
+
+    await Future.wait([_loadHistoricalData(), _loadStatisticsData()]);
+  }
+
+  Future<void> _changeYear(int? newYear) async {
+    if (newYear == _selectedYear) return;
+
+    setState(() {
+      _selectedYear = newYear;
       _isLoadingChart = true;
       _isLoadingStats = true;
     });
@@ -1045,7 +1146,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Real-time Discharge History',
+                          _selectedYear != null
+                              ? 'Discharge History - $_selectedYear'
+                              : 'Real-time Discharge History',
                           style: Theme.of(context).textTheme.titleLarge
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -1271,12 +1374,28 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                             ),
                           )
                         else
-                          const Center(
+                          Center(
                             child: Padding(
                               padding: EdgeInsets.all(40.0),
-                              child: Text(
-                                'No historical data available',
-                                style: TextStyle(color: Colors.grey),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    _selectedYear != null
+                                        ? 'No historical data available for $_selectedYear'
+                                        : 'No historical data available',
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  if (_selectedYear != null) ...[
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'This station may only have real-time data',
+                                      style: TextStyle(
+                                        color: Colors.grey,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ],
                               ),
                             ),
                           ),
@@ -1395,7 +1514,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   spacing: 8.0,
                   children: [3, 14, 30, 365].map((days) {
                     final isSelected = days == _selectedDays;
-                    final label = days == 365 ? '2024' : '${days}d';
+                    final label = days == 365 ? 'Year' : '${days}d';
                     final isLocked = days != 3 && !premiumProvider.isPremium;
 
                     return FilterChip(
@@ -1440,6 +1559,55 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                       ),
                     ),
                   ),
+
+                // Year selector (only shown when 365 days is selected and user is premium)
+                if (_selectedDays == 365 && premiumProvider.isPremium) ...[
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Select Year',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8.0,
+                    children:
+                        [
+                          null,
+                          DateTime.now().year - 1,
+                          DateTime.now().year - 2,
+                          DateTime.now().year - 3,
+                          DateTime.now().year - 4,
+                        ].map((year) {
+                          final isSelected = year == _selectedYear;
+                          final label = year == null ? 'Year' : year.toString();
+
+                          return FilterChip(
+                            label: Text(label),
+                            selected: isSelected,
+                            onSelected: (selected) {
+                              if (selected) {
+                                _changeYear(year);
+                              }
+                            },
+                            selectedColor: Colors.blue.withOpacity(0.3),
+                            backgroundColor: Colors.grey.withOpacity(0.1),
+                          );
+                        }).toList(),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'ℹ️ View historical data from previous years',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -1479,7 +1647,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Flow Statistics (Last ${_selectedDays == 365 ? '2024' : '$_selectedDays days'})',
+              _selectedYear != null
+                  ? 'Flow Statistics - $_selectedYear'
+                  : 'Flow Statistics (Last ${_selectedDays == 365 ? '2024' : '$_selectedDays days'})',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),

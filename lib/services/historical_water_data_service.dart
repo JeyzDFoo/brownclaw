@@ -100,23 +100,33 @@ class HistoricalWaterDataService {
   /// - [startDate]: Start date for data range (optional)
   /// - [endDate]: End date for data range (defaults to December 31, 2024)
   /// - [daysBack]: Number of days back from endDate (defaults to 365)
+  /// - [year]: Specific year to fetch data for (e.g., 2024) - fetches full calendar year
   static Future<List<Map<String, dynamic>>> fetchHistoricalData(
     String stationId, {
     DateTime? startDate,
     DateTime? endDate,
     int? daysBack,
+    int? year,
   }) async {
-    // Default to December 31, 2024 - the last date with available historical data
-    // Note: Current year data (2025) is not available through this historical API
-    final historicalDataEnd = DateTime(2024, 12, 31);
+    // If year is specified, fetch the full calendar year
+    if (year != null) {
+      startDate = DateTime(year, 1, 1);
+      endDate = DateTime(year, 12, 31);
+    } else {
+      // Default to December 31, 2024 - the last date with available historical data
+      // Note: Current year data (2025) is not available through this historical API
+      final historicalDataEnd = DateTime(2024, 12, 31);
 
-    endDate ??= historicalDataEnd;
-    startDate ??= daysBack != null
-        ? endDate.subtract(Duration(days: daysBack))
-        : DateTime(endDate.year, 1, 1); // Default to full year
+      endDate ??= historicalDataEnd;
+      startDate ??= daysBack != null
+          ? endDate.subtract(Duration(days: daysBack))
+          : DateTime(endDate.year, 1, 1); // Default to full year
+    }
 
     final cacheKey =
         '${stationId}_${startDate.millisecondsSinceEpoch}_${endDate.millisecondsSinceEpoch}';
+
+    debugPrint('   🔑 Cache key: $cacheKey');
 
     // Check for valid cached data first
     final cachedData = _historicalDataCache[cacheKey];
@@ -125,8 +135,15 @@ class HistoricalWaterDataService {
     if (cachedData != null && cacheTime != null) {
       final cacheAge = DateTime.now().difference(cacheTime);
       if (cacheAge < _cacheTimeout) {
+        debugPrint(
+          '   ♻️ Using cached data (age: ${cacheAge.inMinutes} minutes)',
+        );
         return List<Map<String, dynamic>>.from(cachedData['data'] ?? []);
+      } else {
+        debugPrint('   🗑️ Cache expired (age: ${cacheAge.inMinutes} minutes)');
       }
+    } else {
+      debugPrint('   📭 No cache found');
     }
 
     try {
@@ -142,13 +159,20 @@ class HistoricalWaterDataService {
           'sortby=DATE&'
           'f=json';
 
+      debugPrint('📊 Fetching historical data: $url');
+      debugPrint('   Date range: $startDateStr to $endDateStr');
+
       final response = await http
           .get(Uri.parse(url))
           .timeout(const Duration(seconds: 30));
 
+      debugPrint('   Response status: ${response.statusCode}');
+
       if (response.statusCode == 200) {
         final jsonData = response.body;
         final historicalData = _parseHistoricalResponse(jsonData, stationId);
+
+        debugPrint('   ✅ Parsed ${historicalData.length} data points');
 
         // Cache successful results
         if (historicalData.isNotEmpty) {
@@ -157,9 +181,11 @@ class HistoricalWaterDataService {
         }
 
         return historicalData;
+      } else {
+        debugPrint('   ❌ Non-200 status code: ${response.statusCode}');
       }
     } catch (e) {
-      // Silent error handling for production
+      debugPrint('   ❌ Error fetching historical data: $e');
     }
 
     return [];
@@ -173,6 +199,8 @@ class HistoricalWaterDataService {
     try {
       final data = json.decode(jsonData);
       final features = data['features'] as List? ?? [];
+
+      debugPrint('   🔍 Parser: Found ${features.length} features in response');
 
       final historicalData = <Map<String, dynamic>>[];
 
@@ -201,6 +229,17 @@ class HistoricalWaterDataService {
         }
       }
 
+      debugPrint(
+        '   ✅ Parser: Created ${historicalData.length} data points from ${features.length} features',
+      );
+
+      if (features.isNotEmpty && historicalData.isEmpty) {
+        debugPrint('   ⚠️ Parser: Had features but created no data points');
+        debugPrint(
+          '   First feature properties: ${features.first['properties']}',
+        );
+      }
+
       // Sort by date (oldest first for historical data)
       historicalData.sort(
         (a, b) => (a['date'] as String).compareTo(b['date'] as String),
@@ -219,12 +258,14 @@ class HistoricalWaterDataService {
     DateTime? startDate,
     DateTime? endDate,
     int? daysBack,
+    int? year,
   }) async {
     final historicalData = await fetchHistoricalData(
       stationId,
       startDate: startDate,
       endDate: endDate,
       daysBack: daysBack,
+      year: year,
     );
 
     if (historicalData.isEmpty) {
@@ -627,13 +668,19 @@ class HistoricalWaterDataService {
 
     // Get real-time data (last 30 days) if requested
     if (includeRealtimeData) {
+      debugPrint('📡 Fetching realtime data...');
       final realtimeData = await fetchRealtimeAsHistorical(stationId);
+      debugPrint('   ✅ Got ${realtimeData.length} realtime data points');
       results['realtime'] = realtimeData;
 
       // Create combined timeline
       final combined = <Map<String, dynamic>>[];
       combined.addAll(historicalData);
       combined.addAll(realtimeData);
+
+      debugPrint(
+        '   📊 Combined total: ${combined.length} data points (${historicalData.length} historical + ${realtimeData.length} realtime)',
+      );
 
       // Sort combined data by date
       combined.sort(
