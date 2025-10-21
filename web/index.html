@@ -34,8 +34,115 @@
 
   <!-- Google Sign-In meta tag -->
   <meta name="google-signin-client_id" content="1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #launch-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      z-index: 9999;
+      transition: opacity 0.5s ease-out;
+    }
+
+    #launch-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .launch-logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 30px;
+      animation: fadeInScale 0.8s ease-out;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .launch-title {
+      color: white;
+      font-size: 32px;
+      font-weight: 600;
+      margin-bottom: 10px;
+      animation: fadeIn 1s ease-out 0.3s both;
+    }
+
+    .launch-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 16px;
+      margin-bottom: 40px;
+      animation: fadeIn 1s ease-out 0.5s both;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite, fadeIn 1s ease-out 0.7s both;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInScale {
+      from {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
 </head>
 <body>
+  <div id="launch-screen">
+    <img src="icons/Icon-192.png" alt="Brown Paw Logo" class="launch-logo">
+    <h1 class="launch-title">Brown Paw</h1>
+    <p class="launch-subtitle">Whitewater Logbook</p>
+    <div class="spinner"></div>
+  </div>
+
+  <script>
+    // Hide launch screen when Flutter app is ready
+    window.addEventListener('flutter-first-frame', function() {
+      const launchScreen = document.getElementById('launch-screen');
+      launchScreen.classList.add('hidden');
+      setTimeout(function() {
+        launchScreen.remove();
+      }, 500);
+    });
+  </script>
+
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
