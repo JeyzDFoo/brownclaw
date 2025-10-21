@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,12 +7,14 @@ import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
 import 'providers/providers.dart';
 import 'services/analytics_service.dart';
+import 'utils/performance_logger.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Mark the very start of app initialization
+  PerformanceLogger.markAppStart();
 
-  // 🚀 HOUR 7: Track app startup time
-  final startTime = DateTime.now();
+  WidgetsFlutterBinding.ensureInitialized();
+  PerformanceLogger.log('flutter_binding_initialized');
 
   // 🔇 QUICK FIX: Disable noisy debug prints for cleaner testing
   // Comment out the next 3 lines to re-enable debug output
@@ -22,16 +23,14 @@ void main() async {
   // };
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  PerformanceLogger.log('firebase_initialized');
 
   // Log app open event
   await AnalyticsService.logAppOpen();
-
-  if (kDebugMode) {
-    final loadTime = DateTime.now().difference(startTime);
-    print('🚀 App initialized in ${loadTime.inMilliseconds}ms');
-  }
+  PerformanceLogger.log('analytics_logged');
 
   runApp(const MainApp());
+  PerformanceLogger.log('runApp_called');
 }
 
 class MainApp extends StatelessWidget {
@@ -39,23 +38,96 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerformanceLogger.log('main_app_build_started');
+
     return MultiProvider(
       providers: [
         // Caching provider - foundation for all data caching
-        ChangeNotifierProvider(create: (_) => CacheProvider()),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('cache_provider_creating');
+            final provider = CacheProvider();
+            PerformanceLogger.log('cache_provider_created');
+            return provider;
+          },
+        ),
         // #todo: Consider adding StationProvider for centralized station data
-        ChangeNotifierProvider(create: (_) => UserProvider()),
-        ChangeNotifierProvider(create: (_) => RiverRunProvider()),
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
-        ChangeNotifierProvider(create: (_) => ThemeProvider()),
-        ChangeNotifierProvider(create: (_) => LiveWaterDataProvider()),
-        ChangeNotifierProvider(create: (_) => LogbookProvider()),
-        ChangeNotifierProvider(create: (_) => PremiumProvider()),
-        ChangeNotifierProvider(create: (_) => TransAltaProvider()),
-        ChangeNotifierProvider(create: (_) => VersionProvider()),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('user_provider_creating');
+            final provider = UserProvider();
+            PerformanceLogger.log('user_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('river_run_provider_creating');
+            final provider = RiverRunProvider();
+            PerformanceLogger.log('river_run_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('favorites_provider_creating');
+            final provider = FavoritesProvider();
+            PerformanceLogger.log('favorites_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('theme_provider_creating');
+            final provider = ThemeProvider();
+            PerformanceLogger.log('theme_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('live_water_data_provider_creating');
+            final provider = LiveWaterDataProvider();
+            PerformanceLogger.log('live_water_data_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('logbook_provider_creating');
+            final provider = LogbookProvider();
+            PerformanceLogger.log('logbook_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('premium_provider_creating');
+            final provider = PremiumProvider();
+            PerformanceLogger.log('premium_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('transalta_provider_creating');
+            final provider = TransAltaProvider();
+            PerformanceLogger.log('transalta_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('version_provider_creating');
+            final provider = VersionProvider();
+            PerformanceLogger.log('version_provider_created');
+            return provider;
+          },
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
+          PerformanceLogger.log('material_app_building');
           return MaterialApp(
             title: 'Brown Paw - Whitewater Logbook',
             theme: themeProvider.lightTheme,
@@ -84,19 +156,24 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    PerformanceLogger.log('home_page_build_started');
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
+          PerformanceLogger.log('auth_state_waiting');
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (snapshot.hasData) {
+          PerformanceLogger.log('user_authenticated_loading_main_screen');
           return const MainScreen();
         }
 
+        PerformanceLogger.log('user_not_authenticated_loading_auth_screen');
         return const AuthScreen();
       },
     );

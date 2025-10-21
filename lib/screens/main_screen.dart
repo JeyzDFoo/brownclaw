@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../widgets/update_banner.dart';
 import '../services/analytics_service.dart';
+import '../utils/performance_logger.dart';
 import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
@@ -22,13 +23,22 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    PerformanceLogger.log('main_screen_init_state');
+
     _pageController = PageController(initialPage: _selectedIndex);
 
     // Check for app updates on startup (web only)
     Future.microtask(() {
       if (mounted) {
+        PerformanceLogger.log('checking_for_updates');
         context.read<VersionProvider>().checkForUpdate();
       }
+    });
+
+    // Log when first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PerformanceLogger.log('main_screen_first_frame_rendered');
+      PerformanceLogger.printSummary();
     });
   }
 

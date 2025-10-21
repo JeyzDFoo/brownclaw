@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../services/google_sign_in_service.dart';
 import '../services/analytics_service.dart';
+import '../utils/performance_logger.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -12,6 +13,17 @@ class AuthScreen extends StatefulWidget {
 
 class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    PerformanceLogger.log('auth_screen_init_state');
+
+    // Log when first frame is rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      PerformanceLogger.log('auth_screen_first_frame_rendered');
+    });
+  }
 
   Future<void> _signInWithGoogle() async {
     setState(() {
@@ -100,6 +112,8 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    PerformanceLogger.log('auth_screen_build_started');
+
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -142,10 +156,41 @@ class _AuthScreenState extends State<AuthScreen> {
                         ],
                       ),
                       child: Image.asset(
-                        'assets/brownclaw.png',
+                        'assets/brownclaw_optimized.png',
                         width: 160,
                         height: 160,
                         fit: BoxFit.contain,
+                        // Add caching and error handling
+                        cacheWidth: 320, // 2x for retina displays
+                        cacheHeight: 320,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to icon if image fails to load
+                          return Icon(
+                            Icons.water_drop,
+                            size: 160,
+                            color: theme.colorScheme.primary,
+                          );
+                        },
+                        frameBuilder:
+                            (context, child, frame, wasSynchronouslyLoaded) {
+                              if (wasSynchronouslyLoaded) {
+                                return child;
+                              }
+                              // Show loading indicator while image loads
+                              if (frame == null) {
+                                return SizedBox(
+                                  width: 160,
+                                  height: 160,
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: theme.colorScheme.primary,
+                                    ),
+                                  ),
+                                );
+                              }
+                              PerformanceLogger.log('auth_screen_image_loaded');
+                              return child;
+                            },
                       ),
                     ),
                   ),

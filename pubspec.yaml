@@ -39,6 +39,7 @@ flutter:
   
   assets:
     - assets/brownclaw.png
+    - assets/brownclaw_optimized.png
 
 flutter_launcher_icons:
   android: true

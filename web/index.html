@@ -29,6 +29,9 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
+  <!-- Preload critical assets for faster loading -->
+  <link rel="preload" as="image" href="assets/assets/brownclaw_optimized.png">
+
   <title>Brown Paw</title>
   <link rel="manifest" href="manifest.json">
 
@@ -133,13 +136,34 @@
   </div>
 
   <script>
+    // Performance tracking
+    const loadStartTime = performance.now();
+    console.log('⏱️ [WEB] Page load started');
+    
+    // Track when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      const domReadyTime = performance.now() - loadStartTime;
+      console.log(`⏱️ [WEB] DOM ready (+${domReadyTime.toFixed(0)}ms)`);
+    });
+    
     // Hide launch screen when Flutter app is ready
     window.addEventListener('flutter-first-frame', function() {
+      const firstFrameTime = performance.now() - loadStartTime;
+      console.log(`⏱️ [WEB] Flutter first frame rendered (+${firstFrameTime.toFixed(0)}ms)`);
+      
       const launchScreen = document.getElementById('launch-screen');
       launchScreen.classList.add('hidden');
       setTimeout(function() {
         launchScreen.remove();
+        const totalTime = performance.now() - loadStartTime;
+        console.log(`⏱️ [WEB] Launch screen removed, total startup: ${totalTime.toFixed(0)}ms`);
       }, 500);
+    });
+    
+    // Track when Flutter bootstrap starts loading
+    window.addEventListener('load', function() {
+      const windowLoadTime = performance.now() - loadStartTime;
+      console.log(`⏱️ [WEB] Window load complete (+${windowLoadTime.toFixed(0)}ms)`);
     });
   </script>
 

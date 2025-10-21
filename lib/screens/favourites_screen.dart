@@ -5,6 +5,7 @@ import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/river_run_service.dart';
 import '../services/analytics_service.dart';
+import '../utils/performance_logger.dart';
 import 'river_run_search_screen.dart';
 import 'river_detail_screen.dart';
 import 'logbook_entry_screen.dart';
@@ -29,6 +30,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
   @override
   void initState() {
     super.initState();
+    PerformanceLogger.log('favourites_screen_init_state');
     // Initial load will happen in build via Consumer
   }
 
@@ -51,6 +53,11 @@ class _FavouritesScreenState extends State<FavouritesScreen>
           '🔄 FavouritesScreen: Favorites changed! Loading ${currentFavoriteIds.length} favorites...',
         );
       }
+      PerformanceLogger.log(
+        'favourites_loading_started',
+        detail: '${currentFavoriteIds.length} favorites',
+      );
+
       _previousFavoriteIds = Set.from(currentFavoriteIds);
 
       // 🔥 FIX: Always reload if we have favorites, even if provider is loading
@@ -64,6 +71,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
               );
             }
             await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
+            PerformanceLogger.log('favourites_runs_loaded');
 
             // After loading runs, fetch live data for the stations
             final runs = riverRunProvider.favoriteRuns;
@@ -75,6 +83,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
 
             if (stationIds.isNotEmpty && mounted) {
               await liveDataProvider.fetchMultipleStations(stationIds);
+              PerformanceLogger.log('favourites_live_data_loaded');
             }
           }
         });
