@@ -79,10 +79,11 @@ service cloud.firestore {
       }
     }
     
-    // River descents (logbook entries) - user-owned data
+    // River descents (logbook entries) - PRIVATE user-owned data
     match /river_descents/{descentId} {
+      // Users can ONLY read their own descents
       allow read: if isAuthenticated()
-        && (isOwner(resource.data.userId) || request.auth.uid == resource.data.userId);
+        && request.auth.uid == resource.data.userId;
       
       allow create: if isAuthenticated()
         && isValidString('riverRunId')
@@ -91,11 +92,11 @@ service cloud.firestore {
         && isValidTimestamp('timestamp');
       
       allow update: if isAuthenticated()
-        && isOwner(resource.data.userId)
+        && request.auth.uid == resource.data.userId
         && request.resource.data.userId == resource.data.userId; // Prevent changing ownership
       
       allow delete: if isAuthenticated()
-        && isOwner(resource.data.userId);
+        && request.auth.uid == resource.data.userId;
     }
     
     // Users collection - for premium status and user profiles
