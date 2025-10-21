@@ -41,9 +41,9 @@ class GoogleSignInService {
             googleProvider,
           );
 
-          print('� GoogleSignInService: Firebase sign-in successful!');
+          print('✅ GoogleSignInService: Firebase sign-in successful!');
           print(
-            '� GoogleSignInService: Firebase user: ${userCredential.user?.email}',
+            '✅ GoogleSignInService: Firebase user: ${userCredential.user?.email}',
           );
 
           return userCredential;

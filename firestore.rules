@@ -19,21 +19,26 @@ service cloud.firestore {
     function isValidTimestamp(field) {
       return request.resource.data[field] is timestamp;
     }
+
+    // Hardcoded admin UID list
+    function isAdmin() {
+      return isAuthenticated() && 
+        (request.auth.uid == "08y0oUgfD2aWOgScPJRDdyfehsv2" || 
+         request.auth.uid == "Ela2Ijh7kedHFLFMNGuKSaygWE02");
+    }
     
     // Rivers collection - open for authenticated users
     match /rivers/{riverId} {
       allow read: if isAuthenticated();
-      
-      // Allow authenticated users to create/update/delete rivers
-      allow create, update, delete: if isAuthenticated();
+      // Only hardcoded admin users can create/update/delete rivers
+      allow create, update, delete: if isAdmin();
     }
     
     // River runs collection - open for authenticated users
     match /river_runs/{runId} {
       allow read: if isAuthenticated();
-      
-      // Allow authenticated users to create/update/delete river runs
-      allow create, update, delete: if isAuthenticated();
+      // Only hardcoded admin users can create/update/delete river runs
+      allow create, update, delete: if isAdmin();
     }
     
     // Gauge stations collection - publicly readable
@@ -81,9 +86,9 @@ service cloud.firestore {
     
     // River descents (logbook entries) - PRIVATE user-owned data
     match /river_descents/{descentId} {
-      // Users can ONLY read their own descents
-      allow read: if isAuthenticated()
-        && request.auth.uid == resource.data.userId;
+      // Users can read their own descents, admins can query/read all descents
+      allow read: if isAdmin() || 
+        (isAuthenticated() && request.auth.uid == resource.data.userId);
       
       allow create: if isAuthenticated()
         && isValidString('riverRunId')

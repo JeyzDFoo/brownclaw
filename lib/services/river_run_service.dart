@@ -243,6 +243,12 @@ class RiverRunService {
       throw Exception('User must be authenticated to delete river runs');
     }
 
+    if (kDebugMode) {
+      print('🗑️ Attempting to delete run: $runId');
+      print('👤 Current user UID: ${user.uid}');
+      print('📧 Current user email: ${user.email}');
+    }
+
     try {
       // Check if any descents exist for this run
       final descentsQuery = await _firestore
