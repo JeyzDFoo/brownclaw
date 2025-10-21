@@ -198,6 +198,7 @@ class _MainScreenState extends State<MainScreen> {
               if (versionProvider.showUpdateBanner)
                 UpdateBanner(
                   message: versionProvider.updateMessage,
+                  changelog: versionProvider.changelog,
                   onDismiss: () => versionProvider.dismissUpdateBanner(),
                 ),
               // Main content

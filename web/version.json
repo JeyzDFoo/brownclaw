@@ -1,7 +1,14 @@
 {
-  "version": "1.0.1",
-  "buildNumber": 2,
-  "buildDate": "2025-10-18",
+  "version": "1.1.0",
+  "buildNumber": 3,
+  "buildDate": "2025-10-20",
   "minRequiredBuild": 1,
-  "updateMessage": "A new version is available. Please refresh to get the latest features and fixes."
+  "updateMessage": "New version available with performance improvements! Launch screen, optimized assets, and detailed logging. Please refresh to update.",
+  "changelog": [
+    "✨ Added beautiful launch screen",
+    "⚡ Optimized startup performance (87% smaller assets)",
+    "📊 Added comprehensive performance logging",
+    "🖼️ Improved image loading with caching",
+    "🎨 Enhanced auth screen with loading states"
+  ]
 }

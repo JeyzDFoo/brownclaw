@@ -18,6 +18,7 @@ class VersionProvider extends ChangeNotifier {
   bool get updateAvailable => _versionChecker.updateAvailable;
   String get updateMessage => _versionChecker.updateMessage;
   int? get latestBuildNumber => _versionChecker.latestBuildNumber;
+  List<String> get changelog => _versionChecker.changelog;
 
   /// Check for updates
   Future<void> checkForUpdate() async {

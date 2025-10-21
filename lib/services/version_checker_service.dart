@@ -16,10 +16,12 @@ class VersionCheckerService {
   bool _updateAvailable = false;
   String _updateMessage = 'A new version is available. Please refresh.';
   int? _latestBuildNumber;
+  List<String> _changelog = [];
 
   bool get updateAvailable => _updateAvailable;
   String get updateMessage => _updateMessage;
   int? get latestBuildNumber => _latestBuildNumber;
+  List<String> get changelog => _changelog;
 
   /// Check if an update is available
   ///
@@ -59,6 +61,13 @@ class VersionCheckerService {
         _latestBuildNumber = data['buildNumber'] as int?;
         _updateMessage = data['updateMessage'] as String? ?? _updateMessage;
 
+        // Parse changelog if available
+        if (data['changelog'] is List) {
+          _changelog = (data['changelog'] as List)
+              .map((e) => e.toString())
+              .toList();
+        }
+
         if (_latestBuildNumber != null) {
           _updateAvailable = _latestBuildNumber! > AppVersion.buildNumber;
 
@@ -68,6 +77,12 @@ class VersionCheckerService {
               'Current: ${AppVersion.buildNumber}, '
               'Latest: $_latestBuildNumber',
             );
+            if (_changelog.isNotEmpty) {
+              debugPrint('VersionChecker: Changelog:');
+              for (final item in _changelog) {
+                debugPrint('  - $item');
+              }
+            }
           } else {
             debugPrint('VersionChecker: App is up to date');
           }
@@ -94,6 +109,7 @@ class VersionCheckerService {
   /// Reset update flag (after user dismisses or refreshes)
   void clearUpdateFlag() {
     _updateAvailable = false;
+    _changelog = [];
   }
 }
 

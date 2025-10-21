@@ -7,8 +7,14 @@ import 'dart:html' as html;
 class UpdateBanner extends StatelessWidget {
   final String message;
   final VoidCallback? onDismiss;
+  final List<String>? changelog;
 
-  const UpdateBanner({super.key, required this.message, this.onDismiss});
+  const UpdateBanner({
+    super.key,
+    required this.message,
+    this.onDismiss,
+    this.changelog,
+  });
 
   void _refreshPage() {
     // Force refresh the page to get new version
@@ -46,6 +52,23 @@ class UpdateBanner extends StatelessWidget {
                       message,
                       style: const TextStyle(color: Colors.white, fontSize: 14),
                     ),
+                    if (changelog != null && changelog!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      ...changelog!
+                          .take(3)
+                          .map(
+                            (item) => Padding(
+                              padding: const EdgeInsets.only(left: 8, top: 2),
+                              child: Text(
+                                item,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+                    ],
                   ],
                 ),
               ),
