@@ -249,6 +249,27 @@ class HighFlowPeriod {
   /// Get arrival time range as a string
   String get arrivalTimeRange => '$firstArrivalTime - $lastArrivalTime';
 
+  /// Get the first arrival time with custom travel time
+  String getFirstArrivalTime({int travelTimeMinutes = 45}) {
+    if (entries.isEmpty) return 'N/A';
+    return entries.first.getArrivalTimeString(
+      travelTimeMinutes: travelTimeMinutes,
+    );
+  }
+
+  /// Get the last arrival time with custom travel time
+  String getLastArrivalTime({int travelTimeMinutes = 45}) {
+    if (entries.isEmpty) return 'N/A';
+    return entries.last.getArrivalTimeString(
+      travelTimeMinutes: travelTimeMinutes,
+    );
+  }
+
+  /// Get arrival time range as a string with custom travel time
+  String getArrivalTimeRange({int travelTimeMinutes = 45}) {
+    return '${getFirstArrivalTime(travelTimeMinutes: travelTimeMinutes)} - ${getLastArrivalTime(travelTimeMinutes: travelTimeMinutes)}';
+  }
+
   /// Get date as string (YYYY-MM-DD)
   String get dateString {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';

@@ -185,4 +185,91 @@ class WeatherService {
     debugPrint('Weather Forecast: ❌ All CORS proxies failed');
     return [];
   }
+
+  /// Fetch hourly forecast for a station (up to 7 days)
+  Future<List<WeatherData>> getHourlyForecast(
+    GaugeStation station, {
+    int days = 3,
+  }) async {
+    // Check cache first
+    final cacheKey = '${station.stationId}_hourly_$days';
+    if (_cache.containsKey(cacheKey) && _cacheTime.containsKey(cacheKey)) {
+      final age = DateTime.now().difference(_cacheTime[cacheKey]!);
+      if (age < _cacheDuration) {
+        debugPrint('Weather Hourly: Using cached data (${age.inMinutes}m old)');
+        // Return cached list - need to store separately
+        // For now, fetch fresh data
+      }
+    }
+
+    // Try each CORS proxy until one works
+    for (int i = 0; i < _corsProxies.length; i++) {
+      final proxyIndex = (_currentProxyIndex + i) % _corsProxies.length;
+      final proxy = _corsProxies[proxyIndex];
+
+      try {
+        final url = Uri.parse(_baseUrl).replace(
+          queryParameters: {
+            'latitude': station.latitude.toString(),
+            'longitude': station.longitude.toString(),
+            'hourly':
+                'temperature_2m,weather_code,precipitation_probability,precipitation,wind_speed_10m',
+            'temperature_unit': 'celsius',
+            'wind_speed_unit': 'kmh',
+            'precipitation_unit': 'mm',
+            'forecast_days': days.toString(),
+          },
+        );
+
+        final proxiedUrl = '$proxy${Uri.encodeComponent(url.toString())}';
+
+        final response = await http
+            .get(Uri.parse(proxiedUrl))
+            .timeout(const Duration(seconds: 15));
+
+        if (response.statusCode != 200) {
+          continue;
+        }
+
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        final hourly = data['hourly'] as Map<String, dynamic>;
+        final times = (hourly['time'] as List).cast<String>();
+        final temps = (hourly['temperature_2m'] as List).cast<num?>();
+        final codes = (hourly['weather_code'] as List).cast<int?>();
+        final precip = (hourly['precipitation'] as List).cast<num?>();
+        final windSpeeds = (hourly['wind_speed_10m'] as List).cast<num?>();
+
+        final forecasts = <WeatherData>[];
+        for (var i = 0; i < times.length; i++) {
+          if (temps[i] != null && codes[i] != null) {
+            forecasts.add(
+              WeatherData(
+                latitude: station.latitude,
+                longitude: station.longitude,
+                temperature: temps[i]!.toDouble(),
+                conditions: _weatherCodeToConditions(codes[i]!),
+                precipitation: precip[i]?.toDouble() ?? 0.0,
+                windSpeed: windSpeeds[i]?.toDouble(),
+                forecastTime: DateTime.parse(times[i]),
+                temperatureUnit: 'C',
+              ),
+            );
+          }
+        }
+
+        // Remember working proxy
+        _currentProxyIndex = proxyIndex;
+        debugPrint(
+          'Weather Hourly: ✅ Success via proxy ${proxyIndex + 1} (${forecasts.length} hours)',
+        );
+        return forecasts;
+      } catch (e) {
+        debugPrint('Weather Hourly: Proxy ${proxyIndex + 1} error: $e');
+        continue;
+      }
+    }
+
+    debugPrint('Weather Hourly: ❌ All CORS proxies failed');
+    return [];
+  }
 }
