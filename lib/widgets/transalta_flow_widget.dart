@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transalta_flow_data.dart';
+import '../models/gauge_station.dart';
+import '../models/weather_data.dart';
 import '../providers/transalta_provider.dart';
 import '../providers/premium_provider.dart';
+import '../services/weather_service.dart';
 import '../screens/premium_purchase_screen.dart';
 
 /// Widget showing TransAlta Barrier Dam flow information
@@ -20,6 +23,61 @@ class TransAltaFlowWidget extends StatefulWidget {
 
 class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   bool _hasInitialized = false;
+  final WeatherService _weatherService = WeatherService();
+  WeatherData? _currentWeather;
+  List<WeatherData> _weatherForecast = [];
+  bool _isLoadingWeather = false;
+
+  // Kananaskis / Barrier Dam approximate coordinates
+  static const double _kananaskisLat = 51.1;
+  static const double _kananaskisLon = -115.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWeather();
+  }
+
+  Future<void> _fetchWeather() async {
+    setState(() {
+      _isLoadingWeather = true;
+    });
+
+    try {
+      // Create a temporary gauge station with Kananaskis coordinates
+      final kananaskisStation = GaugeStation(
+        stationId: 'kananaskis',
+        name: 'Kananaskis River',
+        latitude: _kananaskisLat,
+        longitude: _kananaskisLon,
+        isActive: true,
+        parameters: const [],
+      );
+
+      // Fetch current weather and 3-day forecast
+      final weather = await _weatherService.getWeatherForStation(
+        kananaskisStation,
+      );
+      final forecast = await _weatherService.getForecastForStation(
+        kananaskisStation,
+        days: 3,
+      );
+
+      if (mounted) {
+        setState(() {
+          _currentWeather = weather;
+          _weatherForecast = forecast;
+          _isLoadingWeather = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingWeather = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,8 +181,8 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Current Flow
-        _buildCurrentFlow(flowData.currentFlow),
+        // Current Flow with Weather
+        _buildCurrentFlow(flowData.currentFlow, highFlowPeriods),
 
         const SizedBox(height: 16),
         const Divider(),
@@ -136,9 +194,18 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     );
   }
 
-  Widget _buildCurrentFlow(HourlyFlowEntry? current) {
+  Widget _buildCurrentFlow(
+    HourlyFlowEntry? current,
+    List<HighFlowPeriod> flowPeriods,
+  ) {
     if (current == null) {
       return const Text('No current flow data available');
+    }
+
+    // Group flow periods by day for easy lookup
+    final Map<int, List<HighFlowPeriod>> periodsByDay = {};
+    for (final period in flowPeriods) {
+      periodsByDay.putIfAbsent(period.dayNumber, () => []).add(period);
     }
 
     return Container(
@@ -176,9 +243,395 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
             style: TextStyle(fontSize: 14, color: Colors.grey[700]),
           ),
           const SizedBox(height: 8),
+
+          // Weather forecast section
+          if (_currentWeather != null || _isLoadingWeather)
+            Builder(
+              builder: (context) {
+                final theme = Theme.of(context);
+                final isDark = theme.brightness == Brightness.dark;
+
+                return Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: isDark
+                          ? [
+                              Colors.blue.shade900.withOpacity(0.3),
+                              Colors.teal.shade900.withOpacity(0.3),
+                            ]
+                          : [
+                              Colors.blue.shade50.withOpacity(0.8),
+                              Colors.teal.shade50.withOpacity(0.8),
+                            ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isDark
+                          ? Colors.blue.shade700.withOpacity(0.4)
+                          : Colors.blue.shade200.withOpacity(0.6),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: _isLoadingWeather
+                      ? Row(
+                          children: [
+                            SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: theme.colorScheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Loading weather...',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: theme.textTheme.bodyMedium?.color,
+                              ),
+                            ),
+                          ],
+                        )
+                      : _currentWeather != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: isDark
+                                              ? Colors.white.withOpacity(0.1)
+                                              : Colors.white.withOpacity(0.7),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          _getWeatherEmoji(
+                                            _currentWeather!.conditions,
+                                          ),
+                                          style: const TextStyle(fontSize: 24),
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              'Weather Forecast',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                                color: isDark
+                                                    ? Colors.blue.shade200
+                                                    : Colors.blue.shade900,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              _currentWeather!.conditions,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: theme
+                                                    .textTheme
+                                                    .bodyMedium
+                                                    ?.color
+                                                    ?.withOpacity(0.8),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.blue.shade800.withOpacity(0.4)
+                                        : Colors.blue.shade100,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Text(
+                                    '${_currentWeather!.temperature.toStringAsFixed(0)}°C',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: isDark
+                                          ? Colors.blue.shade100
+                                          : Colors.blue.shade900,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (_weatherForecast.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              Divider(
+                                height: 1,
+                                color: isDark
+                                    ? Colors.white.withOpacity(0.2)
+                                    : Colors.grey.withOpacity(0.3),
+                              ),
+                              const SizedBox(height: 12),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: _weatherForecast.take(3).map((day) {
+                                  final dayName = _getDayName(day.forecastTime);
+
+                                  // Get the day number (0=today, 1=tomorrow, 2=day after)
+                                  final now = DateTime.now();
+                                  final today = DateTime(
+                                    now.year,
+                                    now.month,
+                                    now.day,
+                                  );
+                                  final forecastDate = day.forecastTime != null
+                                      ? DateTime(
+                                          day.forecastTime!.year,
+                                          day.forecastTime!.month,
+                                          day.forecastTime!.day,
+                                        )
+                                      : today;
+                                  final dayNumber = forecastDate
+                                      .difference(today)
+                                      .inDays;
+
+                                  // Get flow periods for this day
+                                  final dayFlowPeriods =
+                                      periodsByDay[dayNumber] ?? [];
+                                  final hasFlow = dayFlowPeriods.isNotEmpty;
+
+                                  String flowInfo = 'No release';
+                                  if (hasFlow) {
+                                    final totalPeriods = dayFlowPeriods.length;
+                                    if (totalPeriods == 1) {
+                                      final period = dayFlowPeriods.first;
+                                      // Get arrival times with 15min travel time
+                                      final firstEntry = period.entries.first;
+                                      final lastEntry = period.entries.last;
+                                      final startTime = firstEntry
+                                          .getArrivalTimeString(
+                                            travelTimeMinutes: 15,
+                                          );
+                                      final endTime = lastEntry
+                                          .getArrivalTimeString(
+                                            travelTimeMinutes: 15,
+                                          );
+                                      flowInfo = '$startTime-$endTime';
+                                    } else {
+                                      // Multiple separate periods in one day
+                                      // Show each period on a separate line
+                                      final periodTimes = dayFlowPeriods
+                                          .map((period) {
+                                            final start = period.entries.first
+                                                .getArrivalTimeString(
+                                                  travelTimeMinutes: 15,
+                                                );
+                                            final end = period.entries.last
+                                                .getArrivalTimeString(
+                                                  travelTimeMinutes: 15,
+                                                );
+                                            return '$start-$end';
+                                          })
+                                          .join('\n');
+                                      flowInfo = periodTimes;
+                                    }
+                                  }
+
+                                  return Expanded(
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                      ),
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: isDark
+                                            ? Colors.white.withOpacity(0.05)
+                                            : Colors.white.withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: hasFlow
+                                            ? Border.all(
+                                                color: isDark
+                                                    ? Colors.blue.shade400
+                                                          .withOpacity(0.5)
+                                                    : Colors.blue.shade300
+                                                          .withOpacity(0.7),
+                                                width: 1.5,
+                                              )
+                                            : null,
+                                      ),
+                                      child: Column(
+                                        children: [
+                                          Text(
+                                            dayName,
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark
+                                                  ? Colors.teal.shade200
+                                                  : Colors.teal.shade900,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Text(
+                                            _getWeatherEmoji(day.conditions),
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
+                                            '${day.temperature.toStringAsFixed(0)}°',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w600,
+                                              color: theme
+                                                  .textTheme
+                                                  .bodyLarge
+                                                  ?.color,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 6),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: hasFlow
+                                                  ? (isDark
+                                                        ? Colors.blue.shade800
+                                                              .withOpacity(0.4)
+                                                        : Colors.blue.shade100
+                                                              .withOpacity(0.8))
+                                                  : (isDark
+                                                        ? Colors.grey.shade800
+                                                              .withOpacity(0.3)
+                                                        : Colors.grey.shade200
+                                                              .withOpacity(
+                                                                0.6,
+                                                              )),
+                                              borderRadius:
+                                                  BorderRadius.circular(6),
+                                            ),
+                                            child: Column(
+                                              children: [
+                                                Text(
+                                                  'Dam Release',
+                                                  style: TextStyle(
+                                                    fontSize: 9,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: hasFlow
+                                                        ? (isDark
+                                                              ? Colors
+                                                                    .blue
+                                                                    .shade200
+                                                              : Colors
+                                                                    .blue
+                                                                    .shade900)
+                                                        : (isDark
+                                                              ? Colors
+                                                                    .grey
+                                                                    .shade400
+                                                              : Colors
+                                                                    .grey
+                                                                    .shade700),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 2),
+                                                Text(
+                                                  flowInfo,
+                                                  style: TextStyle(
+                                                    fontSize: 9,
+                                                    color: hasFlow
+                                                        ? (isDark
+                                                              ? Colors
+                                                                    .blue
+                                                                    .shade100
+                                                              : Colors
+                                                                    .blue
+                                                                    .shade800)
+                                                        : (isDark
+                                                              ? Colors
+                                                                    .grey
+                                                                    .shade500
+                                                              : Colors
+                                                                    .grey
+                                                                    .shade600),
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ],
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                );
+              },
+            ),
         ],
       ),
     );
+  }
+
+  String _getWeatherEmoji(String conditions) {
+    final lower = conditions.toLowerCase();
+    if (lower.contains('clear') || lower.contains('sunny')) return '☀️';
+    if (lower.contains('partly') || lower.contains('cloud')) return '⛅';
+    if (lower.contains('rain') || lower.contains('drizzle')) return '🌧️';
+    if (lower.contains('snow')) return '❄️';
+    if (lower.contains('thunder') || lower.contains('storm')) return '⛈️';
+    if (lower.contains('fog')) return '🌫️';
+    return '🌤️';
+  }
+
+  String _getDayName(DateTime? dateTime) {
+    if (dateTime == null) return '';
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+
+    final difference = date.difference(today).inDays;
+
+    if (difference == 0) return 'Today';
+    if (difference == 1) return 'Tmrw';
+    if (difference == 2) return 'Day 3';
+
+    final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return weekdays[dateTime.weekday - 1];
   }
 
   Widget _buildHighFlowSchedule(
@@ -219,7 +672,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         ),
         const SizedBox(height: 4),
         const Text(
-          'Includes 45min travel time from dam to window maker',
+          'Includes 15min travel time to widowmaker',
           style: TextStyle(fontSize: 12, color: Colors.grey),
         ),
         const SizedBox(height: 12),
