@@ -1,20 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart'; // Commented out while all users are premium
 
 class PremiumProvider extends ChangeNotifier {
-  bool _isPremium = false;
+  // Commented out - not needed while all users are premium
+  // bool _isPremium = false;
   bool _isLoading = false;
   bool _cancelAtPeriodEnd = false;
   DateTime? _currentPeriodEnd;
 
-  bool get isPremium => _isPremium;
+  // Temporarily make all users premium by default (3-month free trial)
+  // TODO: Implement proper 3-month trial logic based on accountCreatedAt
+  bool get isPremium => true; // All users are premium by default
   bool get isLoading => _isLoading;
   bool get cancelAtPeriodEnd => _cancelAtPeriodEnd;
   DateTime? get currentPeriodEnd => _currentPeriodEnd;
 
   PremiumProvider() {
     // Listen to auth state changes and check premium status
+    // Commented out while all users are premium by default
+    /*
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       if (user != null) {
         _checkPremiumStatus(user.uid);
@@ -23,9 +28,12 @@ class PremiumProvider extends ChangeNotifier {
         notifyListeners();
       }
     });
+    */
   }
 
   Future<void> _checkPremiumStatus(String userId) async {
+    // Commented out while all users are premium by default
+    /*
     _isLoading = true;
     notifyListeners();
 
@@ -71,6 +79,7 @@ class PremiumProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+    */
   }
 
   /// Manually refresh premium status
@@ -83,6 +92,8 @@ class PremiumProvider extends ChangeNotifier {
 
   /// For testing/admin purposes - toggle premium status
   Future<void> setPremiumStatus(bool premium) async {
+    // Commented out while all users are premium by default
+    /*
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
@@ -98,5 +109,6 @@ class PremiumProvider extends ChangeNotifier {
         print('Error setting premium status: $e');
       }
     }
+    */
   }
 }

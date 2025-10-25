@@ -1,8 +1,8 @@
-# Cloud Functions for Firebase - Stripe Integration
+    # Cloud Functions for Firebase - Stripe Integration
 # Deploy with `firebase deploy --only functions`
 
 from firebase_functions import https_fn, options
-from firebase_admin import initialize_app, firestore
+from firebase_admin import initialize_app, firestore, auth
 import stripe
 import json
 import os
@@ -533,3 +533,65 @@ def stripeWebhook(req: https_fn.Request) -> https_fn.Response:
     except Exception as e:
         print(f"Error handling webhook: {str(e)}")
         return https_fn.Response(f"Error: {str(e)}", status=500)
+
+
+@https_fn.on_call(cors=cors_options)
+def initializeNewUserFavorites(req: https_fn.CallableRequest) -> dict[str, Any]:
+    """
+    Callable function to initialize default favorites for a new user.
+    Called from the Flutter app after user account creation.
+    
+    Default favorites:
+    - Upper Kananaskis River
+    - Harvie Passage (Bow River)
+    """
+    # Verify authentication
+    if not req.auth:
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.UNAUTHENTICATED,
+            message="User must be authenticated"
+        )
+    
+    user_id = req.auth.uid
+    
+    try:
+        db = firestore.client()
+        
+        # Check if user already has favorites
+        favorites_ref = db.collection('user_favorites').document(user_id)
+        favorites_doc = favorites_ref.get()
+        
+        if favorites_doc.exists:
+            return {
+                'success': True,
+                'message': 'User already has favorites',
+                'alreadyInitialized': True
+            }
+        
+        # Default favorite river run IDs
+        default_favorites = [
+            '09oCVcqR8JjEAJS0PP7E',  # Upper Kananaskis River
+            'N0ptPBwD1u2ByePoCOiY',  # Harvie Passage (Bow River)
+        ]
+        
+        # Create user_favorites document with default favorites
+        favorites_ref.set({
+            'riverRuns': default_favorites,
+            'lastUpdated': firestore.SERVER_TIMESTAMP,
+            'createdAt': firestore.SERVER_TIMESTAMP,
+        })
+        
+        print(f"✅ Added default favorites for new user {user_id}")
+        
+        return {
+            'success': True,
+            'message': 'Default favorites initialized',
+            'favoriteCount': len(default_favorites)
+        }
+        
+    except Exception as e:
+        print(f"❌ Error adding default favorites for user {user_id}: {str(e)}")
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message=f"Failed to initialize favorites: {str(e)}"
+        )

@@ -5,14 +5,14 @@
 class AppVersion {
   /// Current app version
   /// Format: MAJOR.MINOR.PATCH (semantic versioning)
-  static const String version = '1.1.0';
+  static const String version = '1.1.1';
 
   /// Build number - increment with each deployment
   /// This is checked against the server to detect updates
-  static const int buildNumber = 3;
+  static const int buildNumber = 4;
 
   /// Build date - automatically shows users when this version was deployed
-  static const String buildDate = '2025-10-20';
+  static const String buildDate = '2025-10-24';
 
   /// Full version string for display
   static String get fullVersion => 'v$version (Build $buildNumber)';

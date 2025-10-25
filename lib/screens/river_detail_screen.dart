@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -8,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../services/live_water_data_service.dart';
 import '../services/historical_water_data_service.dart';
 import '../services/river_run_service.dart';
+import '../services/river_service.dart';
 import '../services/analytics_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
@@ -15,6 +17,7 @@ import '../widgets/transalta_flow_widget.dart';
 import '../widgets/user_runs_history_widget.dart';
 import 'edit_river_run_screen.dart';
 import 'premium_purchase_screen.dart';
+import 'logbook_entry_screen.dart';
 
 class RiverDetailScreen extends StatefulWidget {
   final Map<String, dynamic> riverData;
@@ -43,11 +46,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   StreamSubscription<RiverRun?>? _runSubscription;
   Map<String, dynamic> _currentRiverData = {};
 
+  // Logbook stats
+  int _totalRuns = 0;
+  DateTime? _lastRanDate;
   @override
   void initState() {
     super.initState();
     _currentRiverData = Map<String, dynamic>.from(widget.riverData);
     _setupRunStream();
+    _loadLogbookStats();
     _loadLiveData();
     _loadHistoricalData();
     _loadStatisticsData();
@@ -86,6 +93,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     });
   }
 
+  /// Check if this is a Kananaskis river (for TransAlta widget display)
+  bool _isKananaskisRiver(String riverName) {
+    final lower = riverName.toLowerCase();
+    return lower.contains('kananaskis') ||
+        lower.contains('kan') ||
+        lower == 'upper kan';
+  }
+
   /// Validates if the river has a valid station ID for data fetching
   String? _validateStationData() {
     final stationId = widget.riverData['stationId'] as String?;
@@ -96,8 +111,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       return 'No gauge station linked to this river run';
     }
 
+    // Allow TransAlta station IDs (contains underscores) and Gov of Canada IDs (alphanumeric only)
     if (!hasValidStation ||
-        !RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase())) {
+        !RegExp(r'^[A-Z0-9_]+$').hasMatch(stationId.toUpperCase())) {
       return 'This river run is not connected to a real-time gauge station.\n\nStation ID: $stationId';
     }
 
@@ -598,6 +614,62 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
   }
 
+  Future<void> _loadLogbookStats() async {
+    final user = context.read<UserProvider>().user;
+    if (user == null) {
+      if (kDebugMode) {
+        print('🚫 _loadLogbookStats: No user authenticated');
+      }
+      return;
+    }
+
+    final runId = widget.riverData['runId'] as String?;
+    if (runId == null || runId.isEmpty) {
+      if (kDebugMode) {
+        print('🚫 _loadLogbookStats: No runId found');
+      }
+      return;
+    }
+
+    try {
+      if (kDebugMode) {
+        print(
+          '🔍 Loading logbook stats for runId: $runId, userId: ${user.uid}',
+        );
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('river_descents')
+          .where('userId', isEqualTo: user.uid)
+          .where('riverRunId', isEqualTo: runId)
+          .orderBy('timestamp', descending: true)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          _totalRuns = snapshot.docs.length;
+          if (snapshot.docs.isNotEmpty) {
+            final mostRecent = RiverDescent.fromMap(
+              snapshot.docs.first.data(),
+              docId: snapshot.docs.first.id,
+            );
+            _lastRanDate = mostRecent.timestamp;
+          }
+        });
+
+        if (kDebugMode) {
+          print(
+            '✅ Logbook stats loaded: $_totalRuns runs, last ran: $_lastRanDate',
+          );
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading logbook stats: $e');
+      }
+    }
+  }
+
   Future<void> _refreshAllData() async {
     await Future.wait([
       _loadLiveData(),
@@ -866,6 +938,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Icon(
                             _getStatusIcon(status),
@@ -877,20 +950,13 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  riverName,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineSmall
-                                      ?.copyWith(fontWeight: FontWeight.bold),
-                                ),
                                 if (section.isNotEmpty)
                                   Text(
                                     '$section ($sectionClass)',
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleMedium
-                                        ?.copyWith(color: Colors.grey[600]),
+                                        .headlineSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                 if (section.isEmpty &&
                                     sectionClass != 'Unknown')
@@ -898,37 +964,58 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                                     sectionClass,
                                     style: Theme.of(context)
                                         .textTheme
-                                        .titleMedium
-                                        ?.copyWith(color: Colors.grey[600]),
+                                        .headlineSmall
+                                        ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                               ],
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
+                          // Logbook stats - top right
+                          if (_totalRuns > 0)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.event,
+                                      size: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      _lastRanDate != null
+                                          ? _formatDate(_lastRanDate!)
+                                          : 'Never',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.format_list_numbered,
+                                      size: 14,
+                                      color: Colors.grey[600],
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      '$_totalRuns ${_totalRuns == 1 ? 'run' : 'runs'}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
-                            decoration: BoxDecoration(
-                              color: _getStatusColor(
-                                status,
-                              ).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: _getStatusColor(
-                                  status,
-                                ).withValues(alpha: 0.3),
-                              ),
-                            ),
-                            child: Text(
-                              status.toUpperCase(),
-                              style: TextStyle(
-                                color: _getStatusColor(status),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
@@ -949,42 +1036,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // Show station ID only if it's a valid gauge station
-                      if (_currentRiverData['hasValidStation'] == true)
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.water,
-                              color: Colors.grey[600],
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Station ID: $stationId',
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ],
-                        )
-                      else
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              color: Colors.orange[600],
-                              size: 16,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'No real-time gauge station data available',
-                                style: TextStyle(
-                                  color: Colors.orange[600],
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
                       if (difficulty != 'Unknown')
                         Padding(
                           padding: const EdgeInsets.only(top: 8),
@@ -1037,7 +1088,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               const SizedBox(height: 16),
 
               // Current Conditions Card - Hidden for Kananaskis (uses TransAlta widget instead)
-              if (!riverName.toLowerCase().contains('kananaskis'))
+              if (!_isKananaskisRiver(riverName))
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -1126,18 +1177,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   ),
                 ),
 
-              if (!riverName.toLowerCase().contains('kananaskis'))
-                const SizedBox(height: 16),
+              if (!_isKananaskisRiver(riverName)) const SizedBox(height: 16),
 
               // TransAlta Flow Widget - Special case for Kananaskis River
-              if (riverName.toLowerCase().contains('kananaskis'))
+              if (_isKananaskisRiver(riverName))
                 const TransAltaFlowWidget(threshold: 20.0),
 
-              if (riverName.toLowerCase().contains('kananaskis'))
-                const SizedBox(height: 16),
+              if (_isKananaskisRiver(riverName)) const SizedBox(height: 16),
 
               // Historical Discharge Chart Card - Hidden for Kananaskis (uses TransAlta widget instead)
-              if (!riverName.toLowerCase().contains('kananaskis'))
+              if (!_isKananaskisRiver(riverName))
                 Card(
                   key: ValueKey('chart_card_${widget.riverData['stationId']}'),
                   child: Padding(
@@ -1452,6 +1501,76 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          // Create RiverRunWithStations object to prefill the logbook entry
+          final runId = widget.riverData['runId'] as String?;
+
+          if (runId == null || runId.isEmpty) {
+            // Show error if no run ID
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Cannot log descent: No run ID found'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            return;
+          }
+
+          // Fetch the full run details
+          final run = await RiverRunService.getRunById(runId);
+          if (run == null) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Cannot log descent: Run details not found'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+            return;
+          }
+
+          // Fetch the river details
+          River? river;
+          try {
+            river = await RiverService.getRiverById(run.riverId);
+          } catch (e) {
+            // River might not exist, but we can still proceed
+          }
+
+          // Create the prefilled run object
+          final prefilledRun = RiverRunWithStations(
+            run: run,
+            river: river,
+            stations: [], // Stations not needed for prefill
+          );
+
+          // Log analytics event
+          final riverName =
+              _currentRiverData['riverName'] as String? ?? 'Unknown River';
+          await AnalyticsService.logRiverRunViewed(runId, riverName);
+
+          // Navigate to logbook entry screen
+          if (mounted) {
+            await Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) =>
+                    LogbookEntryScreen(prefilledRun: prefilledRun),
+              ),
+            );
+
+            // Refresh logbook stats after returning
+            _loadLogbookStats();
+          }
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Log Descent'),
+        backgroundColor: Colors.teal,
+        foregroundColor: Colors.white,
+      ),
     );
   }
 
@@ -1729,6 +1848,28 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         ),
       ),
     );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 30) {
+      final weeks = (difference.inDays / 7).floor();
+      return weeks == 1 ? '1 week ago' : '$weeks weeks ago';
+    } else if (difference.inDays < 365) {
+      final months = (difference.inDays / 30).floor();
+      return months == 1 ? '1 month ago' : '$months months ago';
+    } else {
+      final years = (difference.inDays / 365).floor();
+      return years == 1 ? '1 year ago' : '$years years ago';
+    }
   }
 
   Widget _buildStatRow(String label, String value) {

@@ -1,7 +1,7 @@
 {
-  "version": "1.1.0",
-  "buildNumber": 3,
-  "buildDate": "2025-10-20",
+  "version": "1.1.1",
+  "buildNumber": 4,
+  "buildDate": "2025-10-24",
   "minRequiredBuild": 1,
   "updateMessage": "New version available with performance improvements! Launch screen, optimized assets, and detailed logging. Please refresh to update.",
   "changelog": [
