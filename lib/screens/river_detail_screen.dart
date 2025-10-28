@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import '../services/live_water_data_service.dart';
 import '../services/historical_water_data_service.dart';
@@ -60,14 +58,39 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingWeather = false;
   String? _weatherError;
 
+  // Unified initial loading state - true until critical data loaded
+  bool _isInitialLoad = true;
+
+  // Cached data for efficient time range switching
+  List<Map<String, dynamic>> _cachedCombinedData = [];
+  DateTime? _cachedDataTime;
+
+  // Cached historical data by year (for 90, 365 day views and historical years)
+  Map<int?, List<Map<String, dynamic>>> _cachedHistoricalData = {};
+  Map<int?, DateTime> _cachedHistoricalDataTime = {};
+
   @override
   void initState() {
     super.initState();
     _currentRiverData = Map<String, dynamic>.from(widget.riverData);
     _setupRunStream();
     _loadLogbookStats();
-    _loadLiveData();
-    _loadHistoricalData();
+    _loadInitialData();
+  }
+
+  /// Load critical data first, then secondary data
+  Future<void> _loadInitialData() async {
+    // Load critical data in parallel (live data + chart)
+    await Future.wait([_loadLiveData(), _loadHistoricalData()]);
+
+    // Mark initial load complete
+    if (mounted) {
+      setState(() {
+        _isInitialLoad = false;
+      });
+    }
+
+    // Load secondary data (statistics + weather) in background
     _loadStatisticsData();
     _loadWeatherData();
   }
@@ -152,11 +175,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         _weatherForecast = [];
         _isLoadingWeather = true;
         _weatherError = null;
+        _isInitialLoad = true; // Reset initial load state
+        // Clear cached data for new river
+        _cachedCombinedData = [];
+        _cachedDataTime = null;
+        _cachedHistoricalData = {};
+        _cachedHistoricalDataTime = {};
       });
-      _loadLiveData();
-      _loadHistoricalData();
-      _loadStatisticsData();
-      _loadWeatherData();
+      _loadInitialData();
     }
   }
 
@@ -255,72 +281,27 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       List<Map<String, dynamic>> dataPoints = [];
 
-      // For very short ranges (14 days or less), use high-resolution real-time data
-      if (_selectedDays <= 14) {
-        if (kDebugMode) {
-          print(
-            '📊 Using high-resolution real-time data for $_selectedDays days',
-          );
-        }
+      // For short to medium ranges (30 days or less), use cached combined timeline
+      // This allows instant switching between 3, 14, and 30-day views
+      if (_selectedDays <= 30 && _selectedYear == null) {
+        // Check if we have valid cached data (less than 5 minutes old)
+        final isCacheValid =
+            _cachedCombinedData.isNotEmpty &&
+            _cachedDataTime != null &&
+            DateTime.now().difference(_cachedDataTime!).inMinutes < 5;
 
-        dataPoints = await _fetchHighResolutionData(stationId, _selectedDays);
-      }
-      // For medium ranges (8-30 days), use combined timeline with daily averages
-      else if (_selectedDays <= 30) {
-        if (kDebugMode) {
-          print('📊 Using combined timeline for $_selectedDays days');
-        }
-
-        final combinedResult =
-            await HistoricalWaterDataService.getCombinedTimeline(
-              stationId,
-              includeRealtimeData: true,
-            );
-
-        final combined =
-            combinedResult['combined'] as List<Map<String, dynamic>>;
-
-        // Take only the last N days from the combined data
-        if (combined.isNotEmpty) {
-          // Sort by date (most recent first)
-          combined.sort(
-            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
-          );
-
-          // Take the requested number of days
-          dataPoints = combined.take(_selectedDays).toList();
-
-          // Reverse back to chronological order for charting
-          dataPoints = dataPoints.reversed.toList();
-        }
-      } else {
-        if (kDebugMode) {
-          print(
-            '📊 Fetching data for $_selectedDays days, year: $_selectedYear (null means current/2024)',
-          );
-        }
-
-        // Check if viewing a specific historical year
-        if (_selectedYear != null) {
-          if (kDebugMode) {
-            print('📅 Fetching historical year data for $_selectedYear');
-          }
-          // Fetch specific year from historical API
-          dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
-            stationId,
-            year: _selectedYear,
-          );
-
+        if (isCacheValid) {
           if (kDebugMode) {
             print(
-              '📅 Got ${dataPoints.length} data points for year $_selectedYear',
+              '💾 Using cached combined timeline data ($_selectedDays days)',
             );
           }
+          dataPoints = _cachedCombinedData;
         } else {
           if (kDebugMode) {
-            print('📅 Fetching combined timeline for current data');
+            print('🌐 Fetching fresh combined timeline (cache miss)');
           }
-          // Default: use combined timeline for current data
+
           final combinedResult =
               await HistoricalWaterDataService.getCombinedTimeline(
                 stationId,
@@ -330,18 +311,117 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           final combined =
               combinedResult['combined'] as List<Map<String, dynamic>>;
 
-          if (combined.isNotEmpty) {
-            // Sort by date (most recent first)
-            combined.sort(
-              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          // Cache the full dataset
+          _cachedCombinedData = combined;
+          _cachedDataTime = DateTime.now();
+
+          dataPoints = combined;
+
+          if (kDebugMode) {
+            print('💾 Cached ${combined.length} days of combined data');
+          }
+        }
+
+        // Filter to requested number of days (client-side)
+        if (dataPoints.isNotEmpty) {
+          // Sort by date (most recent first)
+          dataPoints.sort(
+            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          );
+
+          // Take the requested number of days
+          dataPoints = dataPoints.take(_selectedDays).toList();
+
+          // Reverse back to chronological order for charting
+          dataPoints = dataPoints.reversed.toList();
+        }
+      } else {
+        // For longer ranges (>30 days) or historical years, use cached historical data
+        if (kDebugMode) {
+          print(
+            '📊 Fetching data for $_selectedDays days, year: $_selectedYear',
+          );
+        }
+
+        // Check if we have valid cached data for this year (15 minutes TTL for historical data)
+        final cacheKey =
+            _selectedYear; // null for current year's long-range data
+        final isCacheValid =
+            _cachedHistoricalData.containsKey(cacheKey) &&
+            _cachedHistoricalDataTime.containsKey(cacheKey) &&
+            DateTime.now()
+                    .difference(_cachedHistoricalDataTime[cacheKey]!)
+                    .inMinutes <
+                15;
+
+        if (isCacheValid) {
+          if (kDebugMode) {
+            print(
+              '💾 Using cached historical data (year: $_selectedYear, ${_selectedDays} days)',
+            );
+          }
+          dataPoints = _cachedHistoricalData[cacheKey]!;
+        } else {
+          // Check if viewing a specific historical year
+          if (_selectedYear != null) {
+            if (kDebugMode) {
+              print('🌐 Fetching historical year data for $_selectedYear');
+            }
+            // Fetch specific year from historical API
+            dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
+              stationId,
+              year: _selectedYear,
             );
 
-            // Take only the last N days
-            dataPoints = combined.take(_selectedDays).toList();
+            if (kDebugMode) {
+              print(
+                '📅 Got ${dataPoints.length} data points for year $_selectedYear',
+              );
+            }
+          } else {
+            if (kDebugMode) {
+              print('🌐 Fetching combined timeline for current data');
+            }
+            // Default: use combined timeline for current data
+            final combinedResult =
+                await HistoricalWaterDataService.getCombinedTimeline(
+                  stationId,
+                  includeRealtimeData: true,
+                );
 
-            // Reverse for charting (oldest first)
-            dataPoints = dataPoints.reversed.toList();
+            dataPoints =
+                combinedResult['combined'] as List<Map<String, dynamic>>;
+
+            if (kDebugMode) {
+              print(
+                '📅 Got ${dataPoints.length} data points from combined timeline',
+              );
+            }
           }
+
+          // Cache the fetched historical data
+          _cachedHistoricalData[cacheKey] = dataPoints;
+          _cachedHistoricalDataTime[cacheKey] = DateTime.now();
+
+          if (kDebugMode) {
+            print(
+              '💾 Cached ${dataPoints.length} days of historical data (year: $_selectedYear)',
+            );
+          }
+        }
+
+        // Filter to requested number of days (client-side)
+        if (dataPoints.isNotEmpty) {
+          // Sort by date (most recent first)
+          dataPoints.sort(
+            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          );
+
+          // Take only the last N days
+          dataPoints = dataPoints.take(_selectedDays).toList();
+
+          // Reverse for charting (oldest first)
+          dataPoints = dataPoints.reversed.toList();
         }
       }
 
@@ -403,112 +483,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   /// Fetch high-resolution real-time data (5-minute intervals) for short time periods
-  Future<List<Map<String, dynamic>>> _fetchHighResolutionData(
-    String stationId,
-    int days,
-  ) async {
-    try {
-      if (kDebugMode) {
-        print('🔍 Fetching high-resolution data for $days days');
-      }
-
-      // Fetch raw real-time data (not daily averages)
-      final url =
-          'https://api.weather.gc.ca/collections/hydrometric-realtime/items?'
-          'STATION_NUMBER=$stationId&'
-          'limit=${days * 288}&' // 288 records per day (5-minute intervals)
-          'sortby=-DATETIME&' // Sort descending (newest first) to get most recent data
-          'f=json';
-
-      final response = await http
-          .get(Uri.parse(url))
-          .timeout(const Duration(seconds: 30));
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final features = data['features'] as List? ?? [];
-
-        final highResData = <Map<String, dynamic>>[];
-
-        for (final feature in features) {
-          final props = feature['properties'];
-          if (props != null) {
-            final datetime = props['DATETIME'] as String?;
-            final discharge = props['DISCHARGE'];
-            final level = props['LEVEL'];
-
-            if (datetime != null && discharge != null) {
-              highResData.add({
-                'datetime': datetime,
-                'discharge': discharge is num
-                    ? discharge.toDouble()
-                    : double.tryParse(discharge.toString()),
-                'level': level is num
-                    ? level.toDouble()
-                    : (level != null
-                          ? double.tryParse(level.toString())
-                          : null),
-                'stationId': stationId,
-                'source': 'realtime-highres',
-              });
-            }
-          }
-        }
-
-        // Filter to exactly the requested number of days from most recent
-        if (highResData.isNotEmpty) {
-          // Sort by datetime (most recent first)
-          highResData.sort(
-            (a, b) =>
-                (b['datetime'] as String).compareTo(a['datetime'] as String),
-          );
-
-          // Calculate cutoff datetime for requested days
-          final mostRecent = DateTime.parse(
-            highResData.first['datetime'] as String,
-          );
-          final cutoffTime = mostRecent.subtract(Duration(days: days));
-
-          // Filter to only include data within the requested time window
-          final filteredData = highResData.where((d) {
-            final dt = DateTime.parse(d['datetime'] as String);
-            return dt.isAfter(cutoffTime);
-          }).toList();
-
-          // Reverse to chronological order for charting
-          filteredData.sort(
-            (a, b) =>
-                (a['datetime'] as String).compareTo(b['datetime'] as String),
-          );
-
-          if (kDebugMode) {
-            print('✅ Got ${filteredData.length} high-resolution data points');
-            if (filteredData.isNotEmpty) {
-              print(
-                '   Time range: ${filteredData.first['datetime']} to ${filteredData.last['datetime']}',
-              );
-            }
-          }
-
-          return filteredData;
-        }
-      }
-
-      if (kDebugMode) {
-        print(
-          '⚠️ No high-resolution data available, falling back to daily averages',
-        );
-      }
-
-      return [];
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error fetching high-resolution data: $e');
-      }
-      return [];
-    }
-  }
-
   Future<void> _loadStatisticsData() async {
     setState(() {
       _isLoadingStats = true;
@@ -528,85 +502,115 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Use different data resolution based on time range
       Map<String, dynamic> flowStats;
 
-      if (_selectedDays <= 14) {
-        // For very short ranges, use high-resolution data for better statistics
-        final highResData = await _fetchHighResolutionData(
-          stationId,
-          _selectedDays,
-        );
+      if (_selectedDays <= 30 && _selectedYear == null) {
+        // For short to medium ranges, use cached combined timeline
+        // This matches the chart data caching strategy
+        List<Map<String, dynamic>> dataPoints;
 
-        if (highResData.isNotEmpty) {
-          flowStats = _calculateStatsFromData(highResData);
+        // Check if we have valid cached data (less than 5 minutes old)
+        final isCacheValid =
+            _cachedCombinedData.isNotEmpty &&
+            _cachedDataTime != null &&
+            DateTime.now().difference(_cachedDataTime!).inMinutes < 5;
+
+        if (isCacheValid) {
+          if (kDebugMode) {
+            print('💾 Using cached data for statistics ($_selectedDays days)');
+          }
+          dataPoints = _cachedCombinedData;
         } else {
-          // Fallback to combined timeline if high-res fails
+          if (kDebugMode) {
+            print('🌐 Fetching combined timeline for statistics');
+          }
           final combinedResult =
               await HistoricalWaterDataService.getCombinedTimeline(
                 stationId,
                 includeRealtimeData: true,
               );
-          final combined =
-              combinedResult['combined'] as List<Map<String, dynamic>>;
+          dataPoints = combinedResult['combined'] as List<Map<String, dynamic>>;
 
-          if (combined.isNotEmpty) {
-            combined.sort(
-              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
-            );
-            final recentData = combined.take(_selectedDays).toList();
-            flowStats = _calculateStatsFromData(recentData);
-          } else {
-            flowStats = {'error': 'No data available', 'count': 0};
-          }
+          // Cache it for future use
+          _cachedCombinedData = dataPoints;
+          _cachedDataTime = DateTime.now();
         }
-      } else if (_selectedDays <= 30) {
-        // For medium ranges, use combined timeline with daily averages
-        final combinedResult =
-            await HistoricalWaterDataService.getCombinedTimeline(
-              stationId,
-              includeRealtimeData: true,
-            );
-        final combined =
-            combinedResult['combined'] as List<Map<String, dynamic>>;
 
-        if (combined.isNotEmpty) {
+        if (dataPoints.isNotEmpty) {
           // Take last N days and calculate statistics
-          combined.sort(
+          dataPoints.sort(
             (a, b) => (b['date'] as String).compareTo(a['date'] as String),
           );
-          final recentData = combined.take(_selectedDays).toList();
+          final recentData = dataPoints.take(_selectedDays).toList();
 
           flowStats = _calculateStatsFromData(recentData);
         } else {
           flowStats = {'error': 'No data available', 'count': 0};
         }
       } else {
-        // Check if viewing a specific historical year
-        if (_selectedYear != null) {
-          // Use historical API for specific year
-          flowStats = await HistoricalWaterDataService.getFlowStatistics(
-            stationId,
-            year: _selectedYear,
-          );
-        } else {
-          // Default: use combined timeline
-          final combinedResult =
-              await HistoricalWaterDataService.getCombinedTimeline(
-                stationId,
-                includeRealtimeData: true,
-              );
-          final combined =
-              combinedResult['combined'] as List<Map<String, dynamic>>;
+        // For longer ranges (>30 days) or historical years, use cached historical data
+        List<Map<String, dynamic>> dataPoints;
 
-          if (combined.isNotEmpty) {
-            // Take last N days
-            combined.sort(
-              (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+        final cacheKey = _selectedYear;
+        final isCacheValid =
+            _cachedHistoricalData.containsKey(cacheKey) &&
+            _cachedHistoricalDataTime.containsKey(cacheKey) &&
+            DateTime.now()
+                    .difference(_cachedHistoricalDataTime[cacheKey]!)
+                    .inMinutes <
+                15;
+
+        if (isCacheValid) {
+          if (kDebugMode) {
+            print(
+              '💾 Using cached historical data for statistics (year: $_selectedYear)',
             );
-            final recentData = combined.take(_selectedDays).toList();
-
-            flowStats = _calculateStatsFromData(recentData);
-          } else {
-            flowStats = {'error': 'No data available', 'count': 0};
           }
+          dataPoints = _cachedHistoricalData[cacheKey]!;
+        } else {
+          // Check if viewing a specific historical year
+          if (_selectedYear != null) {
+            if (kDebugMode) {
+              print(
+                '🌐 Fetching historical data for statistics (year: $_selectedYear)',
+              );
+            }
+            // Fetch specific year from historical API
+            dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
+              stationId,
+              year: _selectedYear,
+            );
+
+            // Cache it
+            _cachedHistoricalData[cacheKey] = dataPoints;
+            _cachedHistoricalDataTime[cacheKey] = DateTime.now();
+          } else {
+            if (kDebugMode) {
+              print('🌐 Fetching combined timeline for statistics');
+            }
+            // Default: use combined timeline
+            final combinedResult =
+                await HistoricalWaterDataService.getCombinedTimeline(
+                  stationId,
+                  includeRealtimeData: true,
+                );
+            dataPoints =
+                combinedResult['combined'] as List<Map<String, dynamic>>;
+
+            // Cache it
+            _cachedHistoricalData[cacheKey] = dataPoints;
+            _cachedHistoricalDataTime[cacheKey] = DateTime.now();
+          }
+        }
+
+        if (dataPoints.isNotEmpty) {
+          // Take last N days and calculate statistics
+          dataPoints.sort(
+            (a, b) => (b['date'] as String).compareTo(a['date'] as String),
+          );
+          final recentData = dataPoints.take(_selectedDays).toList();
+
+          flowStats = _calculateStatsFromData(recentData);
+        } else {
+          flowStats = {'error': 'No data available', 'count': 0};
         }
       }
 
@@ -759,6 +763,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<void> _refreshAllData() async {
+    // Clear cache to force fresh data fetch
+    setState(() {
+      _cachedCombinedData = [];
+      _cachedDataTime = null;
+      _cachedHistoricalData = {};
+      _cachedHistoricalDataTime = {};
+    });
+
     await Future.wait([
       _loadLiveData(),
       _loadHistoricalData(),
@@ -1011,615 +1023,704 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _refreshAllData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header Card with Status
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            _getStatusIcon(status),
-                            color: _getStatusColor(status),
-                            size: 32,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
+      body: _isInitialLoad
+          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
+          : RefreshIndicator(
+              onRefresh: _refreshAllData,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Card with Status
+                    Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (section.isNotEmpty)
-                                  Text(
-                                    '$section ($sectionClass)',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                Icon(
+                                  _getStatusIcon(status),
+                                  color: _getStatusColor(status),
+                                  size: 32,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      if (section.isNotEmpty)
+                                        Text(
+                                          '$section ($sectionClass)',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                      if (section.isEmpty &&
+                                          sectionClass != 'Unknown')
+                                        Text(
+                                          sectionClass,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineSmall
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
+                                    ],
                                   ),
-                                if (section.isEmpty &&
-                                    sectionClass != 'Unknown')
-                                  Text(
-                                    sectionClass,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                // Logbook stats - top right
+                                if (_totalRuns > 0)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.event,
+                                            size: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            _lastRanDate != null
+                                                ? _formatDate(_lastRanDate!)
+                                                : 'Never',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.format_list_numbered,
+                                            size: 14,
+                                            color: Colors.grey[600],
+                                          ),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            '$_totalRuns ${_totalRuns == 1 ? 'run' : 'runs'}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
                                   ),
                               ],
                             ),
-                          ),
-                          // Logbook stats - top right
-                          if (_totalRuns > 0)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.event,
-                                      size: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      _lastRanDate != null
-                                          ? _formatDate(_lastRanDate!)
-                                          : 'Never',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 4),
-                                Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.format_list_numbered,
-                                      size: 14,
-                                      color: Colors.grey[600],
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      '$_totalRuns ${_totalRuns == 1 ? 'run' : 'runs'}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey[600],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            color: Colors.grey[600],
-                            size: 16,
-                          ),
-                          const SizedBox(width: 4),
-                          Expanded(
-                            child: Text(
-                              location,
-                              style: TextStyle(color: Colors.grey[600]),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      if (difficulty != 'Unknown')
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.trending_up,
-                                color: Colors.grey[600],
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Difficulty: $difficulty',
-                                style: TextStyle(color: Colors.grey[600]),
-                              ),
-                            ],
-                          ),
-                        ),
-                      // Show flow recommendations if available
-                      if (_currentRiverData['minRunnable'] != null &&
-                          _currentRiverData['maxSafe'] != null &&
-                          _currentRiverData['minRunnable'] > 0)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.water_drop,
-                                color: Colors.blue[600],
-                                size: 16,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  'Recommended flow: ${_currentRiverData['minRunnable']}-${_currentRiverData['maxSafe']} m³/s',
-                                  style: TextStyle(
-                                    color: Colors.blue[600],
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              // Current Conditions Card - Hidden for Kananaskis (uses TransAlta widget instead)
-              if (!_isKananaskisRiver(riverName))
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Current Conditions',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-
-                        if (_isLoading)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(20.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.teal,
-                              ),
-                            ),
-                          )
-                        else if (_error != null)
-                          Center(
-                            child: Column(
+                            const SizedBox(height: 16),
+                            Row(
                               children: [
                                 Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red[300],
-                                  size: 48,
+                                  Icons.location_on,
+                                  color: Colors.grey[600],
+                                  size: 16,
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Error loading live data',
-                                  style: TextStyle(color: Colors.red[600]),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  _error!,
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                                const SizedBox(width: 4),
+                                Expanded(
+                                  child: Text(
+                                    location,
+                                    style: TextStyle(color: Colors.grey[600]),
                                   ),
-                                  textAlign: TextAlign.center,
                                 ),
                               ],
                             ),
-                          )
-                        else if (_liveData != null)
-                          Column(
-                            children: [
-                              _buildDataRow(
-                                icon: Icons.water_drop,
-                                label: 'Flow Rate',
-                                value: _liveData!.formattedFlowRate,
-                                color: Colors.blue,
+                            const SizedBox(height: 8),
+                            if (difficulty != 'Unknown')
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.trending_up,
+                                      color: Colors.grey[600],
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Difficulty: $difficulty',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              const SizedBox(height: 12),
-                              // Show current weather if available
-                              if (_currentWeather != null) ...[
-                                _buildDataRow(
-                                  icon: Icons.thermostat,
-                                  label: 'Temperature',
-                                  value:
-                                      '${_currentWeather!.temperature.toStringAsFixed(1)}°${_currentWeather!.temperatureUnit}',
-                                  color: Colors.orange,
+                            // Show flow recommendations if available
+                            if (_currentRiverData['minRunnable'] != null &&
+                                _currentRiverData['maxSafe'] != null &&
+                                _currentRiverData['minRunnable'] > 0)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.water_drop,
+                                      color: Colors.blue[600],
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Expanded(
+                                      child: Text(
+                                        'Recommended flow: ${_currentRiverData['minRunnable']}-${_currentRiverData['maxSafe']} m³/s',
+                                        style: TextStyle(
+                                          color: Colors.blue[600],
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(height: 12),
-                                _buildDataRow(
-                                  icon: Icons.wb_cloudy_outlined,
-                                  label: 'Conditions',
-                                  value: _currentWeather!.conditions,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 12),
-                                if (_currentWeather!.windSpeed != null)
-                                  _buildDataRow(
-                                    icon: Icons.air,
-                                    label: 'Wind',
-                                    value:
-                                        '${_currentWeather!.windSpeed!.toStringAsFixed(0)} km/h',
-                                    color: Colors.teal,
-                                  ),
-                                if (_currentWeather!.windSpeed != null)
-                                  const SizedBox(height: 12),
-                              ],
-                              _buildDataRow(
-                                icon: Icons.schedule,
-                                label: 'Last Updated',
-                                value: _formatDateTime(
-                                  _liveData!.timestamp.toIso8601String(),
-                                ),
-                                color: Colors.grey,
                               ),
-                            ],
-                          )
-                        else
-                          const Center(
-                            child: Text(
-                              'No live data available',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ),
-                      ],
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
-                ),
 
-              if (!_isKananaskisRiver(riverName)) const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-              // Weather Forecast Widget - Hidden for Kananaskis (uses TransAlta widget)
-              if (!_isKananaskisRiver(riverName))
-                WeatherForecastWidget(
-                  forecast: _weatherForecast,
-                  isLoading: _isLoadingWeather,
-                  error: _weatherError,
-                ),
-
-              if (!_isKananaskisRiver(riverName)) const SizedBox(height: 16),
-
-              // TransAlta Flow Widget - Special case for Kananaskis River
-              if (_isKananaskisRiver(riverName))
-                const TransAltaFlowWidget(threshold: 20.0),
-
-              if (_isKananaskisRiver(riverName)) const SizedBox(height: 16),
-
-              // Historical Discharge Chart Card - Hidden for Kananaskis (uses TransAlta widget instead)
-              if (!_isKananaskisRiver(riverName))
-                Card(
-                  key: ValueKey('chart_card_${widget.riverData['stationId']}'),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          _selectedYear != null
-                              ? 'Discharge History - $_selectedYear'
-                              : 'Real-time Discharge History',
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-
-                        if (_isLoadingChart)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(40.0),
-                              child: CircularProgressIndicator(
-                                color: Colors.teal,
+                    // Current Conditions Card - Hidden for Kananaskis (uses TransAlta widget instead)
+                    if (!_isKananaskisRiver(riverName))
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Current Conditions',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
-                            ),
-                          )
-                        else if (_chartError != null)
-                          Center(
-                            child: Column(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: Colors.red[300],
-                                  size: 48,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Real historical data unavailable',
-                                  style: TextStyle(color: Colors.red[600]),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Unable to fetch government historical data for this station',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
+                              const SizedBox(height: 16),
+
+                              if (_isLoading)
+                                SizedBox(
+                                  height:
+                                      200, // Match the height of loaded data
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.teal,
+                                          ),
+                                        ),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          'Loading current conditions...',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  textAlign: TextAlign.center,
+                                )
+                              else if (_error != null)
+                                SizedBox(
+                                  height:
+                                      200, // Match the height of loaded data
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red[300],
+                                          size: 48,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Error loading live data',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          _error!,
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else if (_liveData != null)
+                                Column(
+                                  children: [
+                                    _buildDataRow(
+                                      icon: Icons.water_drop,
+                                      label: 'Flow Rate',
+                                      value: _liveData!.formattedFlowRate,
+                                      color: Colors.blue,
+                                    ),
+                                    const SizedBox(height: 12),
+                                    // Show current weather if available
+                                    if (_currentWeather != null) ...[
+                                      _buildDataRow(
+                                        icon: Icons.thermostat,
+                                        label: 'Temperature',
+                                        value:
+                                            '${_currentWeather!.temperature.toStringAsFixed(1)}°${_currentWeather!.temperatureUnit}',
+                                        color: Colors.orange,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      _buildDataRow(
+                                        icon: Icons.wb_cloudy_outlined,
+                                        label: 'Conditions',
+                                        value: _currentWeather!.conditions,
+                                        color: Colors.grey,
+                                      ),
+                                      const SizedBox(height: 12),
+                                      if (_currentWeather!.windSpeed != null)
+                                        _buildDataRow(
+                                          icon: Icons.air,
+                                          label: 'Wind',
+                                          value:
+                                              '${_currentWeather!.windSpeed!.toStringAsFixed(0)} km/h',
+                                          color: Colors.teal,
+                                        ),
+                                      if (_currentWeather!.windSpeed != null)
+                                        const SizedBox(height: 12),
+                                    ],
+                                    _buildDataRow(
+                                      icon: Icons.schedule,
+                                      label: 'Last Updated',
+                                      value: _formatDateTime(
+                                        _liveData!.timestamp.toIso8601String(),
+                                      ),
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                )
+                              else
+                                const SizedBox(
+                                  height:
+                                      200, // Match the height of loaded data
+                                  child: Center(
+                                    child: Text(
+                                      'No live data available',
+                                      style: TextStyle(color: Colors.grey),
+                                    ),
+                                  ),
                                 ),
-                              ],
-                            ),
-                          )
-                        else if (_historicalData.isNotEmpty)
-                          SizedBox(
-                            height: 200,
-                            child: LineChart(
-                              key: ValueKey(
-                                'chart_${widget.riverData['stationId']}',
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    if (!_isKananaskisRiver(riverName))
+                      const SizedBox(height: 16),
+
+                    // Weather Forecast Widget - Hidden for Kananaskis (uses TransAlta widget)
+                    if (!_isKananaskisRiver(riverName))
+                      WeatherForecastWidget(
+                        forecast: _weatherForecast,
+                        isLoading: _isLoadingWeather,
+                        error: _weatherError,
+                      ),
+
+                    if (!_isKananaskisRiver(riverName))
+                      const SizedBox(height: 16),
+
+                    // TransAlta Flow Widget - Special case for Kananaskis River
+                    if (_isKananaskisRiver(riverName))
+                      const TransAltaFlowWidget(threshold: 20.0),
+
+                    if (_isKananaskisRiver(riverName))
+                      const SizedBox(height: 16),
+
+                    // Historical Discharge Chart Card - Hidden for Kananaskis (uses TransAlta widget instead)
+                    if (!_isKananaskisRiver(riverName))
+                      Card(
+                        key: ValueKey(
+                          'chart_card_${widget.riverData['stationId']}',
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _selectedYear != null
+                                    ? 'Discharge History - $_selectedYear'
+                                    : 'Real-time Discharge History',
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(fontWeight: FontWeight.bold),
                               ),
-                              LineChartData(
-                                gridData: FlGridData(
-                                  show: true,
-                                  drawHorizontalLine: true,
-                                  drawVerticalLine: false,
-                                  horizontalInterval: _historicalData.isNotEmpty
-                                      ? (_historicalData
+                              const SizedBox(height: 16),
+
+                              if (_isLoadingChart)
+                                SizedBox(
+                                  height: 200, // Match chart height
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: const [
+                                        SizedBox(
+                                          width: 24,
+                                          height: 24,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.teal,
+                                          ),
+                                        ),
+                                        SizedBox(height: 12),
+                                        Text(
+                                          'Loading chart data...',
+                                          style: TextStyle(color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else if (_chartError != null)
+                                SizedBox(
+                                  height: 200, // Match chart height
+                                  child: Center(
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: Colors.red[300],
+                                          size: 48,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          'Real historical data unavailable',
+                                          style: TextStyle(
+                                            color: Colors.red[600],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'Unable to fetch government historical data for this station',
+                                          style: TextStyle(
+                                            color: Colors.grey[600],
+                                            fontSize: 12,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              else if (_historicalData.isNotEmpty)
+                                SizedBox(
+                                  height: 200,
+                                  child: LineChart(
+                                    key: ValueKey(
+                                      'chart_${widget.riverData['stationId']}',
+                                    ),
+                                    LineChartData(
+                                      gridData: FlGridData(
+                                        show: true,
+                                        drawHorizontalLine: true,
+                                        drawVerticalLine: false,
+                                        horizontalInterval:
+                                            _historicalData.isNotEmpty
+                                            ? (_historicalData
+                                                          .map((e) => e.y)
+                                                          .reduce(
+                                                            (a, b) =>
+                                                                a > b ? a : b,
+                                                          ) /
+                                                      6)
+                                                  .clamp(2.0, 20.0)
+                                            : 10,
+                                        getDrawingHorizontalLine: (value) {
+                                          return FlLine(
+                                            color: Colors.grey.withOpacity(0.3),
+                                            strokeWidth: 1,
+                                          );
+                                        },
+                                      ),
+                                      titlesData: FlTitlesData(
+                                        leftTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 50,
+                                            getTitlesWidget: (value, meta) {
+                                              return Text(
+                                                '${value.toInt()}',
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                  fontSize: 12,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        bottomTitles: AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: true,
+                                            reservedSize: 50,
+                                            interval: _historicalData.isNotEmpty
+                                                ? (_historicalData.last.x -
+                                                          _historicalData
+                                                              .first
+                                                              .x) /
+                                                      4
+                                                : null,
+                                            getTitlesWidget: (value, meta) {
+                                              final dateTime =
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    value.toInt(),
+                                                  );
+
+                                              // Show actual date in MM/DD format
+                                              final dateStr =
+                                                  '${dateTime.month.toString().padLeft(2, '0')}/${dateTime.day.toString().padLeft(2, '0')}';
+
+                                              return Transform.rotate(
+                                                angle:
+                                                    -0.5, // Slight angle to fit better
+                                                child: Text(
+                                                  dateStr,
+                                                  style: const TextStyle(
+                                                    color: Colors.grey,
+                                                    fontSize: 10,
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                        topTitles: const AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
+                                        ),
+                                        rightTitles: const AxisTitles(
+                                          sideTitles: SideTitles(
+                                            showTitles: false,
+                                          ),
+                                        ),
+                                      ),
+                                      borderData: FlBorderData(
+                                        show: true,
+                                        border: Border.all(
+                                          color: Colors.grey.withOpacity(0.3),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      lineTouchData: LineTouchData(
+                                        enabled: true,
+                                        touchTooltipData: LineTouchTooltipData(
+                                          getTooltipItems: (touchedSpots) {
+                                            return touchedSpots.map((
+                                              touchedSpot,
+                                            ) {
+                                              final dateTime =
+                                                  DateTime.fromMillisecondsSinceEpoch(
+                                                    touchedSpot.x.toInt(),
+                                                  );
+                                              final flow = touchedSpot.y;
+
+                                              // Format date as "Oct 15, 2025"
+                                              final months = [
+                                                'Jan',
+                                                'Feb',
+                                                'Mar',
+                                                'Apr',
+                                                'May',
+                                                'Jun',
+                                                'Jul',
+                                                'Aug',
+                                                'Sep',
+                                                'Oct',
+                                                'Nov',
+                                                'Dec',
+                                              ];
+                                              final formattedDate =
+                                                  '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
+
+                                              return LineTooltipItem(
+                                                '$formattedDate\n${flow.toStringAsFixed(1)} cms',
+                                                const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 12,
+                                                ),
+                                              );
+                                            }).toList();
+                                          },
+                                        ),
+                                        touchCallback:
+                                            (
+                                              FlTouchEvent event,
+                                              LineTouchResponse? touchResponse,
+                                            ) {
+                                              // Optional: Add haptic feedback on touch
+                                              // HapticFeedback.lightImpact();
+                                            },
+                                        handleBuiltInTouches: true,
+                                      ),
+                                      lineBarsData: [
+                                        LineChartBarData(
+                                          spots: _historicalData,
+                                          isCurved: true,
+                                          color: Colors.teal,
+                                          barWidth: 3,
+                                          isStrokeCapRound: true,
+                                          belowBarData: BarAreaData(
+                                            show: true,
+                                            color: Colors.teal.withOpacity(0.1),
+                                          ),
+                                          dotData: FlDotData(
+                                            show: false,
+                                            getDotPainter:
+                                                (
+                                                  spot,
+                                                  percent,
+                                                  barData,
+                                                  index,
+                                                ) {
+                                                  return FlDotCirclePainter(
+                                                    radius: 4,
+                                                    color: Colors.white,
+                                                    strokeWidth: 2,
+                                                    strokeColor: Colors.teal,
+                                                  );
+                                                },
+                                          ),
+                                        ),
+                                      ],
+                                      minY: _historicalData.isNotEmpty
+                                          ? (_historicalData
+                                                        .map((e) => e.y)
+                                                        .reduce(
+                                                          (a, b) =>
+                                                              a < b ? a : b,
+                                                        ) *
+                                                    0.8)
+                                                .clamp(0, double.infinity)
+                                          : 0,
+                                      maxY: _historicalData.isNotEmpty
+                                          ? _historicalData
                                                     .map((e) => e.y)
                                                     .reduce(
                                                       (a, b) => a > b ? a : b,
-                                                    ) /
-                                                6)
-                                            .clamp(2.0, 20.0)
-                                      : 10,
-                                  getDrawingHorizontalLine: (value) {
-                                    return FlLine(
-                                      color: Colors.grey.withOpacity(0.3),
-                                      strokeWidth: 1,
-                                    );
-                                  },
-                                ),
-                                titlesData: FlTitlesData(
-                                  leftTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 50,
-                                      getTitlesWidget: (value, meta) {
-                                        return Text(
-                                          '${value.toInt()}',
-                                          style: const TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        );
-                                      },
+                                                    ) *
+                                                1.3
+                                          : 80,
                                     ),
                                   ),
-                                  bottomTitles: AxisTitles(
-                                    sideTitles: SideTitles(
-                                      showTitles: true,
-                                      reservedSize: 50,
-                                      interval: _historicalData.isNotEmpty
-                                          ? (_historicalData.last.x -
-                                                    _historicalData.first.x) /
-                                                4
-                                          : null,
-                                      getTitlesWidget: (value, meta) {
-                                        final dateTime =
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              value.toInt(),
-                                            );
-
-                                        // Show actual date in MM/DD format
-                                        final dateStr =
-                                            '${dateTime.month.toString().padLeft(2, '0')}/${dateTime.day.toString().padLeft(2, '0')}';
-
-                                        return Transform.rotate(
-                                          angle:
-                                              -0.5, // Slight angle to fit better
-                                          child: Text(
-                                            dateStr,
+                                )
+                              else
+                                SizedBox(
+                                  height: 200, // Match chart height
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(40.0),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            _selectedYear != null
+                                                ? 'No historical data available for $_selectedYear'
+                                                : 'No historical data available',
                                             style: const TextStyle(
                                               color: Colors.grey,
-                                              fontSize: 10,
                                             ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  topTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                  rightTitles: const AxisTitles(
-                                    sideTitles: SideTitles(showTitles: false),
-                                  ),
-                                ),
-                                borderData: FlBorderData(
-                                  show: true,
-                                  border: Border.all(
-                                    color: Colors.grey.withOpacity(0.3),
-                                    width: 1,
-                                  ),
-                                ),
-                                lineTouchData: LineTouchData(
-                                  enabled: true,
-                                  touchTooltipData: LineTouchTooltipData(
-                                    getTooltipItems: (touchedSpots) {
-                                      return touchedSpots.map((touchedSpot) {
-                                        final dateTime =
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              touchedSpot.x.toInt(),
-                                            );
-                                        final flow = touchedSpot.y;
-
-                                        // Format date as "Oct 15, 2025"
-                                        final months = [
-                                          'Jan',
-                                          'Feb',
-                                          'Mar',
-                                          'Apr',
-                                          'May',
-                                          'Jun',
-                                          'Jul',
-                                          'Aug',
-                                          'Sep',
-                                          'Oct',
-                                          'Nov',
-                                          'Dec',
-                                        ];
-                                        final formattedDate =
-                                            '${months[dateTime.month - 1]} ${dateTime.day}, ${dateTime.year}';
-
-                                        return LineTooltipItem(
-                                          '$formattedDate\n${flow.toStringAsFixed(1)} cms',
-                                          const TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                          ),
-                                        );
-                                      }).toList();
-                                    },
-                                  ),
-                                  touchCallback:
-                                      (
-                                        FlTouchEvent event,
-                                        LineTouchResponse? touchResponse,
-                                      ) {
-                                        // Optional: Add haptic feedback on touch
-                                        // HapticFeedback.lightImpact();
-                                      },
-                                  handleBuiltInTouches: true,
-                                ),
-                                lineBarsData: [
-                                  LineChartBarData(
-                                    spots: _historicalData,
-                                    isCurved: true,
-                                    color: Colors.teal,
-                                    barWidth: 3,
-                                    isStrokeCapRound: true,
-                                    belowBarData: BarAreaData(
-                                      show: true,
-                                      color: Colors.teal.withOpacity(0.1),
-                                    ),
-                                    dotData: FlDotData(
-                                      show: false,
-                                      getDotPainter:
-                                          (spot, percent, barData, index) {
-                                            return FlDotCirclePainter(
-                                              radius: 4,
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                              strokeColor: Colors.teal,
-                                            );
-                                          },
-                                    ),
-                                  ),
-                                ],
-                                minY: _historicalData.isNotEmpty
-                                    ? (_historicalData
-                                                  .map((e) => e.y)
-                                                  .reduce(
-                                                    (a, b) => a < b ? a : b,
-                                                  ) *
-                                              0.8)
-                                          .clamp(0, double.infinity)
-                                    : 0,
-                                maxY: _historicalData.isNotEmpty
-                                    ? _historicalData
-                                              .map((e) => e.y)
-                                              .reduce((a, b) => a > b ? a : b) *
-                                          1.3
-                                    : 80,
-                              ),
-                            ),
-                          )
-                        else
-                          Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(40.0),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    _selectedYear != null
-                                        ? 'No historical data available for $_selectedYear'
-                                        : 'No historical data available',
-                                    style: TextStyle(color: Colors.grey),
-                                  ),
-                                  if (_selectedYear != null) ...[
-                                    SizedBox(height: 8),
-                                    Text(
-                                      'This station may only have real-time data',
-                                      style: TextStyle(
-                                        color: Colors.grey,
-                                        fontSize: 12,
+                                          if (_selectedYear != null) ...[
+                                            const SizedBox(height: 8),
+                                            const Text(
+                                              'This station may only have real-time data',
+                                              style: TextStyle(
+                                                color: Colors.grey,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-
-                        if (_historicalData.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.info_outline,
-                                  size: 16,
-                                  color: Colors.grey[600],
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Discharge in cms',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: 12,
                                   ),
                                 ),
-                              ],
-                            ),
+
+                              if (_historicalData.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 16),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        Icons.info_outline,
+                                        size: 16,
+                                        color: Colors.grey[600],
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Discharge in cms',
+                                        style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                              // Day range selector
+                              const SizedBox(height: 16),
+                              _buildDayRangeSelector(),
+
+                              // Flow statistics section
+                              const SizedBox(height: 16),
+                              _buildFlowStatistics(),
+
+                              // Recent trend section
+                              const SizedBox(height: 16),
+                              _buildRecentTrend(),
+                            ],
                           ),
+                        ),
+                      ),
 
-                        // Day range selector
-                        const SizedBox(height: 16),
-                        _buildDayRangeSelector(),
+                    // User's historical runs on this river
+                    if (_currentRiverData['runId'] != null &&
+                        _currentRiverData['runId'].toString().isNotEmpty)
+                      UserRunsHistoryWidget(
+                        riverRunId: _currentRiverData['runId'] as String,
+                        riverName: riverName,
+                      ),
 
-                        // Flow statistics section
-                        const SizedBox(height: 16),
-                        _buildFlowStatistics(),
-
-                        // Recent trend section
-                        const SizedBox(height: 16),
-                        _buildRecentTrend(),
-                      ],
-                    ),
-                  ),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-
-              // User's historical runs on this river
-              if (_currentRiverData['runId'] != null &&
-                  _currentRiverData['runId'].toString().isNotEmpty)
-                UserRunsHistoryWidget(
-                  riverRunId: _currentRiverData['runId'] as String,
-                  riverName: riverName,
-                ),
-
-              const SizedBox(height: 32),
-            ],
-          ),
-        ),
-      ),
+              ),
+            ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           // Create RiverRunWithStations object to prefill the logbook entry
@@ -1799,53 +1900,72 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                   ),
 
                 // Year selector (only shown when 365 days is selected and user is premium)
-                if (_selectedDays == 365 && premiumProvider.isPremium) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Select Year',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8.0,
-                    children:
-                        [
-                          null,
-                          DateTime.now().year - 1,
-                          DateTime.now().year - 2,
-                          DateTime.now().year - 3,
-                          DateTime.now().year - 4,
-                        ].map((year) {
-                          final isSelected = year == _selectedYear;
-                          final label = year == null ? 'Year' : year.toString();
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: _selectedDays == 365 && premiumProvider.isPremium
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            const Divider(),
+                            const SizedBox(height: 12),
+                            const Text(
+                              'Select Year',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8.0,
+                              children:
+                                  [
+                                    null,
+                                    DateTime.now().year - 1,
+                                    DateTime.now().year - 2,
+                                    DateTime.now().year - 3,
+                                    DateTime.now().year - 4,
+                                  ].map((year) {
+                                    final isSelected = year == _selectedYear;
+                                    final label = year == null
+                                        ? 'Year'
+                                        : year.toString();
 
-                          return FilterChip(
-                            label: Text(label),
-                            selected: isSelected,
-                            onSelected: (selected) {
-                              if (selected) {
-                                _changeYear(year);
-                              }
-                            },
-                            selectedColor: Colors.blue.withOpacity(0.3),
-                            backgroundColor: Colors.grey.withOpacity(0.1),
-                          );
-                        }).toList(),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'ℹ️ View historical data from previous years',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ],
+                                    return FilterChip(
+                                      label: Text(label),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        if (selected) {
+                                          _changeYear(year);
+                                        }
+                                      },
+                                      selectedColor: Colors.blue.withOpacity(
+                                        0.3,
+                                      ),
+                                      backgroundColor: Colors.grey.withOpacity(
+                                        0.1,
+                                      ),
+                                    );
+                                  }).toList(),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8),
+                              child: Text(
+                                'ℹ️ View historical data from previous years',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                      : const SizedBox.shrink(),
+                ),
               ],
             ),
           ),
@@ -1855,47 +1975,57 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Widget _buildFlowStatistics() {
-    if (_isLoadingStats) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Center(child: CircularProgressIndicator(color: Colors.teal)),
-        ),
-      );
-    }
-
-    if (_flowStatistics == null || _flowStatistics!.containsKey('error')) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Flow statistics unavailable',
-            style: TextStyle(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    final stats = _flowStatistics!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              _selectedYear != null
-                  ? 'Flow Statistics - $_selectedYear'
-                  : 'Flow Statistics (Last ${_selectedDays == 365 ? '2024' : '$_selectedDays days'})',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _selectedYear != null
+                        ? 'Flow Statistics - $_selectedYear'
+                        : 'Flow Statistics (Last ${_selectedDays == 365 ? '2024' : '$_selectedDays days'})',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                if (_isLoadingStats)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.teal,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 12),
-            _buildStatRow('Average:', '${stats['average']} m³/s'),
-            _buildStatRow('Minimum:', '${stats['minimum']} m³/s'),
-            _buildStatRow('Maximum:', '${stats['maximum']} m³/s'),
-            _buildStatRow('Median:', '${stats['median']} m³/s'),
-            _buildStatRow('Data Points:', '${stats['count']}'),
+            if (_flowStatistics == null ||
+                _flowStatistics!.containsKey('error'))
+              SizedBox(
+                height: 140, // Match the approximate height of 5 stat rows
+                child: Center(
+                  child: Text(
+                    _isLoadingStats
+                        ? 'Loading statistics...'
+                        : 'Flow statistics unavailable',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                ),
+              )
+            else ...[
+              _buildStatRow('Average:', '${_flowStatistics!['average']} m³/s'),
+              _buildStatRow('Minimum:', '${_flowStatistics!['minimum']} m³/s'),
+              _buildStatRow('Maximum:', '${_flowStatistics!['maximum']} m³/s'),
+              _buildStatRow('Median:', '${_flowStatistics!['median']} m³/s'),
+              _buildStatRow('Data Points:', '${_flowStatistics!['count']}'),
+            ],
           ],
         ),
       ),
@@ -1903,69 +2033,86 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Widget _buildRecentTrend() {
-    if (_isLoadingStats) {
-      return const SizedBox.shrink();
-    }
-
-    if (_recentTrend == null || _recentTrend!.containsKey('error')) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Trend analysis unavailable',
-            style: TextStyle(color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-        ),
-      );
-    }
-
-    final trend = _recentTrend!;
-    final trendColor = trend['trendColor'] as Color;
-    final percentChange = trend['percentChange'] as double;
-    final trendText = trend['trend'] as String;
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Recent Trend',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-            const SizedBox(height: 12),
             Row(
               children: [
-                Icon(_getTrendIcon(trendText), color: trendColor, size: 24),
-                const SizedBox(width: 8),
-                Text(
-                  trendText,
-                  style: TextStyle(
-                    color: trendColor,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                const Expanded(
+                  child: Text(
+                    'Recent Trend',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                   ),
                 ),
-                const Spacer(),
-                Text(
-                  '${percentChange >= 0 ? '+' : ''}${percentChange.toStringAsFixed(1)}%',
-                  style: TextStyle(
-                    color: trendColor,
-                    fontWeight: FontWeight.bold,
+                if (_isLoadingStats)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.teal,
+                    ),
                   ),
-                ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Last ${trend['recentDays']} days vs ${trend['historicalDays']} day average',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
-            ),
+            const SizedBox(height: 12),
+            if (_recentTrend == null || _recentTrend!.containsKey('error'))
+              SizedBox(
+                height: 80, // Match approximate height of trend content
+                child: Center(
+                  child: Text(
+                    _isLoadingStats
+                        ? 'Loading trend analysis...'
+                        : 'Trend analysis unavailable',
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                ),
+              )
+            else
+              _buildTrendContent(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildTrendContent() {
+    final trend = _recentTrend!;
+    final trendColor = trend['trendColor'] as Color;
+    final percentChange = trend['percentChange'] as double;
+    final trendText = trend['trend'] as String;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(_getTrendIcon(trendText), color: trendColor, size: 24),
+            const SizedBox(width: 8),
+            Text(
+              trendText,
+              style: TextStyle(
+                color: trendColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${percentChange >= 0 ? '+' : ''}${percentChange.toStringAsFixed(1)}%',
+              style: TextStyle(color: trendColor, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Last ${trend['recentDays']} days vs ${trend['historicalDays']} day average',
+          style: TextStyle(color: Colors.grey[600], fontSize: 12),
+        ),
+      ],
     );
   }
 

@@ -77,30 +77,58 @@ class WeatherForecastWidget extends StatelessWidget {
             const SizedBox(height: 16),
 
             if (isLoading)
-              const Center(
-                child: Padding(
-                  padding: EdgeInsets.all(20.0),
-                  child: CircularProgressIndicator(color: Colors.teal),
+              const SizedBox(
+                height: 150, // Match the forecast height
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.teal,
+                        ),
+                      ),
+                      SizedBox(height: 12),
+                      Text(
+                        'Loading weather forecast...',
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    ],
+                  ),
                 ),
               )
             else if (error != null)
-              Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.error_outline, color: Colors.red[300], size: 48),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Weather data unavailable',
-                      style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                    ),
-                  ],
+              SizedBox(
+                height: 150, // Match the forecast height
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red[300],
+                        size: 48,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Weather data unavailable',
+                        style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                      ),
+                    ],
+                  ),
                 ),
               )
             else if (forecast.isEmpty)
-              Center(
-                child: Text(
-                  'No forecast available',
-                  style: TextStyle(color: Colors.grey[600]),
+              SizedBox(
+                height: 150, // Match the forecast height
+                child: Center(
+                  child: Text(
+                    'No forecast available',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
                 ),
               )
             else

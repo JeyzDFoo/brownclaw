@@ -123,7 +123,10 @@ class UserRunsHistoryWidget extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            const Center(child: CircularProgressIndicator()),
+            const SizedBox(
+              height: 80, // Minimum height to prevent layout shift
+              child: Center(child: CircularProgressIndicator()),
+            ),
           ],
         ),
       ),
