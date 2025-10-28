@@ -56,13 +56,14 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         parameters: const [],
       );
 
-      // Fetch current weather (today), 3-day forecast (next 3 days), and hourly forecast
+      // Fetch current weather (today), 4-day forecast, and hourly forecast
+      // We want 4 total days: today + next 3 days
       final weather = await _weatherService.getWeatherForStation(
         kananaskisStation,
       );
       final forecast = await _weatherService.getForecastForStation(
         kananaskisStation,
-        days: 3,
+        days: 4, // Request 4 days to ensure we get enough data
       );
       final hourly = await _weatherService.getHourlyForecast(
         kananaskisStation,
@@ -74,10 +75,12 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
           // Combine current weather (today) with forecast (tomorrow onwards)
           // This ensures we always have today's data as the first entry
           final combinedForecast = <WeatherData>[];
+
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
+
           if (weather != null) {
-            // Ensure current weather has today's date for proper day labeling
-            final now = DateTime.now();
-            final today = DateTime(now.year, now.month, now.day);
+            // Add current weather as today
             final weatherWithDate = WeatherData(
               latitude: weather.latitude,
               longitude: weather.longitude,
@@ -89,7 +92,23 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
             );
             combinedForecast.add(weatherWithDate);
           }
-          combinedForecast.addAll(forecast);
+
+          // Add forecast days, but skip if first forecast day is also today
+          for (final forecastDay in forecast) {
+            if (forecastDay.forecastTime != null) {
+              final forecastDate = DateTime(
+                forecastDay.forecastTime!.year,
+                forecastDay.forecastTime!.month,
+                forecastDay.forecastTime!.day,
+              );
+              // Only add if it's not today (we already added current weather for today)
+              if (!forecastDate.isAtSameMomentAs(today)) {
+                combinedForecast.add(forecastDay);
+              }
+            } else {
+              combinedForecast.add(forecastDay);
+            }
+          }
 
           _currentWeather = weather;
           _weatherForecast = combinedForecast;
@@ -476,6 +495,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     final difference = date.difference(today).inDays;
 
     if (difference == 0) return 'Today';
+    if (difference == 1) return 'Tomorrow';
 
     // For all other days, show the actual day of the week
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

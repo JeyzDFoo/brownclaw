@@ -11,10 +11,13 @@ import '../services/historical_water_data_service.dart';
 import '../services/river_run_service.dart';
 import '../services/river_service.dart';
 import '../services/analytics_service.dart';
+import '../services/gauge_station_service.dart';
+import '../services/weather_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import '../widgets/transalta_flow_widget.dart';
 import '../widgets/user_runs_history_widget.dart';
+import '../widgets/weather_forecast_widget.dart';
 import 'edit_river_run_screen.dart';
 import 'premium_purchase_screen.dart';
 import 'logbook_entry_screen.dart';
@@ -49,6 +52,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   // Logbook stats
   int _totalRuns = 0;
   DateTime? _lastRanDate;
+
+  // Weather data
+  final WeatherService _weatherService = WeatherService();
+  List<WeatherData> _weatherForecast = [];
+  WeatherData? _currentWeather;
+  bool _isLoadingWeather = false;
+  String? _weatherError;
+
   @override
   void initState() {
     super.initState();
@@ -58,6 +69,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     _loadLiveData();
     _loadHistoricalData();
     _loadStatisticsData();
+    _loadWeatherData();
   }
 
   @override
@@ -136,10 +148,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         _isLoadingStats = true;
         _error = null;
         _chartError = null;
+        _currentWeather = null;
+        _weatherForecast = [];
+        _isLoadingWeather = true;
+        _weatherError = null;
       });
       _loadLiveData();
       _loadHistoricalData();
       _loadStatisticsData();
+      _loadWeatherData();
     }
   }
 
@@ -670,11 +687,83 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
   }
 
+  Future<void> _loadWeatherData() async {
+    setState(() {
+      _isLoadingWeather = true;
+      _weatherError = null;
+    });
+
+    try {
+      // Get the station ID from river data
+      final stationId = widget.riverData['stationId'] as String?;
+      if (stationId == null || stationId.isEmpty) {
+        setState(() {
+          _weatherError = 'No station linked';
+          _isLoadingWeather = false;
+        });
+        return;
+      }
+
+      // Fetch the gauge station to get GPS coordinates
+      final station = await GaugeStationService.getStationById(stationId);
+      if (station == null) {
+        setState(() {
+          _weatherError = 'Station not found';
+          _isLoadingWeather = false;
+        });
+        return;
+      }
+
+      if (kDebugMode) {
+        print(
+          '🌤️ Loading weather for station ${station.name} at ${station.latitude}, ${station.longitude}',
+        );
+      }
+
+      // Fetch current weather and 5-day forecast in parallel
+      final results = await Future.wait([
+        _weatherService.getWeatherForStation(station),
+        _weatherService.getForecastForStation(station, days: 5),
+      ]);
+
+      final currentWeather = results[0] as WeatherData?;
+      final forecast = results[1] as List<WeatherData>;
+
+      if (mounted) {
+        setState(() {
+          _currentWeather = currentWeather;
+          _weatherForecast = forecast;
+          _isLoadingWeather = false;
+          if (forecast.isEmpty && currentWeather == null) {
+            _weatherError = 'Weather data unavailable';
+          }
+        });
+
+        if (kDebugMode) {
+          print(
+            '✅ Weather loaded: current=${currentWeather != null}, ${forecast.length} days forecast',
+          );
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading weather: $e');
+      }
+      if (mounted) {
+        setState(() {
+          _weatherError = 'Failed to load weather';
+          _isLoadingWeather = false;
+        });
+      }
+    }
+  }
+
   Future<void> _refreshAllData() async {
     await Future.wait([
       _loadLiveData(),
       _loadHistoricalData(),
       _loadStatisticsData(),
+      _loadWeatherData(),
     ]);
   }
 
@@ -1147,14 +1236,34 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                                 color: Colors.blue,
                               ),
                               const SizedBox(height: 12),
-                              // _buildDataRow(
-                              //   icon: Icons.thermostat,
-                              //   label: 'Temperature',
-                              //   value:
-                              //       '${_liveData!.temperature?.toStringAsFixed(1) ?? 'N/A'}°C',
-                              //   color: Colors.orange,
-                              // ),
-                              // const SizedBox(height: 12),
+                              // Show current weather if available
+                              if (_currentWeather != null) ...[
+                                _buildDataRow(
+                                  icon: Icons.thermostat,
+                                  label: 'Temperature',
+                                  value:
+                                      '${_currentWeather!.temperature.toStringAsFixed(1)}°${_currentWeather!.temperatureUnit}',
+                                  color: Colors.orange,
+                                ),
+                                const SizedBox(height: 12),
+                                _buildDataRow(
+                                  icon: Icons.wb_cloudy_outlined,
+                                  label: 'Conditions',
+                                  value: _currentWeather!.conditions,
+                                  color: Colors.grey,
+                                ),
+                                const SizedBox(height: 12),
+                                if (_currentWeather!.windSpeed != null)
+                                  _buildDataRow(
+                                    icon: Icons.air,
+                                    label: 'Wind',
+                                    value:
+                                        '${_currentWeather!.windSpeed!.toStringAsFixed(0)} km/h',
+                                    color: Colors.teal,
+                                  ),
+                                if (_currentWeather!.windSpeed != null)
+                                  const SizedBox(height: 12),
+                              ],
                               _buildDataRow(
                                 icon: Icons.schedule,
                                 label: 'Last Updated',
@@ -1175,6 +1284,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                       ],
                     ),
                   ),
+                ),
+
+              if (!_isKananaskisRiver(riverName)) const SizedBox(height: 16),
+
+              // Weather Forecast Widget - Hidden for Kananaskis (uses TransAlta widget)
+              if (!_isKananaskisRiver(riverName))
+                WeatherForecastWidget(
+                  forecast: _weatherForecast,
+                  isLoading: _isLoadingWeather,
+                  error: _weatherError,
                 ),
 
               if (!_isKananaskisRiver(riverName)) const SizedBox(height: 16),
