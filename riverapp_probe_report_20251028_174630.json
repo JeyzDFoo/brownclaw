@@ -1,0 +1,302 @@
+[
+  {
+    "timestamp": "2025-10-28T17:46:04.446961",
+    "category": "FAILED",
+    "message": "API Root - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:05.126829",
+    "category": "FAILED",
+    "message": "API v1 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:05.802630",
+    "category": "FAILED",
+    "message": "API v2 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:06.477269",
+    "category": "FAILED",
+    "message": "Rivers - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:07.155631",
+    "category": "FAILED",
+    "message": "Gauges - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:07.834582",
+    "category": "FAILED",
+    "message": "Stations - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:08.508423",
+    "category": "FAILED",
+    "message": "Flows - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:09.178170",
+    "category": "FAILED",
+    "message": "Levels - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:09.870992",
+    "category": "FAILED",
+    "message": "Regions - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:10.543508",
+    "category": "FAILED",
+    "message": "Locations - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:11.224477",
+    "category": "FAILED",
+    "message": "States - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:11.905996",
+    "category": "FAILED",
+    "message": "Provinces - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:12.581083",
+    "category": "FAILED",
+    "message": "Current - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:13.261030",
+    "category": "FAILED",
+    "message": "Realtime - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:13.944205",
+    "category": "FAILED",
+    "message": "Latest - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:14.617905",
+    "category": "FAILED",
+    "message": "Historical - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:15.300535",
+    "category": "FAILED",
+    "message": "Region: canada - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:15.774941",
+    "category": "FAILED",
+    "message": "Region: usa - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:16.254141",
+    "category": "FAILED",
+    "message": "Region: british-columbia - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:16.732413",
+    "category": "FAILED",
+    "message": "Region: bc - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:17.208011",
+    "category": "FAILED",
+    "message": "Region: alberta - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:17.680104",
+    "category": "FAILED",
+    "message": "Region: oregon - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:18.169768",
+    "category": "FAILED",
+    "message": "Region: washington - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:18.648538",
+    "category": "FAILED",
+    "message": "Region: california - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:19.122896",
+    "category": "FAILED",
+    "message": "Region: colorado - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:19.604466",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:19.981386",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:20.356563",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:20.732172",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:21.109571",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:21.481108",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:21.855361",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:22.232441",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:22.609973",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:22.985037",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:23.360961",
+    "category": "FAILED",
+    "message": "Gauge 12345 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:23.736568",
+    "category": "FAILED",
+    "message": "Gauge 12345 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:24.114648",
+    "category": "FAILED",
+    "message": "Gauge 12345 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:24.488881",
+    "category": "FAILED",
+    "message": "Gauge 12345 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:24.891033",
+    "category": "FAILED",
+    "message": "Gauge 12345 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:25.264422",
+    "category": "FAILED",
+    "message": "Gauge test - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:25.637729",
+    "category": "FAILED",
+    "message": "Gauge test - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:26.011598",
+    "category": "FAILED",
+    "message": "Gauge test - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:26.384955",
+    "category": "FAILED",
+    "message": "Gauge test - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:26.755817",
+    "category": "FAILED",
+    "message": "Gauge test - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:27.129176",
+    "category": "FAILED",
+    "message": "Search: kicking horse - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:27.805336",
+    "category": "FAILED",
+    "message": "Search: bow river - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:28.479797",
+    "category": "FAILED",
+    "message": "Search: spillimacheen - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:29.153648",
+    "category": "FAILED",
+    "message": "GraphQL Query 1 - Status 404",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:46:29.827936",
+    "category": "FAILED",
+    "message": "GraphQL Query 2 - Status 404",
+    "data": null
+  }
+]

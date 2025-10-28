@@ -1,0 +1,458 @@
+[
+  {
+    "timestamp": "2025-10-28T17:51:55.318551",
+    "category": "FAILED",
+    "message": "API Root - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:55.875674",
+    "category": "FAILED",
+    "message": "Rivers - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:56.325158",
+    "category": "FAILED",
+    "message": "Gauges - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:56.768409",
+    "category": "FAILED",
+    "message": "Stations - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:57.236169",
+    "category": "FAILED",
+    "message": "Runs - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:57.708147",
+    "category": "FAILED",
+    "message": "Sections - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:58.182861",
+    "category": "FAILED",
+    "message": "Regions - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:58.686244",
+    "category": "FAILED",
+    "message": "Region Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:59.147763",
+    "category": "FAILED",
+    "message": "Region BC - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:51:59.689691",
+    "category": "FAILED",
+    "message": "Current - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:00.132137",
+    "category": "FAILED",
+    "message": "Realtime - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:00.707796",
+    "category": "FAILED",
+    "message": "Flow Data - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:01.162348",
+    "category": "FAILED",
+    "message": "Level Data - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:01.782401",
+    "category": "FAILED",
+    "message": "Region Data: Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:02.140251",
+    "category": "FAILED",
+    "message": "Region Data: Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:02.482889",
+    "category": "FAILED",
+    "message": "Region Data: Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:02.836660",
+    "category": "FAILED",
+    "message": "Region Data: Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:03.181643",
+    "category": "FAILED",
+    "message": "Region Data: Alberta - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:03.532253",
+    "category": "FAILED",
+    "message": "Region Data: British-Columbia - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:03.870269",
+    "category": "FAILED",
+    "message": "Region Data: British-Columbia - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:04.215854",
+    "category": "FAILED",
+    "message": "Region Data: British-Columbia - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:04.557960",
+    "category": "FAILED",
+    "message": "Region Data: British-Columbia - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:04.895752",
+    "category": "FAILED",
+    "message": "Region Data: British-Columbia - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:05.270834",
+    "category": "FAILED",
+    "message": "Region Data: Ontario - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:05.634690",
+    "category": "FAILED",
+    "message": "Region Data: Ontario - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:05.986104",
+    "category": "FAILED",
+    "message": "Region Data: Ontario - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:06.343524",
+    "category": "FAILED",
+    "message": "Region Data: Ontario - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:06.681879",
+    "category": "FAILED",
+    "message": "Region Data: Ontario - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:07.014791",
+    "category": "FAILED",
+    "message": "Region Data: Quebec - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:07.397394",
+    "category": "FAILED",
+    "message": "Region Data: Quebec - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:07.805122",
+    "category": "FAILED",
+    "message": "Region Data: Quebec - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:08.212350",
+    "category": "FAILED",
+    "message": "Region Data: Quebec - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:08.633020",
+    "category": "FAILED",
+    "message": "Region Data: Quebec - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:08.975581",
+    "category": "FAILED",
+    "message": "Region Data: California - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:09.312478",
+    "category": "FAILED",
+    "message": "Region Data: California - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:09.645135",
+    "category": "FAILED",
+    "message": "Region Data: California - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:09.995533",
+    "category": "FAILED",
+    "message": "Region Data: California - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:10.351179",
+    "category": "FAILED",
+    "message": "Region Data: California - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:10.705568",
+    "category": "FAILED",
+    "message": "River: Kananaskis River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:11.064435",
+    "category": "FAILED",
+    "message": "River: Kananaskis River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:11.411287",
+    "category": "FAILED",
+    "message": "River: Kananaskis River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:11.834511",
+    "category": "FAILED",
+    "message": "River: Kananaskis River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:12.177982",
+    "category": "FAILED",
+    "message": "River: Bow River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:12.522699",
+    "category": "FAILED",
+    "message": "River: Bow River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:12.885681",
+    "category": "FAILED",
+    "message": "River: Bow River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:13.216516",
+    "category": "FAILED",
+    "message": "River: Bow River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:13.545922",
+    "category": "FAILED",
+    "message": "River: Red Deer River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:13.862477",
+    "category": "FAILED",
+    "message": "River: Red Deer River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:14.263475",
+    "category": "FAILED",
+    "message": "River: Red Deer River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:14.613563",
+    "category": "FAILED",
+    "message": "River: Red Deer River - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:14.997173",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:15.339397",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:15.684297",
+    "category": "FAILED",
+    "message": "Gauge 05BH004 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:16.021660",
+    "category": "FAILED",
+    "message": "Gauge 05BJ001 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:16.370962",
+    "category": "FAILED",
+    "message": "Gauge 05BJ001 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:16.711267",
+    "category": "FAILED",
+    "message": "Gauge 05BJ001 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:17.067444",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:17.393056",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:17.725604",
+    "category": "FAILED",
+    "message": "Gauge 08NA011 - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:18.051861",
+    "category": "FAILED",
+    "message": "Search: kananaskis - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:18.514194",
+    "category": "FAILED",
+    "message": "Search: bow river - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:18.932548",
+    "category": "FAILED",
+    "message": "Search: red deer - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:19.367058",
+    "category": "FAILED",
+    "message": "Search: kananaskis - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:19.799310",
+    "category": "FAILED",
+    "message": "Search: bow river - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:20.286059",
+    "category": "FAILED",
+    "message": "Search: red deer - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:20.734597",
+    "category": "FAILED",
+    "message": "Search: kananaskis - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:21.166075",
+    "category": "FAILED",
+    "message": "Search: bow river - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:21.609548",
+    "category": "FAILED",
+    "message": "Search: red deer - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:22.036418",
+    "category": "FAILED",
+    "message": "Static File: rivers.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:22.369425",
+    "category": "FAILED",
+    "message": "Static File: gauges.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:22.703177",
+    "category": "FAILED",
+    "message": "Static File: Alberta.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:23.112657",
+    "category": "FAILED",
+    "message": "Static File: regions.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:23.444855",
+    "category": "FAILED",
+    "message": "Static File: rivers.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:23.781417",
+    "category": "FAILED",
+    "message": "Static File: Alberta.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:24.123373",
+    "category": "FAILED",
+    "message": "Static File: rivers.json - Status 403",
+    "data": null
+  },
+  {
+    "timestamp": "2025-10-28T17:52:24.468486",
+    "category": "FAILED",
+    "message": "Static File: rivers.json - Status 403",
+    "data": null
+  }
+]
