@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../models/models.dart';
-import '../services/river_run_service.dart';
 import '../services/analytics_service.dart';
 import '../utils/performance_logger.dart';
 import 'river_run_search_screen.dart';
@@ -51,15 +50,15 @@ class _FavouritesScreenState extends State<FavouritesScreen>
 
       _previousFavoriteIds = Set.from(currentFavoriteIds);
 
-      // 🔥 FIX: Always reload if we have favorites, even if provider is loading
-      // The provider will handle the initialization wait internally
+      // 🔥 STALE-WHILE-REVALIDATE: Fire and forget - don't await!
+      // UI shows immediately with cached data, updates when fresh data arrives
       if (currentFavoriteIds.isNotEmpty) {
         Future.microtask(() async {
           if (mounted) {
             await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
             PerformanceLogger.log('favourites_runs_loaded');
 
-            // After loading runs, fetch live data for the stations
+            // After loading runs, fetch live data for the stations IN BACKGROUND
             final runs = riverRunProvider.favoriteRuns;
             final stationIds = runs
                 .map((r) => r.run.stationId)
@@ -68,8 +67,13 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                 .toList();
 
             if (stationIds.isNotEmpty && mounted) {
-              await liveDataProvider.fetchMultipleStations(stationIds);
-              PerformanceLogger.log('favourites_live_data_loaded');
+              // 🔥 DON'T AWAIT - Let it update in background
+              // Provider will notifyListeners() when data arrives
+              liveDataProvider.fetchMultipleStations(stationIds).then((_) {
+                if (mounted) {
+                  PerformanceLogger.log('favourites_live_data_loaded');
+                }
+              });
             }
           }
         });
@@ -89,13 +93,23 @@ class _FavouritesScreenState extends State<FavouritesScreen>
   String _getFlowStatus(
     RiverRunWithStations runWithStations,
     LiveWaterData? liveData,
+    LiveWaterDataProvider liveDataProvider,
   ) {
     final discharge = liveData?.flowRate;
 
     if (discharge == null) {
       final stationId = runWithStations.run.stationId;
       if (stationId != null && stationId.isNotEmpty) {
-        return 'Loading...';
+        // 🔥 STALE-WHILE-REVALIDATE: Only show "Loading..." if actively fetching
+        // Otherwise show "No Data" - data will update when it arrives
+        if (liveDataProvider.isUpdating(stationId)) {
+          return 'Loading...';
+        }
+        // Check if there's an error
+        final error = liveDataProvider.getError(stationId);
+        if (error != null) {
+          return 'Error';
+        }
       }
       return 'No Data';
     }
@@ -170,6 +184,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
   Map<String, dynamic> _convertRunToLegacyFormat(
     RiverRunWithStations runWithStations,
     LiveWaterData? liveData,
+    LiveWaterDataProvider liveDataProvider,
   ) {
     final primaryStation = runWithStations.primaryStation;
     final stationId =
@@ -201,7 +216,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
           ? 'live'
           : 'unavailable',
       'isLive': _hasLiveData(runWithStations, liveData),
-      'status': _getFlowStatus(runWithStations, liveData),
+      'status': _getFlowStatus(runWithStations, liveData, liveDataProvider),
     };
   }
 
@@ -413,277 +428,199 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                   itemCount: favoriteRuns.length,
                                   itemBuilder: (context, index) {
                                     final runWithStations = favoriteRuns[index];
-                                    final runId = runWithStations.run.id;
 
-                                    // 🔥 NEW: Use StreamBuilder to watch for run changes in real-time!
-                                    return StreamBuilder<RiverRun?>(
-                                      stream: RiverRunService.watchRunById(
-                                        runId,
-                                      ),
-                                      initialData: runWithStations.run,
-                                      builder: (context, runSnapshot) {
-                                        // Use updated run data if available, fallback to initial
-                                        final updatedRun =
-                                            runSnapshot.data ??
-                                            runWithStations.run;
+                                    // 🔥 STALE-WHILE-REVALIDATE: Use cached data directly from provider
+                                    // Consumer4 rebuilds when riverRunProvider updates, giving us fresh data
+                                    // No need for StreamBuilder - it bypasses cache and creates unnecessary Firestore listeners
+                                    final currentRunWithStations =
+                                        runWithStations;
 
-                                        // Rebuild runWithStations with updated run data
-                                        final currentRunWithStations =
-                                            RiverRunWithStations(
-                                              run: updatedRun,
-                                              river: runWithStations.river,
-                                              stations:
-                                                  runWithStations.stations,
-                                            );
+                                    final stationId =
+                                        currentRunWithStations.run.stationId;
 
-                                        final stationId = currentRunWithStations
-                                            .run
-                                            .stationId;
+                                    // 🔥 Get live data from provider (cached)
+                                    final liveData = stationId != null
+                                        ? liveDataProvider.getLiveData(
+                                            stationId,
+                                          )
+                                        : null;
 
-                                        // 🔥 Get live data from provider (cached)
-                                        final liveData = stationId != null
-                                            ? liveDataProvider.getLiveData(
-                                                stationId,
-                                              )
-                                            : null;
-
-                                        final currentDischarge =
-                                            _getCurrentDischarge(
-                                              currentRunWithStations,
-                                              liveData,
-                                            );
-                                        final hasLiveData = _hasLiveData(
+                                    final currentDischarge =
+                                        _getCurrentDischarge(
                                           currentRunWithStations,
                                           liveData,
                                         );
-                                        final flowStatus = _getFlowStatus(
-                                          currentRunWithStations,
-                                          liveData,
-                                        );
+                                    final hasLiveData = _hasLiveData(
+                                      currentRunWithStations,
+                                      liveData,
+                                    );
+                                    final flowStatus = _getFlowStatus(
+                                      currentRunWithStations,
+                                      liveData,
+                                      liveDataProvider,
+                                    );
 
-                                        return Card(
-                                          margin: const EdgeInsets.only(
-                                            bottom: 12,
-                                          ),
-                                          child: ListTile(
-                                            onTap: () async {
-                                              // Log river detail view from favorites
-                                              await AnalyticsService.logRiverRunViewed(
-                                                runWithStations.run.id,
-                                                runWithStations.run.displayName,
-                                              );
+                                    return Card(
+                                      margin: const EdgeInsets.only(bottom: 12),
+                                      child: ListTile(
+                                        onTap: () async {
+                                          // Log river detail view from favorites
+                                          await AnalyticsService.logRiverRunViewed(
+                                            runWithStations.run.id,
+                                            runWithStations.run.displayName,
+                                          );
 
-                                              if (kDebugMode) {
-                                                print(
-                                                  '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
-                                                );
-                                              }
-                                              await Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      RiverDetailScreen(
-                                                        riverData:
-                                                            _convertRunToLegacyFormat(
-                                                              currentRunWithStations,
-                                                              liveData,
-                                                            ),
-                                                      ),
-                                                ),
-                                              );
-
-                                              // Refresh favorites when returning in case run was edited or deleted
-                                              if (mounted) {
-                                                final favoritesProvider =
-                                                    context
-                                                        .read<
-                                                          FavoritesProvider
-                                                        >();
-                                                final riverRunProvider = context
-                                                    .read<RiverRunProvider>();
-                                                final liveDataProvider = context
-                                                    .read<
-                                                      LiveWaterDataProvider
-                                                    >();
-
-                                                // Reload favorites
-                                                final favoriteIds =
-                                                    favoritesProvider
-                                                        .favoriteRunIds;
-                                                if (favoriteIds.isNotEmpty) {
-                                                  await riverRunProvider
-                                                      .loadFavoriteRuns(
-                                                        favoriteIds,
-                                                      );
-
-                                                  // Refresh live data for stations
-                                                  final runs = riverRunProvider
-                                                      .favoriteRuns;
-                                                  final stationIds = runs
-                                                      .map(
-                                                        (r) => r.run.stationId,
-                                                      )
-                                                      .whereType<String>()
-                                                      .where(
-                                                        (id) => id.isNotEmpty,
-                                                      )
-                                                      .toList();
-
-                                                  if (stationIds.isNotEmpty) {
-                                                    await liveDataProvider
-                                                        .fetchMultipleStations(
-                                                          stationIds,
-                                                        );
-                                                  }
-                                                }
-                                              }
-                                            },
-                                            leading: IconButton(
-                                              icon: const Icon(
-                                                Icons.add,
-                                                color: Colors.blue,
-                                              ),
-                                              onPressed: () {
-                                                // Log logbook entry creation from favorites
-                                                AnalyticsService.logLogbookEntryCreated(
-                                                  currentRunWithStations
-                                                      .run
-                                                      .displayName,
-                                                );
-
-                                                Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        LogbookEntryScreen(
-                                                          prefilledRun:
-                                                              currentRunWithStations,
+                                          if (kDebugMode) {
+                                            print(
+                                              '🚀 Navigating to RiverDetailScreen with run: ${runWithStations.run.displayName}',
+                                            );
+                                          }
+                                          await Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  RiverDetailScreen(
+                                                    riverData:
+                                                        _convertRunToLegacyFormat(
+                                                          currentRunWithStations,
+                                                          liveData,
+                                                          liveDataProvider,
                                                         ),
                                                   ),
-                                                );
-                                              },
-                                              tooltip: 'Log Descent',
                                             ),
-                                            title: Text(
+                                          );
+
+                                          // Refresh favorites when returning in case run was edited or deleted
+                                          if (mounted) {
+                                            final favoritesProvider = context
+                                                .read<FavoritesProvider>();
+                                            final riverRunProvider = context
+                                                .read<RiverRunProvider>();
+                                            final liveDataProvider = context
+                                                .read<LiveWaterDataProvider>();
+
+                                            // Reload favorites
+                                            final favoriteIds =
+                                                favoritesProvider
+                                                    .favoriteRunIds;
+                                            if (favoriteIds.isNotEmpty) {
+                                              await riverRunProvider
+                                                  .loadFavoriteRuns(
+                                                    favoriteIds,
+                                                  );
+
+                                              // Refresh live data for stations
+                                              final runs =
+                                                  riverRunProvider.favoriteRuns;
+                                              final stationIds = runs
+                                                  .map((r) => r.run.stationId)
+                                                  .whereType<String>()
+                                                  .where((id) => id.isNotEmpty)
+                                                  .toList();
+
+                                              if (stationIds.isNotEmpty) {
+                                                await liveDataProvider
+                                                    .fetchMultipleStations(
+                                                      stationIds,
+                                                    );
+                                              }
+                                            }
+                                          }
+                                        },
+                                        leading: IconButton(
+                                          icon: const Icon(
+                                            Icons.add,
+                                            color: Colors.blue,
+                                          ),
+                                          onPressed: () {
+                                            // Log logbook entry creation from favorites
+                                            AnalyticsService.logLogbookEntryCreated(
                                               currentRunWithStations
-                                                      .river
-                                                      ?.name ??
-                                                  'Unknown River',
+                                                  .run
+                                                  .displayName,
+                                            );
+
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    LogbookEntryScreen(
+                                                      prefilledRun:
+                                                          currentRunWithStations,
+                                                    ),
+                                              ),
+                                            );
+                                          },
+                                          tooltip: 'Log Descent',
+                                        ),
+                                        title: Text(
+                                          currentRunWithStations.river?.name ??
+                                              'Unknown River',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        subtitle: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              '${currentRunWithStations.run.name} - ${currentRunWithStations.run.difficultyClass}',
                                               style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w500,
                                               ),
                                             ),
-                                            subtitle: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  '${currentRunWithStations.run.name} - ${currentRunWithStations.run.difficultyClass}',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 4),
-                                                // Show Kananaskis-specific flow info or regular flow info
-                                                _isKananaskis(
-                                                      currentRunWithStations,
-                                                    )
-                                                    ? Builder(
-                                                        builder: (context) {
-                                                          final flowInfo =
-                                                              _getKananaskisFlowSummary(
-                                                                transAltaProvider,
-                                                              );
-                                                          final hasFlowToday =
-                                                              !flowInfo
-                                                                  .contains(
-                                                                    'No flow',
-                                                                  ) &&
-                                                              !flowInfo.contains(
-                                                                'unavailable',
-                                                              ) &&
-                                                              !flowInfo
-                                                                  .contains(
-                                                                    'error',
-                                                                  ) &&
-                                                              !flowInfo
-                                                                  .contains(
-                                                                    'Loading',
-                                                                  );
-
-                                                          return Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons
-                                                                    .water_drop,
-                                                                size: 14,
-                                                                color:
-                                                                    hasFlowToday
-                                                                    ? Colors
-                                                                          .blue[600]
-                                                                    : Colors
-                                                                          .grey[600],
-                                                              ),
-                                                              const SizedBox(
-                                                                width: 6,
-                                                              ),
-                                                              Expanded(
-                                                                child: Text(
-                                                                  'Today: $flowInfo',
-                                                                  style: TextStyle(
-                                                                    fontSize:
-                                                                        13,
-                                                                    color:
-                                                                        hasFlowToday
-                                                                        ? Colors
-                                                                              .blue[700]
-                                                                        : Colors
-                                                                              .grey[600],
-                                                                    fontWeight:
-                                                                        hasFlowToday
-                                                                        ? FontWeight
-                                                                              .w500
-                                                                        : FontWeight
-                                                                              .normal,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
+                                            const SizedBox(height: 4),
+                                            // Show Kananaskis-specific flow info or regular flow info
+                                            _isKananaskis(
+                                                  currentRunWithStations,
+                                                )
+                                                ? Builder(
+                                                    builder: (context) {
+                                                      final flowInfo =
+                                                          _getKananaskisFlowSummary(
+                                                            transAltaProvider,
                                                           );
-                                                        },
-                                                      )
-                                                    : Row(
+                                                      final hasFlowToday =
+                                                          !flowInfo.contains(
+                                                            'No flow',
+                                                          ) &&
+                                                          !flowInfo.contains(
+                                                            'unavailable',
+                                                          ) &&
+                                                          !flowInfo.contains(
+                                                            'error',
+                                                          ) &&
+                                                          !flowInfo.contains(
+                                                            'Loading',
+                                                          );
+
+                                                      return Row(
                                                         children: [
                                                           Icon(
-                                                            hasLiveData
-                                                                ? Icons.live_tv
-                                                                : Icons
-                                                                      .info_outline,
+                                                            Icons.water_drop,
                                                             size: 14,
-                                                            color: hasLiveData
+                                                            color: hasFlowToday
                                                                 ? Colors
-                                                                      .green[600]
+                                                                      .blue[600]
                                                                 : Colors
-                                                                      .orange[600],
+                                                                      .grey[600],
                                                           ),
                                                           const SizedBox(
                                                             width: 6,
                                                           ),
                                                           Expanded(
                                                             child: Text(
-                                                              currentDischarge !=
-                                                                      null
-                                                                  ? 'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s • $flowStatus'
-                                                                  : 'Status: $flowStatus',
+                                                              'Today: $flowInfo',
                                                               style: TextStyle(
                                                                 fontSize: 13,
                                                                 color:
-                                                                    hasLiveData
+                                                                    hasFlowToday
                                                                     ? Colors
-                                                                          .green[700]
+                                                                          .blue[700]
                                                                     : Colors
                                                                           .grey[600],
                                                                 fontWeight:
-                                                                    hasLiveData
+                                                                    hasFlowToday
                                                                     ? FontWeight
                                                                           .w500
                                                                     : FontWeight
@@ -692,80 +629,68 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                                             ),
                                                           ),
                                                         ],
-                                                      ),
-                                              ],
-                                            ),
-
-                                            trailing: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                // 🔥 Manual refresh button - uses provider now!
-                                                if (stationId != null &&
-                                                    stationId.isNotEmpty)
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                      Icons.refresh,
-                                                      color: Colors.blue,
-                                                      size: 20,
-                                                    ),
-                                                    onPressed: () async {
-                                                      // Log refresh action
-                                                      await AnalyticsService.logRefreshAction(
-                                                        'favorites',
                                                       );
-
-                                                      if (kDebugMode) {
-                                                        print(
-                                                          '🔄 Manual refresh for station: $stationId',
-                                                        );
-                                                      }
-
-                                                      // Use provider's fetchStationData which handles caching
-                                                      await liveDataProvider
-                                                          .fetchStationData(
-                                                            stationId,
-                                                          );
-
-                                                      if (mounted) {
-                                                        ScaffoldMessenger.of(
-                                                          context,
-                                                        ).showSnackBar(
-                                                          const SnackBar(
-                                                            content: Text(
-                                                              'Station data refreshed',
-                                                            ),
-                                                            backgroundColor:
-                                                                Colors.green,
-                                                            duration: Duration(
-                                                              seconds: 1,
-                                                            ),
-                                                          ),
-                                                        );
-                                                      }
                                                     },
-                                                    tooltip:
-                                                        'Refresh live data',
-                                                  ),
-
-                                                // Remove from favorites button
-                                                IconButton(
-                                                  icon: const Icon(
-                                                    Icons.favorite,
-                                                    color: Colors.red,
-                                                  ),
-                                                  onPressed: () =>
-                                                      _toggleFavorite(
-                                                        currentRunWithStations,
+                                                  )
+                                                : Row(
+                                                    children: [
+                                                      Icon(
+                                                        hasLiveData
+                                                            ? Icons.live_tv
+                                                            : Icons
+                                                                  .info_outline,
+                                                        size: 14,
+                                                        color: hasLiveData
+                                                            ? Colors.green[600]
+                                                            : Colors
+                                                                  .orange[600],
                                                       ),
-                                                  tooltip:
-                                                      'Remove from favorites',
-                                                ),
-                                              ],
+                                                      const SizedBox(width: 6),
+                                                      Expanded(
+                                                        child: Text(
+                                                          currentDischarge !=
+                                                                  null
+                                                              ? 'Flow: ${currentDischarge.toStringAsFixed(2)} m³/s • $flowStatus'
+                                                              : 'Status: $flowStatus',
+                                                          style: TextStyle(
+                                                            fontSize: 13,
+                                                            color: hasLiveData
+                                                                ? Colors
+                                                                      .green[700]
+                                                                : Colors
+                                                                      .grey[600],
+                                                            fontWeight:
+                                                                hasLiveData
+                                                                ? FontWeight
+                                                                      .w500
+                                                                : FontWeight
+                                                                      .normal,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                          ],
+                                        ),
+
+                                        trailing: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            // Remove from favorites button
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.favorite,
+                                                color: Colors.red,
+                                              ),
+                                              onPressed: () => _toggleFavorite(
+                                                currentRunWithStations,
+                                              ),
+                                              tooltip: 'Remove from favorites',
                                             ),
-                                          ),
-                                        );
-                                      }, // End of StreamBuilder builder
-                                    ); // End of StreamBuilder
+                                          ],
+                                        ),
+                                      ),
+                                    );
                                   },
                                 ),
                               ),

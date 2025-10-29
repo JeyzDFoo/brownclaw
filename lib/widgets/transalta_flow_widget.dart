@@ -232,11 +232,9 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
 
     return Consumer2<TransAltaProvider, PremiumProvider>(
       builder: (context, transAltaProvider, premiumProvider, child) {
-        // Fetch data once on first build if not already loaded
-        if (!_hasInitialized &&
-            !transAltaProvider.hasData &&
-            !transAltaProvider.isLoading &&
-            transAltaProvider.error == null) {
+        // 🔥 STALE-WHILE-REVALIDATE: Fetch data once on first build if not already loaded
+        // Provider will return cached data immediately and refresh in background if stale
+        if (!_hasInitialized) {
           _hasInitialized = true;
           Future.microtask(() => transAltaProvider.fetchFlowData());
         }
@@ -270,14 +268,17 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Header Section
-                  if (transAltaProvider.isLoading)
+                  // 🔥 STALE-WHILE-REVALIDATE: Only show spinner if NO data exists
+                  // Provider may be loading in background while showing cached data
+                  if (transAltaProvider.isLoading && !transAltaProvider.hasData)
                     const Center(
                       child: Padding(
                         padding: EdgeInsets.all(24),
                         child: CircularProgressIndicator(),
                       ),
                     )
-                  else if (transAltaProvider.error != null)
+                  else if (transAltaProvider.error != null &&
+                      !transAltaProvider.hasData)
                     Center(
                       child: Column(
                         children: [
