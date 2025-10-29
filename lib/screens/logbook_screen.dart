@@ -410,6 +410,7 @@ class _LogBookScreenState extends State<LogBookScreen>
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'logbook_fab',
         onPressed: () async {
           // Log logbook entry creation intent
           await AnalyticsService.logCustomEvent('logbook_fab_clicked');

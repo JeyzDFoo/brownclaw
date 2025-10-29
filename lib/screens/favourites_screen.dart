@@ -23,6 +23,8 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     with AutomaticKeepAliveClientMixin {
   Set<String> _previousFavoriteIds = {};
   bool _hasInitializedTransAlta = false;
+  bool _isPostFrameCallbackScheduled =
+      false; // Track if callback is already scheduled
 
   @override
   bool get wantKeepAlive => true; // Keep state alive when navigating away
@@ -278,21 +280,29 @@ class _FavouritesScreenState extends State<FavouritesScreen>
             final error = riverRunProvider.error;
 
             // Check if favorites have changed and reload if needed
-            // Use WidgetsBinding to avoid setState during build
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _checkAndReloadFavorites(
-                favoriteIds,
-                riverRunProvider,
-                liveDataProvider,
-              );
-            });
+            // Only schedule callback if favorites actually changed AND callback not already scheduled
+            final favoritesChanged =
+                _previousFavoriteIds.length != favoriteIds.length ||
+                !_previousFavoriteIds.containsAll(favoriteIds);
+
+            if (favoritesChanged && !_isPostFrameCallbackScheduled) {
+              _isPostFrameCallbackScheduled = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                _isPostFrameCallbackScheduled = false; // Reset for next change
+                _checkAndReloadFavorites(
+                  favoriteIds,
+                  riverRunProvider,
+                  liveDataProvider,
+                );
+              });
+            }
 
             // Fetch TransAlta data once if we have any Kananaskis rivers in favorites
             if (!_hasInitializedTransAlta &&
                 favoriteRuns.any((run) => _isKananaskis(run))) {
               if (!transAltaProvider.hasData && !transAltaProvider.isLoading) {
                 WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (!_hasInitializedTransAlta) {
+                  if (!_hasInitializedTransAlta && mounted) {
                     _hasInitializedTransAlta = true;
                     transAltaProvider.fetchFlowData();
                   }
@@ -765,6 +775,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                 ],
               ),
               floatingActionButton: FloatingActionButton.extended(
+                heroTag: 'favourites_fab',
                 onPressed: () {
                   if (widget.onNavigateToSearch != null) {
                     widget.onNavigateToSearch!();

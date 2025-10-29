@@ -504,6 +504,7 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
             ],
           ),
           floatingActionButton: FloatingActionButton.extended(
+            heroTag: 'river_run_search_fab',
             onPressed: () async {
               final result = await Navigator.of(context).push<bool>(
                 MaterialPageRoute(

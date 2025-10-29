@@ -874,31 +874,17 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
                           prefixIcon: Icon(Icons.sensors),
                         ),
                         hint: const Text('Choose a gauge station (optional)'),
+                        menuMaxHeight: 400,
                         items: _availableWaterStations.map((station) {
                           return DropdownMenuItem(
                             value: station,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  station.stationName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                Text(
-                                  station.stationId,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey[600],
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
+                            child: Text(
+                              '${station.stationName} (${station.stationId})',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w400,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
                           );
                         }).toList(),
