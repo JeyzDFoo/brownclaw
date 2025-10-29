@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../services/persistent_cache_service.dart';
 
 /// Centralized cache provider for managing static and live data caching
 ///
@@ -7,6 +8,7 @@ import 'package:flutter/foundation.dart';
 /// - TTL-based expiration for static and live data
 /// - Offline mode support
 /// - Type-safe cache operations
+/// - Persistent storage across app sessions (mobile & web)
 class CacheProvider extends ChangeNotifier {
   // Static data cache (rivers, runs, stations)
   final Map<String, dynamic> _staticCache = {};
@@ -17,6 +19,9 @@ class CacheProvider extends ChangeNotifier {
   final Map<String, dynamic> _liveDataCache = {};
   final Map<String, DateTime> _liveDataTimestamps = {};
   final Map<String, int> _liveDataAccessCount = {};
+
+  // Track if cache has been loaded from persistent storage
+  bool _isInitialized = false;
 
   // Cache timeouts
   static const Duration staticCacheTimeout = Duration(hours: 1);
@@ -35,6 +40,69 @@ class CacheProvider extends ChangeNotifier {
   int _staticCacheMisses = 0;
   int _liveDataCacheHits = 0;
   int _liveDataCacheMisses = 0;
+
+  CacheProvider() {
+    _initializeCache();
+  }
+
+  /// Initialize cache by loading from persistent storage
+  Future<void> _initializeCache() async {
+    if (_isInitialized) return;
+
+    try {
+      if (kDebugMode) {
+        print('🔄 Loading cache from persistent storage...');
+      }
+
+      // Load static cache
+      final staticCache = await PersistentCacheService.loadStaticCache();
+      final staticTimestamps =
+          await PersistentCacheService.loadStaticTimestamps();
+
+      _staticCache.addAll(staticCache);
+      _staticCacheTimestamps.addAll(staticTimestamps);
+
+      // Initialize access counts for loaded items
+      for (final key in _staticCache.keys) {
+        _staticCacheAccessCount[key] = 1;
+      }
+
+      // Load live data cache
+      final liveCache = await PersistentCacheService.loadLiveDataCache();
+      final liveTimestamps = await PersistentCacheService.loadLiveTimestamps();
+
+      _liveDataCache.addAll(liveCache);
+      _liveDataTimestamps.addAll(liveTimestamps);
+
+      // Initialize access counts for loaded items
+      for (final key in _liveDataCache.keys) {
+        _liveDataAccessCount[key] = 1;
+      }
+
+      _isInitialized = true;
+
+      if (kDebugMode) {
+        print(
+          '✅ Cache loaded: ${_staticCache.length} static, ${_liveDataCache.length} live',
+        );
+      }
+
+      // Clean up expired entries
+      clearExpiredCache();
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error initializing cache: $e');
+      }
+      _isInitialized = true; // Don't block app on cache error
+    }
+  }
+
+  /// Ensure cache is initialized before operations
+  Future<void> ensureInitialized() async {
+    if (!_isInitialized) {
+      await _initializeCache();
+    }
+  }
 
   /// Get cache hit rate for static data (0.0 to 1.0)
   double get staticCacheHitRate {
@@ -85,7 +153,24 @@ class CacheProvider extends ChangeNotifier {
     _staticCacheTimestamps[key] = DateTime.now();
     _staticCacheAccessCount[key] = 1;
 
+    // Persist to local storage asynchronously
+    _persistStaticCache();
+
     notifyListeners();
+  }
+
+  /// Persist static cache to local storage
+  Future<void> _persistStaticCache() async {
+    try {
+      await PersistentCacheService.saveStaticCache(
+        _staticCache,
+        _staticCacheTimestamps,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error persisting static cache: $e');
+      }
+    }
   }
 
   /// Check if static cache entry is still valid
@@ -145,7 +230,24 @@ class CacheProvider extends ChangeNotifier {
     _liveDataTimestamps[key] = DateTime.now();
     _liveDataAccessCount[key] = 1;
 
+    // Persist to local storage asynchronously
+    _persistLiveDataCache();
+
     notifyListeners();
+  }
+
+  /// Persist live data cache to local storage
+  Future<void> _persistLiveDataCache() async {
+    try {
+      await PersistentCacheService.saveLiveDataCache(
+        _liveDataCache,
+        _liveDataTimestamps,
+      );
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error persisting live data cache: $e');
+      }
+    }
   }
 
   /// Check if live data cache entry is still valid
@@ -227,6 +329,9 @@ class CacheProvider extends ChangeNotifier {
     _liveDataCacheHits = 0;
     _liveDataCacheMisses = 0;
 
+    // Clear persistent storage
+    PersistentCacheService.clearAllCache();
+
     notifyListeners();
   }
 
@@ -235,6 +340,10 @@ class CacheProvider extends ChangeNotifier {
     _staticCache.clear();
     _staticCacheTimestamps.clear();
     _staticCacheAccessCount.clear();
+
+    // Clear persistent storage
+    PersistentCacheService.clearStaticCache();
+
     notifyListeners();
   }
 
@@ -243,6 +352,10 @@ class CacheProvider extends ChangeNotifier {
     _liveDataCache.clear();
     _liveDataTimestamps.clear();
     _liveDataAccessCount.clear();
+
+    // Clear persistent storage
+    PersistentCacheService.clearLiveDataCache();
+
     notifyListeners();
   }
 
@@ -251,6 +364,10 @@ class CacheProvider extends ChangeNotifier {
     _staticCache.remove(key);
     _staticCacheTimestamps.remove(key);
     _staticCacheAccessCount.remove(key);
+
+    // Remove from persistent storage
+    PersistentCacheService.removeEntry(key, isLiveData: false);
+
     notifyListeners();
   }
 
@@ -259,6 +376,10 @@ class CacheProvider extends ChangeNotifier {
     _liveDataCache.remove(key);
     _liveDataTimestamps.remove(key);
     _liveDataAccessCount.remove(key);
+
+    // Remove from persistent storage
+    PersistentCacheService.removeEntry(key, isLiveData: true);
+
     notifyListeners();
   }
 

@@ -51,6 +51,8 @@ class MainApp extends StatelessWidget {
           create: (_) {
             PerformanceLogger.log('cache_provider_creating');
             final provider = CacheProvider();
+            // Initialize cache from persistent storage asynchronously
+            provider.ensureInitialized();
             PerformanceLogger.log('cache_provider_created');
             return provider;
           },
