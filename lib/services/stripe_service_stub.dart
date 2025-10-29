@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+
 /// Stub implementation for unsupported platforms
 class StripeServiceImpl {
   static void redirectToCheckout(String url) {
@@ -9,6 +11,13 @@ class StripeServiceImpl {
   }
 
   static void reloadPage() {
+    throw UnsupportedError('Platform not supported');
+  }
+
+  static Future<bool> createSubscriptionMobile(
+    String priceId,
+    User user,
+  ) async {
     throw UnsupportedError('Platform not supported');
   }
 }

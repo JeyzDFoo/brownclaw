@@ -130,6 +130,22 @@ class MainApp extends StatelessWidget {
             return provider;
           },
         ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('historical_water_data_provider_creating');
+            final provider = HistoricalWaterDataProvider();
+            PerformanceLogger.log('historical_water_data_provider_created');
+            return provider;
+          },
+        ),
+        ChangeNotifierProvider(
+          create: (_) {
+            PerformanceLogger.log('weather_provider_creating');
+            final provider = WeatherProvider();
+            PerformanceLogger.log('weather_provider_created');
+            return provider;
+          },
+        ),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {

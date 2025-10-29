@@ -1,8 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_stripe/flutter_stripe.dart'
-    if (dart.library.html) 'package:cloud_functions/cloud_functions.dart';
 import 'stripe_service_stub.dart'
     if (dart.library.html) 'stripe_service_web.dart'
     if (dart.library.io) 'stripe_service_mobile.dart';
@@ -36,7 +34,8 @@ class StripeService {
       if (kIsWeb) {
         return _createSubscriptionWeb(priceId, user);
       } else {
-        return _createSubscriptionMobile(priceId, user);
+        // Mobile implementation uses platform-specific code
+        return StripeServiceImpl.createSubscriptionMobile(priceId, user);
       }
     } catch (e) {
       if (kDebugMode) {
@@ -77,48 +76,6 @@ class StripeService {
 
     // Redirect to Stripe Checkout
     StripeServiceImpl.redirectToCheckout(checkoutUrl);
-
-    return true;
-  }
-
-  /// Mobile implementation using flutter_stripe
-  Future<bool> _createSubscriptionMobile(String priceId, User user) async {
-    // Call Cloud Function to create subscription
-    final functions = FirebaseFunctions.instance;
-    final createSubscription = functions.httpsCallable('createSubscription');
-
-    final result = await createSubscription.call({
-      'priceId': priceId,
-      'userId': user.uid,
-      'email': user.email,
-    });
-
-    final data = result.data as Map<String, dynamic>;
-    final clientSecret = data['clientSecret'] as String?;
-
-    if (clientSecret == null) {
-      throw Exception('Failed to get client secret');
-    }
-
-    if (kDebugMode) {
-      print('✅ Subscription created, presenting payment sheet...');
-    }
-
-    // Present payment sheet
-    await Stripe.instance.initPaymentSheet(
-      paymentSheetParameters: SetupPaymentSheetParameters(
-        merchantDisplayName: 'Brown Paw',
-        paymentIntentClientSecret: clientSecret,
-        customerEphemeralKeySecret: data['ephemeralKey'] as String?,
-        customerId: data['customer'] as String?,
-      ),
-    );
-
-    await Stripe.instance.presentPaymentSheet();
-
-    if (kDebugMode) {
-      print('✅ Payment completed successfully');
-    }
 
     return true;
   }

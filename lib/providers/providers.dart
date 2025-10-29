@@ -8,3 +8,5 @@ export 'logbook_provider.dart';
 export 'premium_provider.dart';
 export 'transalta_provider.dart';
 export 'version_provider.dart';
+export 'historical_water_data_provider.dart';
+export 'weather_provider.dart';

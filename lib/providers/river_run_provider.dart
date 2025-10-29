@@ -279,4 +279,56 @@ class RiverRunProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  /// Watch for real-time updates to a specific river run
+  /// Returns a stream that emits the run whenever it changes in Firestore
+  /// [runId] - The ID of the run to watch
+  Stream<RiverRun?> watchRunById(String runId) {
+    return RiverRunService.watchRunById(runId);
+  }
+
+  /// Get a single river run by ID
+  /// First checks cache, then fetches from Firestore if needed
+  /// [runId] - The ID of the run to fetch
+  /// [forceRefresh] - Bypass cache and fetch fresh data
+  Future<RiverRun?> getRunById(
+    String runId, {
+    bool forceRefresh = false,
+  }) async {
+    // Check cache first
+    if (!forceRefresh && _cache.containsKey(runId)) {
+      if (kDebugMode) {
+        print('⚡ CACHE HIT: Run $runId from cache');
+      }
+      return _cache[runId]?.run;
+    }
+
+    try {
+      if (kDebugMode) {
+        print('🌐 Fetching run $runId from Firestore');
+      }
+
+      final run = await RiverRunService.getRunById(runId);
+
+      // Update cache if run found
+      if (run != null) {
+        // Get the full RiverRunWithStations if possible, otherwise create a basic one
+        final existingCached = _cache[runId];
+        if (existingCached != null) {
+          // Update the run in the cached object
+          _cache[runId] = RiverRunWithStations(
+            run: run,
+            stations: existingCached.stations,
+          );
+        }
+      }
+
+      return run;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error fetching run $runId: $e');
+      }
+      return null;
+    }
+  }
 }

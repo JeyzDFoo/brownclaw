@@ -5,13 +5,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
-import '../services/live_water_data_service.dart';
-import '../services/historical_water_data_service.dart';
-import '../services/river_run_service.dart';
 import '../services/river_service.dart';
 import '../services/analytics_service.dart';
 import '../services/gauge_station_service.dart';
-import '../services/weather_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import '../widgets/user_runs_history_widget.dart';
@@ -30,14 +26,11 @@ class RiverDetailScreen extends StatefulWidget {
 }
 
 class _RiverDetailScreenState extends State<RiverDetailScreen> {
-  LiveWaterData? _liveData;
   List<FlSpot> _historicalData = [];
   Map<String, dynamic>? _flowStatistics;
   Map<String, dynamic>? _recentTrend;
-  bool _isLoading = true;
   bool _isLoadingChart = true;
   bool _isLoadingStats = true;
-  String? _error;
   String? _chartError;
   int _selectedDays = 3; // Default to 3 days of historical data
   int?
@@ -52,7 +45,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   DateTime? _lastRanDate;
 
   // Weather data
-  final WeatherService _weatherService = WeatherService();
   List<WeatherData> _weatherForecast = [];
   WeatherData? _currentWeather;
   bool _isLoadingWeather = false;
@@ -80,8 +72,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   /// Load critical data first, then secondary data
   Future<void> _loadInitialData() async {
-    // Load critical data in parallel (live data + chart)
-    await Future.wait([_loadLiveData(), _loadHistoricalData()]);
+    // Trigger background data fetch (provider handles caching)
+    final stationId = widget.riverData['stationId'] as String?;
+    if (stationId != null) {
+      // Fire and forget - provider will notify listeners when done
+      context.read<LiveWaterDataProvider>().fetchStationData(stationId);
+    }
+
+    // Load historical chart data
+    await _loadHistoricalData();
 
     // Mark initial load complete
     if (mounted) {
@@ -111,21 +110,24 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       return;
     }
 
-    _runSubscription = RiverRunService.watchRunById(runId).listen((run) {
-      if (run != null && mounted) {
-        setState(() {
-          // Update the difficulty and other run details in the current data
-          _currentRiverData['difficulty'] = run.difficultyClass;
-          _currentRiverData['section'] = {
-            'name': run.name,
-            'difficulty': run.difficultyClass,
-          };
-          _currentRiverData['minRunnable'] = run.minRecommendedFlow ?? 0.0;
-          _currentRiverData['maxSafe'] = run.maxRecommendedFlow ?? 1000.0;
-          _currentRiverData['location'] = run.putIn ?? 'Unknown Location';
+    _runSubscription = context
+        .read<RiverRunProvider>()
+        .watchRunById(runId)
+        .listen((run) {
+          if (run != null && mounted) {
+            setState(() {
+              // Update the difficulty and other run details in the current data
+              _currentRiverData['difficulty'] = run.difficultyClass;
+              _currentRiverData['section'] = {
+                'name': run.name,
+                'difficulty': run.difficultyClass,
+              };
+              _currentRiverData['minRunnable'] = run.minRecommendedFlow ?? 0.0;
+              _currentRiverData['maxSafe'] = run.maxRecommendedFlow ?? 1000.0;
+              _currentRiverData['location'] = run.putIn ?? 'Unknown Location';
+            });
+          }
         });
-      }
-    });
   }
 
   /// Get the river type (Kananaskis vs Standard)
@@ -157,14 +159,11 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     if (oldWidget.riverData['stationId'] != widget.riverData['stationId']) {
       // Clear previous data and reload for new river
       setState(() {
-        _liveData = null;
         _historicalData = [];
         _flowStatistics = null;
         _recentTrend = null;
-        _isLoading = true;
         _isLoadingChart = true;
         _isLoadingStats = true;
-        _error = null;
         _chartError = null;
         _currentWeather = null;
         _weatherForecast = [];
@@ -181,52 +180,16 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
   }
 
-  Future<void> _loadLiveData() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final validationError = _validateStationData();
-      if (validationError != null) {
-        setState(() {
-          _error = validationError;
-          _isLoading = false;
-        });
-        return;
-      }
-
-      final stationId = widget.riverData['stationId'] as String;
-      final liveData = await LiveWaterDataService.fetchStationData(stationId);
-
-      if (mounted) {
-        setState(() {
-          _liveData = liveData;
-          _isLoading = false;
-          if (liveData == null) {
-            _error = 'No real-time data available for station $stationId';
-          }
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading live data: $e');
-      }
-      if (mounted) {
-        setState(() {
-          _error = 'Failed to load real-time data: ${e.toString()}';
-          _isLoading = false;
-        });
-      }
-    }
-  }
-
   Future<void> _loadHistoricalData() async {
-    setState(() {
-      _isLoadingChart = true;
-      _chartError = null;
-    });
+    // 🚀 Only show loading if we don't already have data
+    final showLoading = _historicalData.isEmpty;
+
+    if (showLoading) {
+      setState(() {
+        _isLoadingChart = true;
+        _chartError = null;
+      });
+    }
 
     try {
       final validationError = _validateStationData();
@@ -297,11 +260,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
             print('🌐 Fetching fresh combined timeline (cache miss)');
           }
 
-          final combinedResult =
-              await HistoricalWaterDataService.getCombinedTimeline(
-                stationId,
-                includeRealtimeData: true,
-              );
+          final combinedResult = await context
+              .read<HistoricalWaterDataProvider>()
+              .getCombinedTimeline(stationId, includeRealtimeData: true);
 
           final combined =
               combinedResult['combined'] as List<Map<String, dynamic>>;
@@ -366,10 +327,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               print('🌐 Fetching historical year data for $_selectedYear');
             }
             // Fetch specific year from historical API
-            dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
-              stationId,
-              year: _selectedYear,
-            );
+            dataPoints = await context
+                .read<HistoricalWaterDataProvider>()
+                .fetchHistoricalData(stationId, year: _selectedYear);
 
             if (kDebugMode) {
               print(
@@ -381,11 +341,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               print('🌐 Fetching combined timeline for current data');
             }
             // Default: use combined timeline for current data
-            final combinedResult =
-                await HistoricalWaterDataService.getCombinedTimeline(
-                  stationId,
-                  includeRealtimeData: true,
-                );
+            final combinedResult = await context
+                .read<HistoricalWaterDataProvider>()
+                .getCombinedTimeline(stationId, includeRealtimeData: true);
 
             dataPoints =
                 combinedResult['combined'] as List<Map<String, dynamic>>;
@@ -482,9 +440,14 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
   /// Fetch high-resolution real-time data (5-minute intervals) for short time periods
   Future<void> _loadStatisticsData() async {
-    setState(() {
-      _isLoadingStats = true;
-    });
+    // 🚀 Only show loading if we don't already have stats
+    final showLoading = _flowStatistics == null;
+
+    if (showLoading) {
+      setState(() {
+        _isLoadingStats = true;
+      });
+    }
 
     try {
       final validationError = _validateStationData();
@@ -520,11 +483,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           if (kDebugMode) {
             print('🌐 Fetching combined timeline for statistics');
           }
-          final combinedResult =
-              await HistoricalWaterDataService.getCombinedTimeline(
-                stationId,
-                includeRealtimeData: true,
-              );
+          final combinedResult = await context
+              .read<HistoricalWaterDataProvider>()
+              .getCombinedTimeline(stationId, includeRealtimeData: true);
           dataPoints = combinedResult['combined'] as List<Map<String, dynamic>>;
 
           // Cache it for future use
@@ -572,10 +533,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               );
             }
             // Fetch specific year from historical API
-            dataPoints = await HistoricalWaterDataService.fetchHistoricalData(
-              stationId,
-              year: _selectedYear,
-            );
+            dataPoints = await context
+                .read<HistoricalWaterDataProvider>()
+                .fetchHistoricalData(stationId, year: _selectedYear);
 
             // Cache it
             _cachedHistoricalData[cacheKey] = dataPoints;
@@ -585,11 +545,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               print('🌐 Fetching combined timeline for statistics');
             }
             // Default: use combined timeline
-            final combinedResult =
-                await HistoricalWaterDataService.getCombinedTimeline(
-                  stationId,
-                  includeRealtimeData: true,
-                );
+            final combinedResult = await context
+                .read<HistoricalWaterDataProvider>()
+                .getCombinedTimeline(stationId, includeRealtimeData: true);
             dataPoints =
                 combinedResult['combined'] as List<Map<String, dynamic>>;
 
@@ -613,9 +571,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       }
 
       // Load recent trend (always use historical service for this)
-      final recentTrend = await HistoricalWaterDataService.getRecentTrend(
-        stationId,
-      );
+      final recentTrend = await context
+          .read<HistoricalWaterDataProvider>()
+          .getRecentTrend(stationId);
 
       if (mounted) {
         setState(() {
@@ -690,10 +648,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<void> _loadWeatherData() async {
-    setState(() {
-      _isLoadingWeather = true;
-      _weatherError = null;
-    });
+    // 🚀 Only show loading if we don't already have weather data
+    final showLoading = _weatherForecast.isEmpty;
+
+    if (showLoading) {
+      setState(() {
+        _isLoadingWeather = true;
+        _weatherError = null;
+      });
+    }
 
     try {
       // Get the station ID from river data
@@ -722,14 +685,15 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         );
       }
 
-      // Fetch current weather and 5-day forecast in parallel
-      final results = await Future.wait([
-        _weatherService.getWeatherForStation(station),
-        _weatherService.getForecastForStation(station, days: 5),
-      ]);
+      // Fetch current weather and 5-day forecast using provider
+      final weatherProvider = context.read<WeatherProvider>();
+      final results = await weatherProvider.fetchAllWeather(
+        station,
+        forecastDays: 5,
+      );
 
-      final currentWeather = results[0] as WeatherData?;
-      final forecast = results[1] as List<WeatherData>;
+      final currentWeather = results['current'] as WeatherData?;
+      final forecast = results['forecast'] as List<WeatherData>;
 
       if (mounted) {
         setState(() {
@@ -769,8 +733,13 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       _cachedHistoricalDataTime = {};
     });
 
+    // Refresh live data via provider (handles its own caching)
+    final stationId = widget.riverData['stationId'] as String?;
+    if (stationId != null) {
+      context.read<LiveWaterDataProvider>().fetchStationData(stationId);
+    }
+
     await Future.wait([
-      _loadLiveData(),
       _loadHistoricalData(),
       _loadStatisticsData(),
       _loadWeatherData(),
@@ -914,35 +883,52 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                     if (_riverType.isKananaskis)
                       const KananaskisRiverSection(flowThreshold: 20.0)
                     else
-                      EnvCanadaRiverSection(
-                        liveData: _liveData,
-                        isLoadingLiveData: _isLoading,
-                        liveDataError: _error,
-                        currentWeather: _currentWeather,
-                        weatherForecast: _weatherForecast,
-                        isLoadingWeather: _isLoadingWeather,
-                        weatherError: _weatherError,
-                        historicalData: _historicalData,
-                        isLoadingChart: _isLoadingChart,
-                        chartError: _chartError,
-                        selectedDays: _selectedDays,
-                        selectedYear: _selectedYear,
-                        flowStatistics: _flowStatistics,
-                        recentTrend: _recentTrend,
-                        isLoadingStats: _isLoadingStats,
-                        onDaysChanged: (days) {
-                          setState(() {
-                            _selectedDays = days;
-                          });
-                          _loadHistoricalData();
+                      // 🚀 Use Consumer to reactively display live data from provider
+                      Consumer<LiveWaterDataProvider>(
+                        builder: (context, liveDataProvider, child) {
+                          final stationId =
+                              widget.riverData['stationId'] as String?;
+                          final liveData = stationId != null
+                              ? liveDataProvider.getLiveData(stationId)
+                              : null;
+                          final isLoadingLiveData = stationId != null
+                              ? liveDataProvider.isUpdating(stationId)
+                              : false;
+                          final liveDataError = stationId != null
+                              ? liveDataProvider.getError(stationId)
+                              : _validateStationData();
+
+                          return EnvCanadaRiverSection(
+                            liveData: liveData,
+                            isLoadingLiveData: isLoadingLiveData,
+                            liveDataError: liveDataError,
+                            currentWeather: _currentWeather,
+                            weatherForecast: _weatherForecast,
+                            isLoadingWeather: _isLoadingWeather,
+                            weatherError: _weatherError,
+                            historicalData: _historicalData,
+                            isLoadingChart: _isLoadingChart,
+                            chartError: _chartError,
+                            selectedDays: _selectedDays,
+                            selectedYear: _selectedYear,
+                            flowStatistics: _flowStatistics,
+                            recentTrend: _recentTrend,
+                            isLoadingStats: _isLoadingStats,
+                            onDaysChanged: (days) {
+                              setState(() {
+                                _selectedDays = days;
+                              });
+                              _loadHistoricalData();
+                            },
+                            onYearChanged: (year) {
+                              setState(() {
+                                _selectedYear = year;
+                              });
+                              _loadHistoricalData();
+                            },
+                            formatDateTime: _formatDateTime,
+                          );
                         },
-                        onYearChanged: (year) {
-                          setState(() {
-                            _selectedYear = year;
-                          });
-                          _loadHistoricalData();
-                        },
-                        formatDateTime: _formatDateTime,
                       ),
 
                     const SizedBox(height: 16),
@@ -980,7 +966,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           }
 
           // Fetch the full run details
-          final run = await RiverRunService.getRunById(runId);
+          final run = await context.read<RiverRunProvider>().getRunById(runId);
           if (run == null) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
