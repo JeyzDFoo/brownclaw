@@ -398,8 +398,18 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEditMode ? 'Edit River Descent' : 'Log River Descent'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Row(
+          children: [
+            Icon(
+              isEditMode ? Icons.edit_note : Icons.add_circle_outline,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Text(isEditMode ? 'Edit River Descent' : 'Log River Descent'),
+          ],
+        ),
+        elevation: 0,
+        scrolledUnderElevation: 3,
         actions: [
           if (_isSubmitting)
             const Padding(

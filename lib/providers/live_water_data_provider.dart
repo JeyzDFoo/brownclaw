@@ -69,7 +69,7 @@ class LiveWaterDataProvider extends ChangeNotifier {
     // Mark station as updating
     _updatingStations.add(stationId);
     _errors.remove(stationId); // Clear any previous errors
-    notifyListeners();
+    _safeNotifyListeners();
 
     // Create and store the request future
     final requestFuture = _performStationRequest(stationId);
@@ -97,7 +97,7 @@ class LiveWaterDataProvider extends ChangeNotifier {
       _activeRequests.remove(stationId);
       _updatingStations.remove(stationId);
       _lastRequestTime[stationId] = DateTime.now();
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 
@@ -137,7 +137,7 @@ class LiveWaterDataProvider extends ChangeNotifier {
   void clearStationData(String stationId) {
     _liveDataCache.remove(stationId);
     _errors.remove(stationId);
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   /// Clear all cached data
@@ -145,7 +145,25 @@ class LiveWaterDataProvider extends ChangeNotifier {
     _liveDataCache.clear();
     _errors.clear();
     _updatingStations.clear();
-    notifyListeners();
+    _safeNotifyListeners();
+  }
+
+  /// Safely notify listeners, deferring if called during build
+  void _safeNotifyListeners() {
+    // Use a microtask to defer notification until after the current frame
+    Future.microtask(() {
+      if (!_disposed) {
+        notifyListeners();
+      }
+    });
+  }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
   }
 
   /// Force refresh a station (ignores rate limiting)

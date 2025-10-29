@@ -475,8 +475,15 @@ class _CreateRiverRunScreenState extends State<CreateRiverRunScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create New River Run'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Row(
+          children: [
+            Icon(Icons.add_location_alt_outlined, size: 24),
+            SizedBox(width: 12),
+            Text('Create New River Run'),
+          ],
+        ),
+        elevation: 0,
+        scrolledUnderElevation: 3,
       ),
       body: Form(
         key: _formKey,

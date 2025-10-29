@@ -709,8 +709,42 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(riverName),
+        title: Row(
+          children: [
+            const Icon(Icons.water, size: 24),
+            const SizedBox(width: 12),
+            Flexible(
+              child: Text(
+                section.isNotEmpty ? '$riverName - $section' : riverName,
+              ),
+            ),
+          ],
+        ),
+        elevation: 0,
+        scrolledUnderElevation: 3,
         actions: [
+          // Difficulty badge
+          if (sectionClass.isNotEmpty && sectionClass != 'Unknown')
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 12, horizontal: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Text(
+                sectionClass,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
           // Edit button - only visible to admins
           Consumer<UserProvider>(
             builder: (context, userProvider, child) {
@@ -739,10 +773,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                 },
               );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _refreshAllData,
           ),
         ],
       ),
