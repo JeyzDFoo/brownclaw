@@ -216,18 +216,60 @@ flutter test test/integration/  # Direct integration test run
 ### Performance Logging
 Use `PerformanceLogger.log('event_name')` at critical points. Already instrumented in `main.dart` provider initialization. See `PERFORMANCE_LOGGING.md`.
 
-### Caching Strategy
-1. Check provider's static cache first
-2. Check `CacheProvider` for shared data
-3. Fall back to service layer
+### Caching Strategy - Stale-While-Revalidate Pattern
+
+**Core Principle**: Return stale cached data immediately for instant UX, then fetch fresh data in the background and update UI when ready.
+
+**Implementation Pattern:**
+1. **Check static cache first** - Return immediately if available (even if stale)
+2. **Trigger background refresh** - Fetch fresh data asynchronously if cache is stale
+3. **Update UI on completion** - Call `notifyListeners()` when fresh data arrives
 4. **Never** cache in UI screens directly
+
+**Benefits:**
+- Instant UI response (no loading spinners for cached data)
+- Always showing the freshest data available
+- Graceful degradation on slow networks
+- Reduced perceived latency
 
 Example from `RiverRunProvider`:
 ```dart
-if (_isCacheValid) {
-  return _cache.values.toList();
+Future<List<RiverRunWithStations>> getRiverRuns() async {
+  // Return stale cache immediately
+  if (_cache.isNotEmpty) {
+    // Start background refresh if stale
+    if (!_isCacheValid) {
+      _refreshInBackground();
+    }
+    return _cache.values.toList();
+  }
+  
+  // No cache - do blocking fetch
+  return await _fetchAndCache();
+}
+
+Future<void> _refreshInBackground() async {
+  try {
+    final freshData = await _fetchFromService();
+    _cache.clear();
+    _cache.addAll(freshData);
+    _cacheTime = DateTime.now();
+    notifyListeners(); // Update UI with fresh data
+  } catch (e) {
+    // Silently fail - user still has stale data
+  }
 }
 ```
+
+**Cache Hierarchy:**
+1. Provider's static cache (primary, with TTL)
+2. `CacheProvider` for shared/cross-provider data
+3. Service layer (network fetch)
+
+**TTL Guidelines:**
+- Static data (rivers, runs): 1 hour
+- Live data (water levels): 5 minutes
+- User data (favorites, logbook): Session-based (clear on logout)
 
 ### Error Handling
 Services return typed models or null. Providers set `_error` string and notify listeners:

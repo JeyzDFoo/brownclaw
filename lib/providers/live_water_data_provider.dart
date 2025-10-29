@@ -47,6 +47,8 @@ class LiveWaterDataProvider extends ChangeNotifier {
   }
 
   /// Fetch live data for a single station with deduplication and rate limiting
+  /// Uses stale-while-revalidate pattern: returns cached data immediately,
+  /// then updates in background if needed
   Future<LiveWaterData?> fetchStationData(String stationId) async {
     // Check if there's already an active request for this station
     if (_activeRequests.containsKey(stationId)) {
@@ -56,14 +58,19 @@ class LiveWaterDataProvider extends ChangeNotifier {
       return _activeRequests[stationId];
     }
 
-    // Check rate limiting
+    // Check rate limiting - if rate limited, return cache and update in background
     if (_shouldRateLimit(stationId)) {
       if (kDebugMode) {
         print(
           '⏰ Rate limited request for station $stationId, returning cached data',
         );
       }
-      return _liveDataCache[stationId];
+      final cachedData = _liveDataCache[stationId];
+
+      // Update in background (fire and forget)
+      _updateStationInBackground(stationId);
+
+      return cachedData;
     }
 
     // Mark station as updating
@@ -104,6 +111,74 @@ class LiveWaterDataProvider extends ChangeNotifier {
   /// Internal method to perform the actual API request
   Future<LiveWaterData?> _performStationRequest(String stationId) async {
     return await LiveWaterDataService.fetchStationData(stationId);
+  }
+
+  /// Update station data in background (for stale-while-revalidate pattern)
+  /// This doesn't wait for the rate limit interval - it schedules an update
+  /// to happen after the minimum interval has passed
+  void _updateStationInBackground(String stationId) {
+    final lastRequest = _lastRequestTime[stationId];
+    if (lastRequest == null) {
+      // No previous request, update immediately
+      _performBackgroundUpdate(stationId);
+      return;
+    }
+
+    final timeSinceLastRequest = DateTime.now().difference(lastRequest);
+    final timeUntilNextAllowed = _minRequestInterval - timeSinceLastRequest;
+
+    if (timeUntilNextAllowed.isNegative ||
+        timeUntilNextAllowed.inMilliseconds <= 0) {
+      // Rate limit has passed, update immediately
+      _performBackgroundUpdate(stationId);
+    } else {
+      // Schedule update after rate limit expires
+      if (kDebugMode) {
+        print(
+          '📅 Scheduling background update for $stationId in ${timeUntilNextAllowed.inSeconds}s',
+        );
+      }
+      Future.delayed(timeUntilNextAllowed, () {
+        _performBackgroundUpdate(stationId);
+      });
+    }
+  }
+
+  /// Perform the actual background update
+  Future<void> _performBackgroundUpdate(String stationId) async {
+    try {
+      // Don't start if there's already an active request
+      if (_activeRequests.containsKey(stationId)) {
+        return;
+      }
+
+      _updatingStations.add(stationId);
+      _safeNotifyListeners();
+
+      final requestFuture = _performStationRequest(stationId);
+      _activeRequests[stationId] = requestFuture;
+
+      final result = await requestFuture;
+
+      if (result != null) {
+        _liveDataCache[stationId] = result;
+        _errors.remove(stationId);
+        if (kDebugMode) {
+          print('✅ Background update completed for $stationId');
+        }
+      }
+
+      _lastRequestTime[stationId] = DateTime.now();
+    } catch (e) {
+      _errors[stationId] = e.toString();
+      if (kDebugMode) {
+        print('❌ Background update failed for $stationId: $e');
+      }
+    } finally {
+      _activeRequests.remove(stationId);
+      _updatingStations.remove(stationId);
+      _safeNotifyListeners();
+    }
   }
 
   /// Fetch live data for multiple stations efficiently

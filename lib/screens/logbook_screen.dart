@@ -58,7 +58,7 @@ class _LogBookScreenState extends State<LogBookScreen>
             stream: _firestore
                 .collection('river_descents')
                 .where('userId', isEqualTo: user.uid)
-                .orderBy('timestamp', descending: true)
+                .orderBy('date', descending: true)
                 .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
