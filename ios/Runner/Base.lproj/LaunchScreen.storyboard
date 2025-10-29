@@ -1,28 +1,91 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="01J-lp-oVM">
+    <device id="retina6_12" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12089"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21678"/>
+        <capability name="Named colors" minToolsVersion="9.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="EHf-IW-A2E">
             <objects>
                 <viewController id="01J-lp-oVM" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="Ydg-fD-yQy"/>
-                        <viewControllerLayoutGuide type="bottom" id="xbc-2k-c8Z"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="Ze5-6b-2t3">
+                        <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="YRO-k0-Ey4">
+                            <!-- Gradient Background View -->
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gradient-view">
+                                <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
+                                <color key="backgroundColor" name="LaunchGradientTop"/>
+                            </view>
+                            
+                            <!-- App Icon Image -->
+                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleAspectFit" image="LaunchImage" translatesAutoresizingMaskIntoConstraints="NO" id="app-icon">
+                                <rect key="frame" x="96.5" y="306" width="200" height="200"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="icon-width"/>
+                                    <constraint firstAttribute="height" constant="200" id="icon-height"/>
+                                </constraints>
                             </imageView>
+                            
+                            <!-- App Name Label -->
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="BrownPaw" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="app-name">
+                                <rect key="frame" x="56" y="526" width="281" height="48"/>
+                                <fontDescription key="fontDescription" type="system" weight="bold" pointSize="40"/>
+                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                                <color key="shadowColor" white="0.0" alpha="0.25" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <size key="shadowOffset" width="0.0" height="2"/>
+                            </label>
+                            
+                            <!-- Tagline Label -->
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Track Your Whitewater Adventures" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tagline">
+                                <rect key="frame" x="56" y="584" width="281" height="21"/>
+                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="17"/>
+                                <color key="textColor" red="0.87843137254901960784" green="0.92156862745098039216" blue="0.90980392156862745098" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            
+                            <!-- Bottom Wave Decoration -->
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wave-accent">
+                                <rect key="frame" x="0.0" y="752" width="393" height="100"/>
+                                <color key="backgroundColor" name="LaunchAccent"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="100" id="wave-height"/>
+                                </constraints>
+                            </view>
                         </subviews>
-                        <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" name="LaunchGradientTop"/>
                         <constraints>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="1a2-6s-vTC"/>
-                            <constraint firstItem="YRO-k0-Ey4" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" id="4X2-HB-R7a"/>
+                            <!-- Gradient fills entire view -->
+                            <constraint firstItem="gradient-view" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="gradient-top"/>
+                            <constraint firstItem="gradient-view" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="gradient-leading"/>
+                            <constraint firstItem="gradient-view" firstAttribute="trailing" secondItem="Ze5-6b-2t3" secondAttribute="trailing" id="gradient-trailing"/>
+                            <constraint firstItem="gradient-view" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="gradient-bottom"/>
+                            
+                            <!-- App Icon centered -->
+                            <constraint firstItem="app-icon" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="icon-center-x"/>
+                            <constraint firstItem="app-icon" firstAttribute="centerY" secondItem="Ze5-6b-2t3" secondAttribute="centerY" constant="-20" id="icon-center-y"/>
+                            
+                            <!-- App Name below icon -->
+                            <constraint firstItem="app-name" firstAttribute="top" secondItem="app-icon" secondAttribute="bottom" constant="20" id="name-top"/>
+                            <constraint firstItem="app-name" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="name-center-x"/>
+                            <constraint firstItem="app-name" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="56" id="name-leading"/>
+                            <constraint firstItem="app-name" firstAttribute="trailing" secondItem="Ze5-6b-2t3" secondAttribute="trailing" constant="-56" id="name-trailing"/>
+                            
+                            <!-- Tagline below name -->
+                            <constraint firstItem="tagline" firstAttribute="top" secondItem="app-name" secondAttribute="bottom" constant="10" id="tagline-top"/>
+                            <constraint firstItem="tagline" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="tagline-center-x"/>
+                            <constraint firstItem="tagline" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" constant="56" id="tagline-leading"/>
+                            <constraint firstItem="tagline" firstAttribute="trailing" secondItem="Ze5-6b-2t3" secondAttribute="trailing" constant="-56" id="tagline-trailing"/>
+                            
+                            <!-- Wave accent at bottom -->
+                            <constraint firstItem="wave-accent" firstAttribute="leading" secondItem="Ze5-6b-2t3" secondAttribute="leading" id="wave-leading"/>
+                            <constraint firstItem="wave-accent" firstAttribute="trailing" secondItem="Ze5-6b-2t3" secondAttribute="trailing" id="wave-trailing"/>
+                            <constraint firstItem="wave-accent" firstAttribute="bottom" secondItem="Ze5-6b-2t3" secondAttribute="bottom" id="wave-bottom"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -33,5 +96,11 @@
     </scenes>
     <resources>
         <image name="LaunchImage" width="168" height="185"/>
+        <namedColor name="LaunchGradientTop">
+            <color red="0.54509803921568623" green="0.27058823529411763" blue="0.07450980392156863" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
+        <namedColor name="LaunchAccent">
+            <color red="0.0" green="0.58823529411764708" blue="0.53333333333333333" alpha="0.29999999999999999" colorSpace="custom" customColorSpace="sRGB"/>
+        </namedColor>
     </resources>
 </document>
