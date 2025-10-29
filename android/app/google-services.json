@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "1047120968895-a5j6ujp1ni89hubjh1kp0t0f5ilc4mvo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.brownpaw.brownclaw",
+            "certificate_hash": "176693ff96a8597e60c6ac150a241b645ae9269a"
+          }
+        },
+        {
           "client_id": "1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com",
           "client_type": 3
         }

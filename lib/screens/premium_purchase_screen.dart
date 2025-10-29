@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../services/stripe_service.dart';
 import '../services/analytics_service.dart';
@@ -21,6 +22,58 @@ class _PremiumPurchaseScreenState extends State<PremiumPurchaseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // On Android, show coming soon message (Google Play Billing required)
+    if (!kIsWeb) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.workspace_premium, color: Colors.white),
+              const SizedBox(width: 8),
+              const Text('Premium'),
+            ],
+          ),
+          backgroundColor: Colors.amber.shade700,
+          foregroundColor: Colors.white,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.construction, size: 80, color: Colors.amber),
+                const SizedBox(height: 24),
+                const Text(
+                  'Premium Subscriptions\nComing Soon!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Premium features will be available for purchase through Google Play Store in a future update.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'In the meantime, visit brownclaw.com on the web to upgrade!',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey[500],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Web version with Stripe checkout
     return Scaffold(
       appBar: AppBar(
         title: Row(

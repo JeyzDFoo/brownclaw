@@ -1,9 +1,14 @@
 # Brown Paw - AI Coding Agent Instructions
 
 ## Project Overview
-BrownClaw is a **web-only** Flutter app for whitewater kayakers to log river descents and track real-time water levels. Built with Firebase (Auth, Firestore, Storage, Analytics, Functions) and Stripe for premium subscriptions.
+BrownClaw is a **cross-platform** Flutter app (Web + Android) for whitewater kayakers to log river descents and track real-time water levels. Built with Firebase (Auth, Firestore, Storage, Analytics, Functions) and Stripe for premium subscriptions.
 
 **Key Stack:** Flutter 3.9.2+, Provider pattern for state management, Firebase backend, Government of Canada hydrometric API for live water data.
+
+## Supported Platforms
+- **Web** (Primary platform - fully tested)
+- **Android** (Newly added - configured and building)
+- **iOS** (Not configured yet)
 
 ## First-Time Setup
 
@@ -56,8 +61,53 @@ firebase emulators:start
 # Run tests in another terminal
 ./run_tests.sh integration
 
+# Run on web
+flutter run -d chrome
+
+# Run on Android (requires emulator or device)
+flutter run -d <device-id>
+
 # If tests pass, setup is complete! ✅
 ```
+
+## Platform-Specific Considerations
+
+### Web
+- Uses `dart:html` for browser APIs (page reload, URL manipulation)
+- Stripe uses hosted Checkout pages (redirect-based flow)
+- No platform-specific permissions needed
+
+### Android
+- Package name: `com.brownpaw.brownclaw`
+- Min SDK: 21 (Android 5.0 Lollipop)
+- Firebase configured via FlutterFire CLI
+- Stripe uses native payment sheet (flutter_stripe SDK)
+- Deep linking configured for: `brownclaw://stripe-redirect`
+- Icons generated via flutter_launcher_icons
+
+### Platform-Aware Code Pattern
+BrownClaw uses **conditional imports** to handle platform differences:
+
+```dart
+// In service files (e.g., stripe_service.dart)
+import 'service_stub.dart'
+    if (dart.library.html) 'service_web.dart'
+    if (dart.library.io) 'service_mobile.dart';
+
+// Use kIsWeb check for runtime platform detection
+if (kIsWeb) {
+  // Web-specific logic
+} else {
+  // Mobile-specific logic
+}
+```
+
+**Important files for platform abstraction:**
+- `lib/services/stripe_service_web.dart` - Web browser APIs (dart:html)
+- `lib/services/stripe_service_mobile.dart` - Mobile APIs
+- `lib/services/stripe_service_stub.dart` - Fallback for unsupported platforms
+
+When adding browser-specific code, always use conditional imports to prevent Android build failures.
 
 ## Architecture Patterns
 
@@ -439,9 +489,10 @@ Access theme via `ThemeProvider` (Material 3 with brown/teal palette):
 
 1. **Don't bypass providers**: Screens calling services directly breaks state management
 2. **Static cache awareness**: Provider recreation doesn't clear static caches - explicit `clearCache()` needed
-3. **Web-only platform**: Don't add mobile-specific code (already stripped from Stripe service)
+3. **Platform-specific imports**: Always use conditional imports for `dart:html` or platform-specific code
 4. **Firestore security**: Always test rule changes with `firebase emulators:start`
 5. **Version bumping**: Use `./deploy.sh`, don't manually edit version files (dual source: `lib/version.dart` + `pubspec.yaml`)
+6. **Android package name**: `com.brownpaw.brownclaw` (not `com.example.brownclaw`)
 
 ## Debugging Tips
 
@@ -556,10 +607,17 @@ flutter build web
 
 ```bash
 flutter pub get                 # Install dependencies
-flutter run -d chrome           # Run on web (primary platform)
+flutter run -d chrome           # Run on web
+flutter run -d <device-id>      # Run on Android device/emulator
+flutter devices                 # List available devices
 ./deploy.sh patch              # Build and deploy with version bump
 ./run_tests.sh coverage        # Generate test coverage
 firebase emulators:start       # Local Firestore testing
+
+# Android-specific commands
+flutter build apk --debug      # Build debug APK
+flutter build apk --release    # Build release APK
+flutter build appbundle        # Build Android App Bundle (AAB) for Play Store
 ```
 
 When in doubt about patterns, search for `// #todo` comments - they highlight both technical debt and preferred implementation approaches.

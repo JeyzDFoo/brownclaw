@@ -857,12 +857,25 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
                 AnalyticsService.logPurchaseInitiated('monthly_premium', 2.29);
 
                 Navigator.of(context).pop();
-                // Navigate to premium purchase page
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const PremiumPurchaseScreen(),
-                  ),
-                );
+
+                // Only navigate to premium purchase on web
+                if (kIsWeb) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const PremiumPurchaseScreen(),
+                    ),
+                  );
+                } else {
+                  // On mobile, show message to use web
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Premium subscriptions are available on the web version at brownclaw.com',
+                      ),
+                      duration: Duration(seconds: 4),
+                    ),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,

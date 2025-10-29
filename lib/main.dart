@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 import 'firebase_options.dart';
 import 'screens/auth_screen.dart';
 import 'screens/main_screen.dart';
@@ -27,14 +26,8 @@ void main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   PerformanceLogger.log('firebase_initialized');
 
-  // Initialize Stripe for mobile platforms (Android/iOS)
-  if (!kIsWeb) {
-    Stripe.publishableKey =
-        'pk_live_51SJ0MEAdlcDQOrDhhUZHnuVr7lzgZxeY4gQ2TyzDjtWv4li2XBGtgTpRFlkOHi2BQYTv3Uoey8IliofMrUvYwNyY00zsQfET3S';
-    Stripe.merchantIdentifier = 'merchant.com.brownpaw.brownclaw';
-    await Stripe.instance.applySettings();
-    PerformanceLogger.log('stripe_initialized');
-  }
+  // Note: Stripe is only used on web (premium purchases via web only)
+  // Android will use Google Play Billing in a future update
 
   // Log app open event
   await AnalyticsService.logAppOpen();

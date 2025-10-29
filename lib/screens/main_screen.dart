@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import '../providers/providers.dart';
 import '../widgets/update_banner.dart';
@@ -114,6 +115,9 @@ class _MainScreenState extends State<MainScreen> {
                         if (context.mounted) {
                           Navigator.pushReplacementNamed(context, '/');
                         }
+                      } else if (value == 'delete_account') {
+                        await AnalyticsService.logMenuAction('delete_account');
+                        _showDeleteAccountDialog(context, userProvider);
                       }
                     },
                     itemBuilder: (context) => [
@@ -139,31 +143,33 @@ class _MainScreenState extends State<MainScreen> {
                           },
                         ),
                       ),
-                      PopupMenuItem(
-                        value: 'premium',
-                        child: Consumer<PremiumProvider>(
-                          builder: (context, premiumProvider, child) {
-                            return Row(
-                              children: [
-                                Icon(
-                                  premiumProvider.isPremium
-                                      ? Icons.workspace_premium
-                                      : Icons.lock,
-                                  color: premiumProvider.isPremium
-                                      ? Colors.amber
-                                      : null,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  premiumProvider.isPremium
-                                      ? 'Premium Active'
-                                      : 'Premium Settings',
-                                ),
-                              ],
-                            );
-                          },
+                      // Premium menu - only show on web
+                      if (kIsWeb)
+                        PopupMenuItem(
+                          value: 'premium',
+                          child: Consumer<PremiumProvider>(
+                            builder: (context, premiumProvider, child) {
+                              return Row(
+                                children: [
+                                  Icon(
+                                    premiumProvider.isPremium
+                                        ? Icons.workspace_premium
+                                        : Icons.lock,
+                                    color: premiumProvider.isPremium
+                                        ? Colors.amber
+                                        : null,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    premiumProvider.isPremium
+                                        ? 'Premium Active'
+                                        : 'Premium Settings',
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
                         ),
-                      ),
                       const PopupMenuItem(
                         value: 'logout',
                         child: Row(
@@ -171,6 +177,19 @@ class _MainScreenState extends State<MainScreen> {
                             Icon(Icons.logout),
                             SizedBox(width: 8),
                             Text('Sign Out'),
+                          ],
+                        ),
+                      ),
+                      const PopupMenuItem(
+                        value: 'delete_account',
+                        child: Row(
+                          children: [
+                            Icon(Icons.delete_forever, color: Colors.red),
+                            SizedBox(width: 8),
+                            Text(
+                              'Delete Account',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ],
                         ),
                       ),
@@ -235,5 +254,112 @@ class _MainScreenState extends State<MainScreen> {
         );
       },
     );
+  }
+
+  void _showDeleteAccountDialog(
+    BuildContext context,
+    UserProvider userProvider,
+  ) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.warning, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Delete Account'),
+            ],
+          ),
+          content: const Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Are you sure you want to delete your account?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 16),
+              Text('This will permanently delete:'),
+              SizedBox(height: 8),
+              Text('• Your logbook entries'),
+              Text('• Your favorite rivers'),
+              Text('• All your personal data'),
+              SizedBox(height: 16),
+              Text(
+                'This action cannot be undone.',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await _deleteAccount(context, userProvider);
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete Account'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _deleteAccount(
+    BuildContext context,
+    UserProvider userProvider,
+  ) async {
+    try {
+      // Show loading indicator
+      if (!context.mounted) return;
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(child: CircularProgressIndicator()),
+      );
+
+      // Delete user account (this will also trigger Firestore deletion via security rules)
+      await userProvider.deleteAccount();
+
+      // Log analytics
+      await AnalyticsService.logMenuAction('account_deleted');
+
+      // Close loading dialog and navigate to auth screen
+      if (context.mounted) {
+        Navigator.of(context).pop(); // Close loading dialog
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      // Close loading dialog if open
+      if (context.mounted) {
+        Navigator.of(context).pop();
+      }
+
+      // Show error
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error deleting account: ${e.toString()}'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+
+      // Log error
+      await AnalyticsService.logError(
+        'Account deletion failed: ${e.toString()}',
+      );
+    }
   }
 }
