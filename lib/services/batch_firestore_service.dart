@@ -29,17 +29,9 @@ class BatchFirestoreService {
 
     final results = <String, DocumentSnapshot>{};
 
-    if (kDebugMode) {
-      print('📦 Batch fetching ${ids.length} docs from $collection');
-    }
-
     // Split into batches of 10 (Firestore whereIn limit)
     for (int i = 0; i < ids.length; i += 10) {
       final batch = ids.skip(i).take(10).toList();
-
-      if (kDebugMode) {
-        print('   Fetching batch ${(i ~/ 10) + 1}: ${batch.length} items');
-      }
 
       final snapshot = await _firestore
           .collection(collection)
@@ -79,12 +71,6 @@ class BatchFirestoreService {
     if (values.isEmpty) return [];
 
     final results = <DocumentSnapshot>[];
-
-    if (kDebugMode) {
-      print(
-        '📦 Batch fetching from $collection where $field in ${values.length} values',
-      );
-    }
 
     // Split into batches of 10
     for (int i = 0; i < values.length; i += 10) {

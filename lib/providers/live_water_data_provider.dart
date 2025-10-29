@@ -81,16 +81,8 @@ class LiveWaterDataProvider extends ChangeNotifier {
       if (result != null) {
         _liveDataCache[stationId] = result;
         _errors.remove(stationId);
-        if (kDebugMode) {
-          print(
-            '✅ Successfully cached live data for $stationId: ${result.formattedFlowRate}',
-          );
-        }
       } else {
         _errors[stationId] = 'No fresh data available';
-        if (kDebugMode) {
-          print('❌ No fresh data available for station $stationId');
-        }
       }
 
       return result;
@@ -118,12 +110,6 @@ class LiveWaterDataProvider extends ChangeNotifier {
   Future<void> fetchMultipleStations(List<String> stationIds) async {
     if (stationIds.isEmpty) return;
 
-    if (kDebugMode) {
-      print(
-        '🌊 Fetching live data for ${stationIds.length} stations: ${stationIds.join(", ")}',
-      );
-    }
-
     // Remove duplicates
     final uniqueStationIds = stationIds.toSet().toList();
 
@@ -144,12 +130,6 @@ class LiveWaterDataProvider extends ChangeNotifier {
       if (i + batchSize < uniqueStationIds.length) {
         await Future.delayed(const Duration(milliseconds: 200));
       }
-    }
-
-    if (kDebugMode) {
-      print(
-        '✅ Completed fetching live data for ${uniqueStationIds.length} stations',
-      );
     }
   }
 

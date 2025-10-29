@@ -319,6 +319,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
         // Filter to requested number of days (client-side)
         if (dataPoints.isNotEmpty) {
+          // Yield to UI thread before heavy processing
+          await Future.delayed(Duration.zero);
+
           // Sort by date (most recent first)
           dataPoints.sort(
             (a, b) => (b['date'] as String).compareTo(a['date'] as String),
@@ -958,6 +961,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
               ),
             ),
       floatingActionButton: FloatingActionButton.extended(
+        heroTag: 'river_detail_fab',
         onPressed: () async {
           // Create RiverRunWithStations object to prefill the logbook entry
           final runId = widget.riverData['runId'] as String?;

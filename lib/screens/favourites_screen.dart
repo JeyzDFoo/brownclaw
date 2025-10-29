@@ -40,19 +40,8 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     RiverRunProvider riverRunProvider,
     LiveWaterDataProvider liveDataProvider,
   ) {
-    if (kDebugMode) {
-      print(
-        '🔍 FavouritesScreen: Checking favorites - current: ${currentFavoriteIds.length}, previous: ${_previousFavoriteIds.length}',
-      );
-    }
-
     if (_previousFavoriteIds.length != currentFavoriteIds.length ||
         !_previousFavoriteIds.containsAll(currentFavoriteIds)) {
-      if (kDebugMode) {
-        print(
-          '🔄 FavouritesScreen: Favorites changed! Loading ${currentFavoriteIds.length} favorites...',
-        );
-      }
       PerformanceLogger.log(
         'favourites_loading_started',
         detail: '${currentFavoriteIds.length} favorites',
@@ -65,11 +54,6 @@ class _FavouritesScreenState extends State<FavouritesScreen>
       if (currentFavoriteIds.isNotEmpty) {
         Future.microtask(() async {
           if (mounted) {
-            if (kDebugMode) {
-              print(
-                '📥 FavouritesScreen: Calling loadFavoriteRuns with ${currentFavoriteIds.length} IDs',
-              );
-            }
             await riverRunProvider.loadFavoriteRuns(currentFavoriteIds);
             PerformanceLogger.log('favourites_runs_loaded');
 
@@ -87,10 +71,6 @@ class _FavouritesScreenState extends State<FavouritesScreen>
             }
           }
         });
-      } else {
-        if (kDebugMode) {
-          print('ℹ️ FavouritesScreen: No favorites to load (empty)');
-        }
       }
     }
   }
@@ -192,35 +172,6 @@ class _FavouritesScreenState extends State<FavouritesScreen>
     final primaryStation = runWithStations.primaryStation;
     final stationId =
         primaryStation?.stationId ?? runWithStations.run.stationId;
-
-    if (kDebugMode) {
-      print('🔄 Converting run to legacy format:');
-      print('   Run ID: ${runWithStations.run.id}');
-      print('   River Name: ${runWithStations.river?.name}');
-      print('   Run Name: ${runWithStations.run.name}');
-      print('   Run Station ID: ${runWithStations.run.stationId}');
-      print('   Number of Stations: ${runWithStations.stations.length}');
-      if (runWithStations.stations.isNotEmpty) {
-        for (int i = 0; i < runWithStations.stations.length; i++) {
-          final station = runWithStations.stations[i];
-          print(
-            '   Station $i: ${station.stationId} (hasLiveData: ${station.hasLiveData})',
-          );
-        }
-      }
-      print('   Primary Station: $primaryStation');
-      print('   Primary Station ID: ${primaryStation?.stationId}');
-      print('   Final Station ID: $stationId');
-      print('   Has Live Data: ${runWithStations.hasLiveData}');
-
-      final hasValidStation =
-          stationId != null &&
-          stationId.isNotEmpty &&
-          RegExp(r'^[A-Z0-9]+$').hasMatch(stationId.toUpperCase());
-      print(
-        '   Will set hasValidStation to: $hasValidStation (based on stationId validation)',
-      );
-    }
 
     return {
       'runId': runWithStations.run.id, // Add runId for Firestore stream
@@ -492,41 +443,6 @@ class _FavouritesScreenState extends State<FavouritesScreen>
                                           currentRunWithStations,
                                           liveData,
                                         );
-
-                                        if (kDebugMode) {
-                                          print(
-                                            '🎯 Rendering ListTile for ${currentRunWithStations.run.displayName}:',
-                                          );
-                                          print('   Station ID: $stationId');
-                                          print(
-                                            '   Current Discharge: $currentDischarge',
-                                          );
-                                          print(
-                                            '   Has Live Data: $hasLiveData',
-                                          );
-                                          print('   Flow Status: $flowStatus');
-                                          if (liveData != null) {
-                                            print('   Live Data: $liveData');
-                                            print(
-                                              '   Live Flow Rate: ${liveData.flowRate}',
-                                            );
-                                            print(
-                                              '   Live Formatted: ${liveData.formattedFlowRate}',
-                                            );
-                                            print(
-                                              '   Live Station Name: ${liveData.stationName}',
-                                            );
-                                            print(
-                                              '   Live Data Source: ${liveData.dataSource}',
-                                            );
-                                            print(
-                                              '   Live Timestamp: ${liveData.timestamp}',
-                                            );
-                                          }
-                                          print(
-                                            '   Fallback discharge from model: ${currentRunWithStations.currentDischarge}',
-                                          );
-                                        }
 
                                         return Card(
                                           margin: const EdgeInsets.only(

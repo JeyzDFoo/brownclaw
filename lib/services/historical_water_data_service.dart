@@ -683,6 +683,8 @@ class HistoricalWaterDataService {
       );
 
       // Sort combined data by date
+      // Use a small delay to prevent UI freezing on large datasets
+      await Future.delayed(Duration.zero);
       combined.sort(
         (a, b) => (a['date'] as String).compareTo(b['date'] as String),
       );

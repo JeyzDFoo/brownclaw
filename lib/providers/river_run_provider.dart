@@ -213,12 +213,6 @@ class RiverRunProvider extends ChangeNotifier {
     setError(null);
 
     try {
-      if (kDebugMode) {
-        print(
-          '🌊 Cache miss or expired, fetching favorite runs from Firestore...',
-        );
-      }
-
       // 🚀 USE NEW BATCH METHOD - 90% fewer queries!
       final favoriteRuns = await RiverRunService.batchGetFavoriteRuns(
         favoriteRunIds.toList(),
@@ -230,9 +224,6 @@ class RiverRunProvider extends ChangeNotifier {
       }
       _cacheTime = DateTime.now();
 
-      if (kDebugMode) {
-        print('💾 Updated cache with ${favoriteRuns.length} favorite runs');
-      }
       _favoriteRuns = favoriteRuns;
       notifyListeners();
     } catch (e) {

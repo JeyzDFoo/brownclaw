@@ -590,20 +590,9 @@ class RiverRunService {
       // Get the parent river information
       River? river;
       if (run.riverId.isNotEmpty) {
-        if (kDebugMode) {
-          print('getRunWithStations - Fetching river for ID: ${run.riverId}');
-        }
         river = await RiverService.getRiverById(run.riverId);
-        print(
-          '🐛 getRunWithStations - River fetched: ${river?.name ?? 'null'}',
-        );
-      } else {
-        print('🐛 getRunWithStations - No riverId, river will be null');
       }
 
-      print(
-        '🐛 getRunWithStations - Creating RiverRunWithStations with run: ${run.name}, river: ${river?.name ?? 'null'}',
-      );
       return RiverRunWithStations(run: run, stations: stations, river: river);
     } catch (e) {
       if (kDebugMode) {
@@ -706,10 +695,6 @@ class RiverRunService {
     if (runIds.isEmpty) return [];
 
     try {
-      if (kDebugMode) {
-        print('🚀 Batch fetching ${runIds.length} runs with all data...');
-      }
-
       // Step 1: Batch fetch all runs (1 query per 10 items)
       final runDocs = await BatchFirestoreService.batchGetDocs(
         'river_runs',

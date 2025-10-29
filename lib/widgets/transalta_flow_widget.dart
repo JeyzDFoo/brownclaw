@@ -142,7 +142,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         }
 
         return Card(
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.zero,
           elevation: 6,
           shadowColor: isDark
               ? Colors.brown.withOpacity(0.4)
@@ -364,7 +364,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
               }
 
               return Container(
-                width: 110,
+                width: 130,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
@@ -711,11 +711,14 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                                 color: Colors.grey,
                               ),
                               const SizedBox(width: 4),
-                              Text(
-                                period.getArrivalTimeRange(
-                                  travelTimeMinutes: 15,
+                              Flexible(
+                                child: Text(
+                                  period.getArrivalTimeRange(
+                                    travelTimeMinutes: 15,
+                                  ),
+                                  style: const TextStyle(fontSize: 14),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
-                                style: const TextStyle(fontSize: 14),
                               ),
                               if (weather.isNotEmpty) ...[
                                 const SizedBox(width: 8),
@@ -731,12 +734,14 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                                   child: Text(
                                     weather,
                                     style: const TextStyle(fontSize: 12),
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                               ],
                             ],
                           ),
                         ),
+                        const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,

@@ -20,54 +20,6 @@ class KananaskisRiverSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // TransAlta Flow Widget - Shows dam release schedule and forecast
-        TransAltaFlowWidget(threshold: flowThreshold),
-        const SizedBox(height: 16),
-
-        // Information card about TransAlta data
-        Card(
-          color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(
-                  Icons.info_outline,
-                  color: Theme.of(context).colorScheme.primary,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'TransAlta Data',
-                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Flow data for Kananaskis rivers comes directly from TransAlta\'s Barrier Dam release schedule. '
-                        'This provides more accurate predictions for dam-controlled flows than standard gauge data.',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+    return TransAltaFlowWidget(threshold: flowThreshold);
   }
 }

@@ -86,6 +86,7 @@ class EnvCanadaRiverSection extends StatelessWidget {
 
   Widget _buildCurrentConditionsCard(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -173,6 +174,7 @@ class EnvCanadaRiverSection extends StatelessWidget {
 
   Widget _buildHistoricalChartCard(BuildContext context) {
     return Card(
+      margin: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
