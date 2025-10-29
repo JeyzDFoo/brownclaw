@@ -23,10 +23,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -64,6 +61,17 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1047120968895',
     projectId: 'brownclaw',
     storageBucket: 'brownclaw.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyB2VSnO5Hz9hLgueozyuXppJh53-rvF0k4',
+    appId: '1:1047120968895:ios:074872d80268fe4c899a0a',
+    messagingSenderId: '1047120968895',
+    projectId: 'brownclaw',
+    storageBucket: 'brownclaw.firebasestorage.app',
+    androidClientId: '1047120968895-a5j6ujp1ni89hubjh1kp0t0f5ilc4mvo.apps.googleusercontent.com',
+    iosClientId: '1047120968895-s3kkojc0cs2vsfrjcn8uaepma7mfpgo3.apps.googleusercontent.com',
+    iosBundleId: 'com.brownpaw.brownclaw',
   );
 
 }

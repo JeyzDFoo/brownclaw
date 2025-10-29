@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1047120968895-s3kkojc0cs2vsfrjcn8uaepma7mfpgo3.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1047120968895-s3kkojc0cs2vsfrjcn8uaepma7mfpgo3</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>1047120968895-a5j6ujp1ni89hubjh1kp0t0f5ilc4mvo.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyB2VSnO5Hz9hLgueozyuXppJh53-rvF0k4</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1047120968895</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.brownpaw.brownclaw</string>
+	<key>PROJECT_ID</key>
+	<string>brownclaw</string>
+	<key>STORAGE_BUCKET</key>
+	<string>brownclaw.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1047120968895:ios:074872d80268fe4c899a0a</string>
+</dict>
+</plist>
