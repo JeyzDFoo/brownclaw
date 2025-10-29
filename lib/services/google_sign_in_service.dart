@@ -12,12 +12,11 @@ class GoogleSignInService {
         // Don't pass clientId here for web
         _googleSignInInstance = GoogleSignIn(scopes: ['email', 'profile']);
       } else {
-        // On mobile/desktop, pass the clientId
-        _googleSignInInstance = GoogleSignIn(
-          clientId:
-              '1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com',
-          scopes: ['email', 'profile'],
-        );
+        // On mobile (iOS/Android), GoogleSignIn automatically reads from:
+        // - iOS: GoogleService-Info.plist (CLIENT_ID)
+        // - Android: google-services.json (client_id)
+        // Do NOT pass clientId explicitly - it causes conflicts
+        _googleSignInInstance = GoogleSignIn(scopes: ['email', 'profile']);
       }
     }
     return _googleSignInInstance!;
