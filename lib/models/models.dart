@@ -2,6 +2,7 @@
 export 'river.dart';
 export 'river_run.dart';
 export 'river_run_with_stations.dart';
+export 'river_type.dart';
 export 'gauge_station.dart';
 export 'river_descent.dart';
 export 'water_station.dart';
