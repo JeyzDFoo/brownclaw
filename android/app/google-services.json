@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1047120968895",
+    "project_id": "brownclaw",
+    "storage_bucket": "brownclaw.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1047120968895:android:4a17f225a7109e91899a0a",
+        "android_client_info": {
+          "package_name": "com.brownpaw.brownclaw"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUO8lljlPNaIGSxso72_DJE4EDesXGF6g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1047120968895-f56596g53nq4fnkf8n78q1hsl97a8fk7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

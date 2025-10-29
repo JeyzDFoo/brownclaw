@@ -1,10 +1,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:html' as html;
+import 'package:flutter_stripe/flutter_stripe.dart'
+    if (dart.library.html) 'package:cloud_functions/cloud_functions.dart';
+import 'stripe_service_stub.dart'
+    if (dart.library.html) 'stripe_service_web.dart'
+    if (dart.library.io) 'stripe_service_mobile.dart';
 
-/// Stripe Service for Web
-/// Uses Stripe Checkout (hosted payment page) instead of native SDK
+/// Stripe Service for Web and Mobile
+/// Web: Uses Stripe Checkout (hosted payment page)
+/// Mobile: Uses flutter_stripe SDK for native payment sheets
 class StripeService {
   static final StripeService _instance = StripeService._internal();
   factory StripeService() => _instance;
@@ -14,7 +19,8 @@ class StripeService {
       'pk_live_51SJ0MEAdlcDQOrDhhUZHnuVr7lzgZxeY4gQ2TyzDjtWv4li2XBGtgTpRFlkOHi2BQYTv3Uoey8IliofMrUvYwNyY00zsQfET3S';
 
   /// Create a subscription for the current user
-  /// Redirects to Stripe Checkout page
+  /// Web: Redirects to Stripe Checkout page
+  /// Mobile: Opens native payment sheet
   Future<bool> createSubscription({required String priceId}) async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -27,41 +33,94 @@ class StripeService {
         print('   Price ID: $priceId');
       }
 
-      // Call Cloud Function to create Stripe Checkout session
-      final functions = FirebaseFunctions.instance;
-      final createCheckoutSession = functions.httpsCallable(
-        'createCheckoutSession',
-      );
-
-      final result = await createCheckoutSession.call({
-        'priceId': priceId,
-        'userId': user.uid,
-        'email': user.email,
-        'successUrl': html.window.location.href,
-        'cancelUrl': html.window.location.href,
-      });
-
-      final data = result.data as Map<String, dynamic>;
-      final checkoutUrl = data['url'] as String?;
-
-      if (checkoutUrl == null) {
-        throw Exception('Failed to get checkout URL');
+      if (kIsWeb) {
+        return _createSubscriptionWeb(priceId, user);
+      } else {
+        return _createSubscriptionMobile(priceId, user);
       }
-
-      if (kDebugMode) {
-        print('✅ Checkout session created, redirecting to Stripe...');
-      }
-
-      // Redirect to Stripe Checkout
-      html.window.location.href = checkoutUrl;
-
-      return true;
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error creating subscription: $e');
       }
       rethrow;
     }
+  }
+
+  /// Web implementation using Stripe Checkout
+  Future<bool> _createSubscriptionWeb(String priceId, User user) async {
+    // Call Cloud Function to create Stripe Checkout session
+    final functions = FirebaseFunctions.instance;
+    final createCheckoutSession = functions.httpsCallable(
+      'createCheckoutSession',
+    );
+
+    final currentUrl = StripeServiceImpl.getCurrentUrl();
+
+    final result = await createCheckoutSession.call({
+      'priceId': priceId,
+      'userId': user.uid,
+      'email': user.email,
+      'successUrl': currentUrl,
+      'cancelUrl': currentUrl,
+    });
+
+    final data = result.data as Map<String, dynamic>;
+    final checkoutUrl = data['url'] as String?;
+
+    if (checkoutUrl == null) {
+      throw Exception('Failed to get checkout URL');
+    }
+
+    if (kDebugMode) {
+      print('✅ Checkout session created, redirecting to Stripe...');
+    }
+
+    // Redirect to Stripe Checkout
+    StripeServiceImpl.redirectToCheckout(checkoutUrl);
+
+    return true;
+  }
+
+  /// Mobile implementation using flutter_stripe
+  Future<bool> _createSubscriptionMobile(String priceId, User user) async {
+    // Call Cloud Function to create subscription
+    final functions = FirebaseFunctions.instance;
+    final createSubscription = functions.httpsCallable('createSubscription');
+
+    final result = await createSubscription.call({
+      'priceId': priceId,
+      'userId': user.uid,
+      'email': user.email,
+    });
+
+    final data = result.data as Map<String, dynamic>;
+    final clientSecret = data['clientSecret'] as String?;
+
+    if (clientSecret == null) {
+      throw Exception('Failed to get client secret');
+    }
+
+    if (kDebugMode) {
+      print('✅ Subscription created, presenting payment sheet...');
+    }
+
+    // Present payment sheet
+    await Stripe.instance.initPaymentSheet(
+      paymentSheetParameters: SetupPaymentSheetParameters(
+        merchantDisplayName: 'Brown Paw',
+        paymentIntentClientSecret: clientSecret,
+        customerEphemeralKeySecret: data['ephemeralKey'] as String?,
+        customerId: data['customer'] as String?,
+      ),
+    );
+
+    await Stripe.instance.presentPaymentSheet();
+
+    if (kDebugMode) {
+      print('✅ Payment completed successfully');
+    }
+
+    return true;
   }
 
   /// Create a one-time payment for premium (lifetime)

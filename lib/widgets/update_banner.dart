@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import '../services/stripe_service_stub.dart'
+    if (dart.library.html) '../services/stripe_service_web.dart'
+    if (dart.library.io) '../services/stripe_service_mobile.dart';
 
 /// Banner that displays when an app update is available
 ///
@@ -17,8 +20,10 @@ class UpdateBanner extends StatelessWidget {
   });
 
   void _refreshPage() {
-    // Force refresh the page to get new version
-    html.window.location.reload();
+    // Force refresh the page to get new version (web only)
+    if (kIsWeb) {
+      StripeServiceImpl.reloadPage();
+    }
   }
 
   @override
