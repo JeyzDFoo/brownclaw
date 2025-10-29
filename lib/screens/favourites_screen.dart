@@ -205,7 +205,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
 
   Future<void> _retryLoad() async {
     // Clear error state and cache to trigger fresh reload
-    RiverRunProvider.clearCache();
+    context.read<RiverRunProvider>().clearCache();
     context.read<RiverRunProvider>().clearError();
 
     // Reset previous favorites to force reload
@@ -278,18 +278,25 @@ class _FavouritesScreenState extends State<FavouritesScreen>
             final error = riverRunProvider.error;
 
             // Check if favorites have changed and reload if needed
-            _checkAndReloadFavorites(
-              favoriteIds,
-              riverRunProvider,
-              liveDataProvider,
-            );
+            // Use WidgetsBinding to avoid setState during build
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _checkAndReloadFavorites(
+                favoriteIds,
+                riverRunProvider,
+                liveDataProvider,
+              );
+            });
 
             // Fetch TransAlta data once if we have any Kananaskis rivers in favorites
             if (!_hasInitializedTransAlta &&
                 favoriteRuns.any((run) => _isKananaskis(run))) {
               if (!transAltaProvider.hasData && !transAltaProvider.isLoading) {
-                _hasInitializedTransAlta = true;
-                Future.microtask(() => transAltaProvider.fetchFlowData());
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (!_hasInitializedTransAlta) {
+                    _hasInitializedTransAlta = true;
+                    transAltaProvider.fetchFlowData();
+                  }
+                });
               }
             }
 

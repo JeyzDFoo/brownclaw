@@ -153,6 +153,28 @@ class RiverRunWithStations {
     );
   }
 
+  // Serialization for persistent cache
+  Map<String, dynamic> toMap() {
+    return {
+      'run': run.toMap(),
+      'stations': stations.map((s) => s.toMap()).toList(),
+      'river': river?.toMap(),
+    };
+  }
+
+  // Deserialization from persistent cache
+  factory RiverRunWithStations.fromMap(Map<String, dynamic> map) {
+    return RiverRunWithStations(
+      run: RiverRun.fromMap(map['run'] as Map<String, dynamic>),
+      stations: (map['stations'] as List<dynamic>)
+          .map((s) => GaugeStation.fromMap(s as Map<String, dynamic>))
+          .toList(),
+      river: map['river'] != null
+          ? River.fromMap(map['river'] as Map<String, dynamic>)
+          : null,
+    );
+  }
+
   @override
   String toString() => '$displayName (${stations.length} stations)';
 

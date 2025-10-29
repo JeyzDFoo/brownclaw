@@ -7,6 +7,7 @@ import '../models/weather_data.dart';
 import '../providers/transalta_provider.dart';
 import '../providers/premium_provider.dart';
 import '../services/weather_service.dart';
+import '../services/persistent_cache_service.dart';
 import '../screens/premium_purchase_screen.dart';
 
 /// Widget showing TransAlta Barrier Dam flow information
@@ -25,19 +26,96 @@ class TransAltaFlowWidget extends StatefulWidget {
 class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   bool _hasInitialized = false;
   final WeatherService _weatherService = WeatherService();
-  WeatherData? _currentWeather;
   List<WeatherData> _weatherForecast = [];
   List<WeatherData> _hourlyWeather = [];
   bool _isLoadingWeather = false;
+
+  // Static cache for weather data (persists across widget rebuilds)
+  static WeatherData? _cachedCurrentWeather;
+  static List<WeatherData> _cachedWeatherForecast = [];
+  static List<WeatherData> _cachedHourlyWeather = [];
+  static DateTime? _weatherCacheTime;
+  static const Duration _weatherCacheTimeout = Duration(minutes: 15);
 
   // Kananaskis / Barrier Dam approximate coordinates
   static const double _kananaskisLat = 51.1;
   static const double _kananaskisLon = -115.0;
 
+  /// Check if weather cache is still valid
+  bool get _isWeatherCacheValid {
+    if (_weatherCacheTime == null || _cachedWeatherForecast.isEmpty) {
+      return false;
+    }
+    final age = DateTime.now().difference(_weatherCacheTime!);
+    return age < _weatherCacheTimeout;
+  }
+
   @override
   void initState() {
     super.initState();
-    _fetchWeather();
+    _loadWeatherData();
+  }
+
+  /// Load weather data from cache or fetch fresh data
+  Future<void> _loadWeatherData() async {
+    // First check in-memory static cache
+    if (_isWeatherCacheValid) {
+      setState(() {
+        _weatherForecast = _cachedWeatherForecast;
+        _hourlyWeather = _cachedHourlyWeather;
+      });
+      debugPrint(
+        'TransAltaFlowWidget: Using in-memory cached weather data (${DateTime.now().difference(_weatherCacheTime!).inMinutes}min old)',
+      );
+      return;
+    }
+
+    // Try to load from persistent storage
+    try {
+      final cachedData = await PersistentCacheService.loadWeatherCache();
+
+      if (cachedData != null) {
+        final timestamp = cachedData['timestamp'] as DateTime;
+        final age = DateTime.now().difference(timestamp);
+
+        // Check if persistent cache is still valid
+        if (age < _weatherCacheTimeout) {
+          final forecastData = cachedData['forecast'] as List<dynamic>;
+          final hourlyData = cachedData['hourly'] as List<dynamic>;
+
+          final forecast = forecastData
+              .map((json) => WeatherData.fromMap(json as Map<String, dynamic>))
+              .toList();
+          final hourly = hourlyData
+              .map((json) => WeatherData.fromMap(json as Map<String, dynamic>))
+              .toList();
+
+          setState(() {
+            _weatherForecast = forecast;
+            _hourlyWeather = hourly;
+          });
+
+          // Update in-memory cache
+          _cachedWeatherForecast = forecast;
+          _cachedHourlyWeather = hourly;
+          _weatherCacheTime = timestamp;
+
+          debugPrint(
+            'TransAltaFlowWidget: Loaded weather data from persistent storage (${age.inMinutes}min old)',
+          );
+          return;
+        } else {
+          debugPrint(
+            'TransAltaFlowWidget: Persistent cache expired (${age.inMinutes}min old), fetching fresh data',
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('TransAltaFlowWidget: Error loading persistent cache: $e');
+    }
+
+    // No valid cache found, fetch fresh data
+    await _fetchWeather();
   }
 
   Future<void> _fetchWeather() async {
@@ -71,50 +149,62 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
       );
 
       if (mounted) {
-        setState(() {
-          // Combine current weather (today) with forecast (tomorrow onwards)
-          // This ensures we always have today's data as the first entry
-          final combinedForecast = <WeatherData>[];
+        // Combine current weather (today) with forecast (tomorrow onwards)
+        // This ensures we always have today's data as the first entry
+        final combinedForecast = <WeatherData>[];
 
-          final now = DateTime.now();
-          final today = DateTime(now.year, now.month, now.day);
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
 
-          if (weather != null) {
-            // Add current weather as today
-            final weatherWithDate = WeatherData(
-              latitude: weather.latitude,
-              longitude: weather.longitude,
-              temperature: weather.temperature,
-              conditions: weather.conditions,
-              precipitation: weather.precipitation,
-              forecastTime: today,
-              temperatureUnit: weather.temperatureUnit,
+        if (weather != null) {
+          // Add current weather as today
+          final weatherWithDate = WeatherData(
+            latitude: weather.latitude,
+            longitude: weather.longitude,
+            temperature: weather.temperature,
+            conditions: weather.conditions,
+            precipitation: weather.precipitation,
+            forecastTime: today,
+            temperatureUnit: weather.temperatureUnit,
+          );
+          combinedForecast.add(weatherWithDate);
+        }
+
+        // Add forecast days, but skip if first forecast day is also today
+        for (final forecastDay in forecast) {
+          if (forecastDay.forecastTime != null) {
+            final forecastDate = DateTime(
+              forecastDay.forecastTime!.year,
+              forecastDay.forecastTime!.month,
+              forecastDay.forecastTime!.day,
             );
-            combinedForecast.add(weatherWithDate);
-          }
-
-          // Add forecast days, but skip if first forecast day is also today
-          for (final forecastDay in forecast) {
-            if (forecastDay.forecastTime != null) {
-              final forecastDate = DateTime(
-                forecastDay.forecastTime!.year,
-                forecastDay.forecastTime!.month,
-                forecastDay.forecastTime!.day,
-              );
-              // Only add if it's not today (we already added current weather for today)
-              if (!forecastDate.isAtSameMomentAs(today)) {
-                combinedForecast.add(forecastDay);
-              }
-            } else {
+            // Only add if it's not today (we already added current weather for today)
+            if (!forecastDate.isAtSameMomentAs(today)) {
               combinedForecast.add(forecastDay);
             }
+          } else {
+            combinedForecast.add(forecastDay);
           }
+        }
 
-          _currentWeather = weather;
+        setState(() {
           _weatherForecast = combinedForecast;
           _hourlyWeather = hourly;
           _isLoadingWeather = false;
+
+          // Update static cache
+          _cachedCurrentWeather = weather;
+          _cachedWeatherForecast = combinedForecast;
+          _cachedHourlyWeather = hourly;
+          _weatherCacheTime = DateTime.now();
+
+          debugPrint(
+            'TransAltaFlowWidget: Weather data fetched and cached (${combinedForecast.length} days)',
+          );
         });
+
+        // Save to persistent storage (async, don't await to avoid blocking UI)
+        _saveWeatherToPersistentStorage(combinedForecast, hourly);
       }
     } catch (e) {
       if (mounted) {
@@ -122,6 +212,21 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
           _isLoadingWeather = false;
         });
       }
+    }
+  }
+
+  /// Save weather data to persistent storage
+  Future<void> _saveWeatherToPersistentStorage(
+    List<WeatherData> forecast,
+    List<WeatherData> hourly,
+  ) async {
+    try {
+      final forecastMaps = forecast.map((w) => w.toMap()).toList();
+      final hourlyMaps = hourly.map((w) => w.toMap()).toList();
+
+      await PersistentCacheService.saveWeatherCache(forecastMaps, hourlyMaps);
+    } catch (e) {
+      debugPrint('TransAltaFlowWidget: Error saving weather to storage: $e');
     }
   }
 
@@ -260,7 +365,20 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
 
         // All 4 days in a horizontal scrollable row
         if (_weatherForecast.isEmpty) {
-          return const SizedBox();
+          // Show loading placeholder to prevent layout jump
+          return _isLoadingWeather
+              ? SizedBox(
+                  height: 180, // Approximate height of weather cards
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: isDark
+                          ? Colors.brown.shade200
+                          : Colors.brown.shade700,
+                    ),
+                  ),
+                )
+              : const SizedBox();
         }
 
         return SingleChildScrollView(

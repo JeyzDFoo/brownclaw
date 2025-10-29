@@ -53,14 +53,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   // Unified initial loading state - true until critical data loaded
   bool _isInitialLoad = true;
 
-  // Cached data for efficient time range switching
-  List<Map<String, dynamic>> _cachedCombinedData = [];
-  DateTime? _cachedDataTime;
-
-  // Cached historical data by year (for 90, 365 day views and historical years)
-  Map<int?, List<Map<String, dynamic>>> _cachedHistoricalData = {};
-  Map<int?, DateTime> _cachedHistoricalDataTime = {};
-
   @override
   void initState() {
     super.initState();
@@ -170,11 +162,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         _isLoadingWeather = true;
         _weatherError = null;
         _isInitialLoad = true; // Reset initial load state
-        // Clear cached data for new river
-        _cachedCombinedData = [];
-        _cachedDataTime = null;
-        _cachedHistoricalData = {};
-        _cachedHistoricalDataTime = {};
       });
       _loadInitialData();
     }
@@ -239,43 +226,26 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
 
       List<Map<String, dynamic>> dataPoints = [];
 
-      // For short to medium ranges (30 days or less), use cached combined timeline
-      // This allows instant switching between 3, 14, and 30-day views
+      // For short to medium ranges (30 days or less), use provider's combined timeline
+      // Provider handles caching internally with persistent storage
       if (_selectedDays <= 30 && _selectedYear == null) {
-        // Check if we have valid cached data (less than 5 minutes old)
-        final isCacheValid =
-            _cachedCombinedData.isNotEmpty &&
-            _cachedDataTime != null &&
-            DateTime.now().difference(_cachedDataTime!).inMinutes < 5;
+        if (kDebugMode) {
+          print(
+            '🌐 Fetching combined timeline from provider (cached if available)',
+          );
+        }
 
-        if (isCacheValid) {
-          if (kDebugMode) {
-            print(
-              '💾 Using cached combined timeline data ($_selectedDays days)',
-            );
-          }
-          dataPoints = _cachedCombinedData;
-        } else {
-          if (kDebugMode) {
-            print('🌐 Fetching fresh combined timeline (cache miss)');
-          }
+        final combinedResult = await context
+            .read<HistoricalWaterDataProvider>()
+            .getCombinedTimeline(stationId, includeRealtimeData: true);
 
-          final combinedResult = await context
-              .read<HistoricalWaterDataProvider>()
-              .getCombinedTimeline(stationId, includeRealtimeData: true);
+        final combined =
+            combinedResult['combined'] as List<Map<String, dynamic>>;
 
-          final combined =
-              combinedResult['combined'] as List<Map<String, dynamic>>;
+        dataPoints = combined;
 
-          // Cache the full dataset
-          _cachedCombinedData = combined;
-          _cachedDataTime = DateTime.now();
-
-          dataPoints = combined;
-
-          if (kDebugMode) {
-            print('💾 Cached ${combined.length} days of combined data');
-          }
+        if (kDebugMode) {
+          print('✅ Got ${combined.length} days of combined data');
         }
 
         // Filter to requested number of days (client-side)
@@ -302,66 +272,38 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           );
         }
 
-        // Check if we have valid cached data for this year (15 minutes TTL for historical data)
-        final cacheKey =
-            _selectedYear; // null for current year's long-range data
-        final isCacheValid =
-            _cachedHistoricalData.containsKey(cacheKey) &&
-            _cachedHistoricalDataTime.containsKey(cacheKey) &&
-            DateTime.now()
-                    .difference(_cachedHistoricalDataTime[cacheKey]!)
-                    .inMinutes <
-                15;
-
-        if (isCacheValid) {
+        // Provider handles caching - just call it directly
+        // Check if viewing a specific historical year
+        if (_selectedYear != null) {
           if (kDebugMode) {
             print(
-              '💾 Using cached historical data (year: $_selectedYear, ${_selectedDays} days)',
+              '🌐 Fetching historical year data for $_selectedYear from provider',
             );
           }
-          dataPoints = _cachedHistoricalData[cacheKey]!;
-        } else {
-          // Check if viewing a specific historical year
-          if (_selectedYear != null) {
-            if (kDebugMode) {
-              print('🌐 Fetching historical year data for $_selectedYear');
-            }
-            // Fetch specific year from historical API
-            dataPoints = await context
-                .read<HistoricalWaterDataProvider>()
-                .fetchHistoricalData(stationId, year: _selectedYear);
-
-            if (kDebugMode) {
-              print(
-                '📅 Got ${dataPoints.length} data points for year $_selectedYear',
-              );
-            }
-          } else {
-            if (kDebugMode) {
-              print('🌐 Fetching combined timeline for current data');
-            }
-            // Default: use combined timeline for current data
-            final combinedResult = await context
-                .read<HistoricalWaterDataProvider>()
-                .getCombinedTimeline(stationId, includeRealtimeData: true);
-
-            dataPoints =
-                combinedResult['combined'] as List<Map<String, dynamic>>;
-
-            if (kDebugMode) {
-              print(
-                '📅 Got ${dataPoints.length} data points from combined timeline',
-              );
-            }
-          }
-
-          // Cache the fetched historical data
-          _cachedHistoricalData[cacheKey] = dataPoints;
-          _cachedHistoricalDataTime[cacheKey] = DateTime.now();
+          // Fetch specific year from historical API (provider caches it)
+          dataPoints = await context
+              .read<HistoricalWaterDataProvider>()
+              .fetchHistoricalData(stationId, year: _selectedYear);
 
           if (kDebugMode) {
             print(
-              '💾 Cached ${dataPoints.length} days of historical data (year: $_selectedYear)',
+              '📅 Got ${dataPoints.length} data points for year $_selectedYear',
+            );
+          }
+        } else {
+          if (kDebugMode) {
+            print('🌐 Fetching combined timeline from provider');
+          }
+          // Default: use combined timeline for current data (provider caches it)
+          final combinedResult = await context
+              .read<HistoricalWaterDataProvider>()
+              .getCombinedTimeline(stationId, includeRealtimeData: true);
+
+          dataPoints = combinedResult['combined'] as List<Map<String, dynamic>>;
+
+          if (kDebugMode) {
+            print(
+              '📅 Got ${dataPoints.length} data points from combined timeline',
             );
           }
         }
@@ -464,105 +406,62 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       Map<String, dynamic> flowStats;
 
       if (_selectedDays <= 30 && _selectedYear == null) {
-        // For short to medium ranges, use cached combined timeline
-        // This matches the chart data caching strategy
-        List<Map<String, dynamic>> dataPoints;
-
-        // Check if we have valid cached data (less than 5 minutes old)
-        final isCacheValid =
-            _cachedCombinedData.isNotEmpty &&
-            _cachedDataTime != null &&
-            DateTime.now().difference(_cachedDataTime!).inMinutes < 5;
-
-        if (isCacheValid) {
-          if (kDebugMode) {
-            print('💾 Using cached data for statistics ($_selectedDays days)');
-          }
-          dataPoints = _cachedCombinedData;
-        } else {
-          if (kDebugMode) {
-            print('🌐 Fetching combined timeline for statistics');
-          }
-          final combinedResult = await context
-              .read<HistoricalWaterDataProvider>()
-              .getCombinedTimeline(stationId, includeRealtimeData: true);
-          dataPoints = combinedResult['combined'] as List<Map<String, dynamic>>;
-
-          // Cache it for future use
-          _cachedCombinedData = dataPoints;
-          _cachedDataTime = DateTime.now();
+        // For short to medium ranges, use provider's combined timeline
+        if (kDebugMode) {
+          print('🌐 Fetching combined timeline for statistics from provider');
         }
+
+        final combinedResult = await context
+            .read<HistoricalWaterDataProvider>()
+            .getCombinedTimeline(stationId, includeRealtimeData: true);
+        final dataPoints =
+            combinedResult['combined'] as List<Map<String, dynamic>>;
 
         if (dataPoints.isNotEmpty) {
           // Take last N days and calculate statistics
-          dataPoints.sort(
+          final sortedData = List<Map<String, dynamic>>.from(dataPoints);
+          sortedData.sort(
             (a, b) => (b['date'] as String).compareTo(a['date'] as String),
           );
-          final recentData = dataPoints.take(_selectedDays).toList();
+          final recentData = sortedData.take(_selectedDays).toList();
 
           flowStats = _calculateStatsFromData(recentData);
         } else {
           flowStats = {'error': 'No data available', 'count': 0};
         }
       } else {
-        // For longer ranges (>30 days) or historical years, use cached historical data
+        // For longer ranges (>30 days) or historical years, use provider's historical data
         List<Map<String, dynamic>> dataPoints;
 
-        final cacheKey = _selectedYear;
-        final isCacheValid =
-            _cachedHistoricalData.containsKey(cacheKey) &&
-            _cachedHistoricalDataTime.containsKey(cacheKey) &&
-            DateTime.now()
-                    .difference(_cachedHistoricalDataTime[cacheKey]!)
-                    .inMinutes <
-                15;
-
-        if (isCacheValid) {
+        // Check if viewing a specific historical year
+        if (_selectedYear != null) {
           if (kDebugMode) {
             print(
-              '💾 Using cached historical data for statistics (year: $_selectedYear)',
+              '🌐 Fetching historical data for statistics (year: $_selectedYear) from provider',
             );
           }
-          dataPoints = _cachedHistoricalData[cacheKey]!;
+          // Fetch specific year from provider (it handles caching)
+          dataPoints = await context
+              .read<HistoricalWaterDataProvider>()
+              .fetchHistoricalData(stationId, year: _selectedYear);
         } else {
-          // Check if viewing a specific historical year
-          if (_selectedYear != null) {
-            if (kDebugMode) {
-              print(
-                '🌐 Fetching historical data for statistics (year: $_selectedYear)',
-              );
-            }
-            // Fetch specific year from historical API
-            dataPoints = await context
-                .read<HistoricalWaterDataProvider>()
-                .fetchHistoricalData(stationId, year: _selectedYear);
-
-            // Cache it
-            _cachedHistoricalData[cacheKey] = dataPoints;
-            _cachedHistoricalDataTime[cacheKey] = DateTime.now();
-          } else {
-            if (kDebugMode) {
-              print('🌐 Fetching combined timeline for statistics');
-            }
-            // Default: use combined timeline
-            final combinedResult = await context
-                .read<HistoricalWaterDataProvider>()
-                .getCombinedTimeline(stationId, includeRealtimeData: true);
-            dataPoints =
-                combinedResult['combined'] as List<Map<String, dynamic>>;
-
-            // Cache it
-            _cachedHistoricalData[cacheKey] = dataPoints;
-            _cachedHistoricalDataTime[cacheKey] = DateTime.now();
+          if (kDebugMode) {
+            print('🌐 Fetching combined timeline for statistics from provider');
           }
+          // Default: use combined timeline (provider handles caching)
+          final combinedResult = await context
+              .read<HistoricalWaterDataProvider>()
+              .getCombinedTimeline(stationId, includeRealtimeData: true);
+          dataPoints = combinedResult['combined'] as List<Map<String, dynamic>>;
         }
 
         if (dataPoints.isNotEmpty) {
           // Take last N days and calculate statistics
-          dataPoints.sort(
+          final sortedData = List<Map<String, dynamic>>.from(dataPoints);
+          sortedData.sort(
             (a, b) => (b['date'] as String).compareTo(a['date'] as String),
           );
-          final recentData = dataPoints.take(_selectedDays).toList();
+          final recentData = sortedData.take(_selectedDays).toList();
 
           flowStats = _calculateStatsFromData(recentData);
         } else {
@@ -725,14 +624,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   }
 
   Future<void> _refreshAllData() async {
-    // Clear cache to force fresh data fetch
-    setState(() {
-      _cachedCombinedData = [];
-      _cachedDataTime = null;
-      _cachedHistoricalData = {};
-      _cachedHistoricalDataTime = {};
-    });
-
+    // Providers handle their own caching - just refresh the data
     // Refresh live data via provider (handles its own caching)
     final stationId = widget.riverData['stationId'] as String?;
     if (stationId != null) {

@@ -66,12 +66,19 @@ class MainApp extends StatelessWidget {
             return provider;
           },
         ),
-        ChangeNotifierProvider(
-          create: (_) {
+        // RiverRunProvider with CacheProvider dependency for persistent cache
+        ChangeNotifierProxyProvider<CacheProvider, RiverRunProvider>(
+          create: (context) {
             PerformanceLogger.log('river_run_provider_creating');
-            final provider = RiverRunProvider();
+            final cacheProvider = context.read<CacheProvider>();
+            final provider = RiverRunProvider(cacheProvider: cacheProvider);
             PerformanceLogger.log('river_run_provider_created');
             return provider;
+          },
+          update: (context, cacheProvider, previous) {
+            PerformanceLogger.log('river_run_provider_updating');
+            // Reuse existing provider if available, otherwise create new
+            return previous ?? RiverRunProvider(cacheProvider: cacheProvider);
           },
         ),
         ChangeNotifierProvider(
@@ -134,6 +141,8 @@ class MainApp extends StatelessWidget {
           create: (_) {
             PerformanceLogger.log('historical_water_data_provider_creating');
             final provider = HistoricalWaterDataProvider();
+            // Initialize cache from persistent storage asynchronously
+            provider.ensureInitialized();
             PerformanceLogger.log('historical_water_data_provider_created');
             return provider;
           },
@@ -142,6 +151,8 @@ class MainApp extends StatelessWidget {
           create: (_) {
             PerformanceLogger.log('weather_provider_creating');
             final provider = WeatherProvider();
+            // Initialize cache from persistent storage asynchronously
+            provider.ensureInitialized();
             PerformanceLogger.log('weather_provider_created');
             return provider;
           },

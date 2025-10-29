@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import '../models/models.dart';
 import '../services/river_run_service.dart';
+import 'cache_provider.dart';
 
 class RiverRunProvider extends ChangeNotifier {
+  final CacheProvider? _cacheProvider;
+
   List<RiverRunWithStations> _riverRuns = [];
   List<RiverRunWithStations> _favoriteRuns = [];
   bool _isLoading = false;
@@ -16,6 +19,9 @@ class RiverRunProvider extends ChangeNotifier {
   static DateTime? _cacheTime;
   static const _cacheTimeout = Duration(minutes: 10);
 
+  // Cache keys for persistent storage
+  static const String _allRunsCacheKey = 'all_river_runs';
+
   /// Check if cache is still valid (within timeout period)
   bool get _isCacheValid {
     if (_cacheTime == null) return false;
@@ -24,12 +30,17 @@ class RiverRunProvider extends ChangeNotifier {
   }
 
   /// Clear the cache (useful for force refresh)
-  static void clearCache() {
+  void clearCache() {
     _cache.clear();
     _cacheTime = null;
+
+    // Also clear persistent cache
+    _cacheProvider?.removeStatic(_allRunsCacheKey);
+    // Note: Individual runs will be cleared as part of the all runs cache
   }
 
-  RiverRunProvider() {
+  RiverRunProvider({CacheProvider? cacheProvider})
+    : _cacheProvider = cacheProvider {
     // Load all runs when provider is created
     _initializationFuture = _initializeData();
   }
@@ -69,14 +80,58 @@ class RiverRunProvider extends ChangeNotifier {
   }
 
   Future<void> loadAllRuns({bool forceRefresh = false}) async {
-    // Check cache first before making Firestore call (unless force refresh)
+    // Check in-memory cache first (fastest)
     if (!forceRefresh && _cache.isNotEmpty && _isCacheValid) {
       _riverRuns = _cache.values.toList();
       if (kDebugMode) {
-        print('⚡ CACHE HIT: Loaded ${_riverRuns.length} runs from cache');
+        print(
+          '⚡ MEMORY CACHE HIT: Loaded ${_riverRuns.length} runs from memory',
+        );
       }
       notifyListeners();
       return;
+    }
+
+    // Check persistent cache (fast, survives app restart)
+    if (!forceRefresh && _cacheProvider != null) {
+      final cachedData = _cacheProvider.getStatic<List<dynamic>>(
+        _allRunsCacheKey,
+      );
+      if (cachedData != null &&
+          _cacheProvider.isStaticCacheValid(_allRunsCacheKey)) {
+        try {
+          // Deserialize from persistent cache
+          final runs = cachedData
+              .map(
+                (data) =>
+                    RiverRunWithStations.fromMap(data as Map<String, dynamic>),
+              )
+              .toList();
+
+          _riverRuns = runs;
+
+          // Populate in-memory cache
+          _cache.clear();
+          for (final run in runs) {
+            _cache[run.run.id] = run;
+          }
+          _cacheTime = DateTime.now();
+
+          if (kDebugMode) {
+            print(
+              '💾 PERSISTENT CACHE HIT: Loaded ${runs.length} runs from disk',
+            );
+          }
+
+          notifyListeners();
+          return;
+        } catch (e) {
+          if (kDebugMode) {
+            print('⚠️ Error deserializing cached runs: $e');
+          }
+          // Fall through to Firestore fetch
+        }
+      }
     }
 
     setLoading(true);
@@ -97,8 +152,17 @@ class RiverRunProvider extends ChangeNotifier {
       }
       _cacheTime = DateTime.now();
 
+      // Save to persistent cache
+      if (_cacheProvider != null) {
+        final serializedRuns = runs.map((run) => run.toMap()).toList();
+        _cacheProvider.setStatic(_allRunsCacheKey, serializedRuns);
+        if (kDebugMode) {
+          print('💾 Saved ${runs.length} runs to persistent cache');
+        }
+      }
+
       if (kDebugMode) {
-        print('💾 Cached ${runs.length} runs');
+        print('💾 Cached ${runs.length} runs in memory');
       }
 
       notifyListeners();
@@ -187,7 +251,10 @@ class RiverRunProvider extends ChangeNotifier {
           );
         }
         _favoriteRuns = favoriteRuns;
-        notifyListeners();
+        // Only notify if favorites actually changed to avoid unnecessary rebuilds
+        if (_favoriteRuns != favoriteRuns) {
+          notifyListeners();
+        }
         return; // Done! No Firestore calls needed
       }
     }
@@ -204,11 +271,15 @@ class RiverRunProvider extends ChangeNotifier {
           print('⚡ CACHE HIT: All ${favoriteRunIds.length} runs from cache');
         }
         _favoriteRuns = cached;
-        notifyListeners();
+        // Only notify if favorites actually changed to avoid unnecessary rebuilds
+        if (_favoriteRuns != cached) {
+          notifyListeners();
+        }
         return; // Done! No Firestore calls needed
       }
     }
 
+    // 🔥 FIX: Only set loading state if we actually need to fetch from Firestore
     setLoading(true);
     setError(null);
 

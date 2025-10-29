@@ -219,9 +219,9 @@ class EnvCanadaRiverSection extends StatelessWidget {
             const SizedBox(height: 16),
             _buildDayRangeSelector(context),
 
-            // Flow statistics section
+            // Year selector for historical data
             const SizedBox(height: 16),
-            _buildFlowStatistics(context),
+            _buildYearSelector(context),
 
             // Recent trend section
             const SizedBox(height: 16),
@@ -357,20 +357,54 @@ class EnvCanadaRiverSection extends StatelessWidget {
               dotData: const FlDotData(show: false),
             ),
           ],
-          minY: historicalData.isNotEmpty
-              ? (historicalData
-                            .map((e) => e.y)
-                            .reduce((a, b) => a < b ? a : b) *
-                        0.8)
-                    .clamp(0, double.infinity)
-              : 0,
-          maxY: historicalData.isNotEmpty
-              ? historicalData.map((e) => e.y).reduce((a, b) => a > b ? a : b) *
-                    1.3
-              : 80,
+          minY: _calculateMinY(),
+          maxY: _calculateMaxY(),
         ),
       ),
     );
+  }
+
+  /// Calculate stable minimum Y value for chart
+  double _calculateMinY() {
+    // Always start at 0 for flow data to provide consistent baseline
+    return 0;
+  }
+
+  /// Calculate stable maximum Y value for chart
+  double _calculateMaxY() {
+    if (historicalData.isEmpty) return 100;
+
+    final maxValue = historicalData
+        .map((e) => e.y)
+        .reduce((a, b) => a > b ? a : b);
+
+    // Use adaptive scaling that handles both normal and flood conditions
+    // Add 20% padding above max value for better visibility
+    final targetMax = maxValue * 1.2;
+
+    // Round up to nice numbers based on the scale
+    if (targetMax <= 10) {
+      return 10.0;
+    } else if (targetMax <= 20) {
+      return 20.0;
+    } else if (targetMax <= 50) {
+      return 50.0;
+    } else if (targetMax <= 100) {
+      return 100.0;
+    } else if (targetMax <= 200) {
+      return 200.0;
+    } else if (targetMax <= 300) {
+      return 300.0;
+    } else if (targetMax <= 500) {
+      return 500.0;
+    } else if (targetMax <= 1000) {
+      return 1000.0;
+    } else if (targetMax <= 2000) {
+      return 2000.0;
+    } else {
+      // For very large values, round up to nearest 500
+      return (targetMax / 500).ceil() * 500.0;
+    }
   }
 
   Widget _buildDayRangeSelector(BuildContext context) {
@@ -395,8 +429,6 @@ class EnvCanadaRiverSection extends StatelessWidget {
                 _buildTimeRangeChip(context, 3, '3 Days'),
                 _buildTimeRangeChip(context, 14, '2 Weeks'),
                 _buildTimeRangeChip(context, 30, '30 Days'),
-                _buildTimeRangeChip(context, 90, '90 Days'),
-                _buildTimeRangeChip(context, 365, '1 Year'),
               ],
             ),
           ],
@@ -421,38 +453,118 @@ class EnvCanadaRiverSection extends StatelessWidget {
     );
   }
 
-  Widget _buildFlowStatistics(BuildContext context) {
-    if (isLoadingStats) {
-      return Card(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: _buildLoadingState('Loading statistics...'),
-        ),
-      );
-    }
+  Widget _buildYearSelector(BuildContext context) {
+    // Historical data available through Dec 31, 2024 via Gov of Canada API
+    // Data goes back to early 1900s for most stations
+    const lastAvailableYear = 2024;
+    const firstAvailableYear = 2005; // 20 years of historical data
 
-    if (flowStatistics == null || flowStatistics!.containsKey('error')) {
-      return const SizedBox.shrink();
-    }
+    // Generate years from 2005 to 2024 (20 years of historical data)
+    final years = List.generate(
+      lastAvailableYear - firstAvailableYear + 1,
+      (index) => lastAvailableYear - index,
+    );
 
     return Card(
+      color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.5),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Flow Statistics',
-              style: Theme.of(
-                context,
-              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 18, color: Colors.teal),
+                const SizedBox(width: 8),
+                Text(
+                  'Historical Years',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
-            _buildStatRow('Average', '${flowStatistics!['average']} cms'),
-            _buildStatRow('Median', '${flowStatistics!['median']} cms'),
-            _buildStatRow('Minimum', '${flowStatistics!['minimum']} cms'),
-            _buildStatRow('Maximum', '${flowStatistics!['maximum']} cms'),
+            SizedBox(
+              height: 60,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: years.length,
+                itemBuilder: (context, index) {
+                  final year = years[index];
+                  final isSelected = selectedYear == year;
+
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      right: index < years.length - 1 ? 12.0 : 0,
+                    ),
+                    child: _buildYearCard(context, year, isSelected),
+                  );
+                },
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildYearCard(BuildContext context, int year, bool isSelected) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          if (isSelected) {
+            // Deselect year and return to current data
+            onYearChanged(null);
+            onDaysChanged(3); // Reset to default 3 days
+          } else {
+            onYearChanged(year);
+            // When selecting a year, default to viewing the full year
+            onDaysChanged(365);
+          }
+        },
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 80,
+          decoration: BoxDecoration(
+            color: isSelected
+                ? Colors.teal
+                : Theme.of(context).colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected ? Colors.teal : Colors.grey.withOpacity(0.3),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: Colors.teal.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.event,
+                size: 20,
+                color: isSelected ? Colors.white : Colors.teal,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                year.toString(),
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.teal,
+                  fontSize: 14,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -497,19 +609,6 @@ class EnvCanadaRiverSection extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildStatRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
-        ],
       ),
     );
   }

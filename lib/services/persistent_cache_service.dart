@@ -325,4 +325,97 @@ class PersistentCacheService {
       }
     }
   }
+
+  // Weather cache specific methods
+  static const String _weatherCacheKey = 'kananaskis_weather';
+  static const String _weatherTimestampKey = 'kananaskis_weather_timestamp';
+
+  /// Save Kananaskis weather data to persistent storage
+  static Future<void> saveWeatherCache(
+    List<Map<String, dynamic>> weatherForecast,
+    List<Map<String, dynamic>> hourlyWeather,
+  ) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final weatherData = {
+        'forecast': weatherForecast,
+        'hourly': hourlyWeather,
+      };
+
+      await prefs.setString(
+        _liveDataCachePrefix + _weatherCacheKey,
+        jsonEncode(weatherData),
+      );
+      await prefs.setString(
+        _liveTimestampPrefix + _weatherTimestampKey,
+        DateTime.now().toIso8601String(),
+      );
+
+      if (kDebugMode) {
+        print(
+          '💾 Saved Kananaskis weather cache (${weatherForecast.length} forecast days, ${hourlyWeather.length} hourly entries)',
+        );
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error saving weather cache: $e');
+      }
+    }
+  }
+
+  /// Load Kananaskis weather data from persistent storage
+  /// Returns null if cache doesn't exist or is invalid
+  static Future<Map<String, dynamic>?> loadWeatherCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+
+      final data = prefs.getString(_liveDataCachePrefix + _weatherCacheKey);
+      final timestampStr = prefs.getString(
+        _liveTimestampPrefix + _weatherTimestampKey,
+      );
+
+      if (data == null || timestampStr == null) {
+        return null;
+      }
+
+      final timestamp = DateTime.parse(timestampStr);
+      final weatherData = jsonDecode(data) as Map<String, dynamic>;
+
+      if (kDebugMode) {
+        final age = DateTime.now().difference(timestamp);
+        print(
+          '📂 Loaded Kananaskis weather cache from storage (${age.inMinutes}min old)',
+        );
+      }
+
+      return {
+        'forecast': weatherData['forecast'] as List<dynamic>,
+        'hourly': weatherData['hourly'] as List<dynamic>,
+        'timestamp': timestamp,
+      };
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading weather cache: $e');
+      }
+      return null;
+    }
+  }
+
+  /// Clear Kananaskis weather cache
+  static Future<void> clearWeatherCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_liveDataCachePrefix + _weatherCacheKey);
+      await prefs.remove(_liveTimestampPrefix + _weatherTimestampKey);
+
+      if (kDebugMode) {
+        print('🗑️ Cleared Kananaskis weather cache');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error clearing weather cache: $e');
+      }
+    }
+  }
 }

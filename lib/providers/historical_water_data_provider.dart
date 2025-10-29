@@ -41,17 +41,29 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
 
   /// Initialize cache by loading from persistent storage
   Future<void> _initializeCache() async {
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      if (kDebugMode) {
+        print('✅ HistoricalWaterDataProvider: Already initialized');
+      }
+      return;
+    }
 
     try {
       if (kDebugMode) {
-        print('🔄 Loading historical water data cache from storage...');
+        print('🔄 HistoricalWaterDataProvider: Loading cache from storage...');
       }
 
       final prefs = await SharedPreferences.getInstance();
       final keys = prefs.getKeys();
 
+      if (kDebugMode) {
+        print('🔍 Found ${keys.length} total SharedPreferences keys');
+      }
+
       // Load combined timeline cache
+      int combinedCount = 0;
+      int timeCount = 0;
+
       for (final key in keys) {
         if (key.startsWith(_prefixCombined) && !key.contains('time_')) {
           final cacheKey = key.substring(_prefixCombined.length);
@@ -60,9 +72,14 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
             try {
               _combinedTimelineCache[cacheKey] =
                   jsonDecode(value) as Map<String, dynamic>;
+              combinedCount++;
+
+              if (kDebugMode) {
+                print('💾   Loaded cache: $cacheKey (${value.length} bytes)');
+              }
             } catch (e) {
               if (kDebugMode) {
-                print('⚠️ Skipping invalid cache entry: $cacheKey');
+                print('⚠️ Skipping invalid cache entry: $cacheKey - $e');
               }
             }
           }
@@ -72,9 +89,14 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
           if (value != null) {
             try {
               _combinedTimelineCacheTime[cacheKey] = DateTime.parse(value);
+              timeCount++;
+
+              if (kDebugMode) {
+                print('💾   Loaded timestamp: $cacheKey = $value');
+              }
             } catch (e) {
               if (kDebugMode) {
-                print('⚠️ Skipping invalid timestamp: $cacheKey');
+                print('⚠️ Skipping invalid timestamp: $cacheKey - $e');
               }
             }
           }
@@ -83,7 +105,7 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
 
       if (kDebugMode) {
         print(
-          '✅ Loaded ${_combinedTimelineCache.length} historical cache entries',
+          '✅ HistoricalWaterDataProvider: Loaded $combinedCount cache entries, $timeCount timestamps',
         );
       }
 
@@ -106,27 +128,37 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
   /// Save cache to persistent storage
   Future<void> _saveToStorage() async {
     try {
+      if (kDebugMode) {
+        print('💾 HistoricalWaterDataProvider: Starting save to storage...');
+      }
+
       final prefs = await SharedPreferences.getInstance();
 
       // Save combined timeline cache
       for (final entry in _combinedTimelineCache.entries) {
-        await prefs.setString(
-          _prefixCombined + entry.key,
-          jsonEncode(entry.value),
-        );
+        final key = _prefixCombined + entry.key;
+        final value = jsonEncode(entry.value);
+        await prefs.setString(key, value);
+
+        if (kDebugMode) {
+          print('💾   Saved cache entry: $key (${value.length} bytes)');
+        }
       }
 
       // Save combined timeline timestamps
       for (final entry in _combinedTimelineCacheTime.entries) {
-        await prefs.setString(
-          _prefixCombinedTime + entry.key,
-          entry.value.toIso8601String(),
-        );
+        final key = _prefixCombinedTime + entry.key;
+        final value = entry.value.toIso8601String();
+        await prefs.setString(key, value);
+
+        if (kDebugMode) {
+          print('💾   Saved timestamp: $key = $value');
+        }
       }
 
       if (kDebugMode) {
         print(
-          '💾 Saved ${_combinedTimelineCache.length} historical cache entries',
+          '✅ Saved ${_combinedTimelineCache.length} historical cache entries to storage',
         );
       }
     } catch (e) {
@@ -151,6 +183,9 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
     bool forceRefresh = false,
     bool includeRealtimeData = true,
   }) async {
+    // Ensure cache is loaded from storage
+    await ensureInitialized();
+
     final cacheKey = '${stationId}_realtime_$includeRealtimeData';
 
     // Check cache
@@ -183,12 +218,18 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
         includeRealtimeData: includeRealtimeData,
       );
 
-      // Cache the result
+      if (kDebugMode) {
+        print(
+          '✅ HistoricalWaterDataProvider: Got combined timeline, caching with key: $cacheKey',
+        );
+      }
+
+      // Cache the result in memory
       _combinedTimelineCache[cacheKey] = result;
       _combinedTimelineCacheTime[cacheKey] = DateTime.now();
 
-      // Save to persistent storage (async, don't await)
-      _saveToStorage();
+      // Save to persistent storage (AWAIT to ensure it completes)
+      await _saveToStorage();
 
       return result;
     } catch (e) {
@@ -217,6 +258,9 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
     int? year,
     bool forceRefresh = false,
   }) async {
+    // Ensure cache is loaded from storage
+    await ensureInitialized();
+
     final cacheKey =
         '${stationId}_${startDate?.millisecondsSinceEpoch}_${endDate?.millisecondsSinceEpoch}_${daysBack}_$year';
 
@@ -280,6 +324,9 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
     int historicalDays = 30,
     bool forceRefresh = false,
   }) async {
+    // Ensure cache is loaded from storage
+    await ensureInitialized();
+
     final cacheKey = '${stationId}_trend_${recentDays}_$historicalDays';
 
     // Check cache

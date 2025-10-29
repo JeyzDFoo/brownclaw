@@ -61,8 +61,9 @@ class WeatherProvider extends ChangeNotifier {
               final Map<String, dynamic> json = jsonDecode(value);
               _currentWeatherCache[cacheKey] = WeatherData.fromMap(json);
             } catch (e) {
-              if (kDebugMode)
+              if (kDebugMode) {
                 print('⚠️ Skipping invalid cache entry: $cacheKey');
+              }
             }
           }
         } else if (key.startsWith(_prefixCurrentTime)) {
@@ -72,7 +73,9 @@ class WeatherProvider extends ChangeNotifier {
             try {
               _currentWeatherCacheTime[cacheKey] = DateTime.parse(value);
             } catch (e) {
-              if (kDebugMode) print('⚠️ Skipping invalid timestamp: $cacheKey');
+              if (kDebugMode) {
+                print('⚠️ Skipping invalid timestamp: $cacheKey');
+              }
             }
           }
         } else if (key.startsWith(_prefixForecast) && !key.contains('time_')) {
@@ -87,7 +90,9 @@ class WeatherProvider extends ChangeNotifier {
                   )
                   .toList();
             } catch (e) {
-              if (kDebugMode) print('⚠️ Skipping invalid forecast: $cacheKey');
+              if (kDebugMode) {
+                print('⚠️ Skipping invalid forecast: $cacheKey');
+              }
             }
           }
         } else if (key.startsWith(_prefixForecastTime)) {
@@ -97,7 +102,9 @@ class WeatherProvider extends ChangeNotifier {
             try {
               _forecastCacheTime[cacheKey] = DateTime.parse(value);
             } catch (e) {
-              if (kDebugMode) print('⚠️ Skipping invalid timestamp: $cacheKey');
+              if (kDebugMode) {
+                print('⚠️ Skipping invalid timestamp: $cacheKey');
+              }
             }
           }
         }
@@ -126,15 +133,23 @@ class WeatherProvider extends ChangeNotifier {
   /// Save cache to persistent storage
   Future<void> _saveToStorage() async {
     try {
+      if (kDebugMode) {
+        print('💾 WeatherProvider: Starting save to storage...');
+      }
+
       final prefs = await SharedPreferences.getInstance();
 
       // Save current weather cache
+      int currentCount = 0;
       for (final entry in _currentWeatherCache.entries) {
         if (entry.value != null) {
-          await prefs.setString(
-            _prefixCurrent + entry.key,
-            jsonEncode(entry.value!.toMap()),
-          );
+          final key = _prefixCurrent + entry.key;
+          await prefs.setString(key, jsonEncode(entry.value!.toMap()));
+          currentCount++;
+
+          if (kDebugMode) {
+            print('💾   Saved current weather: ${entry.key}');
+          }
         }
       }
 
@@ -147,11 +162,20 @@ class WeatherProvider extends ChangeNotifier {
       }
 
       // Save forecast cache
+      int forecastCount = 0;
       for (final entry in _forecastCache.entries) {
+        final key = _prefixForecast + entry.key;
         await prefs.setString(
-          _prefixForecast + entry.key,
+          key,
           jsonEncode(entry.value.map((w) => w.toMap()).toList()),
         );
+        forecastCount++;
+
+        if (kDebugMode) {
+          print(
+            '💾   Saved forecast: ${entry.key} (${entry.value.length} days)',
+          );
+        }
       }
 
       // Save forecast timestamps
@@ -163,7 +187,9 @@ class WeatherProvider extends ChangeNotifier {
       }
 
       if (kDebugMode) {
-        print('💾 Saved ${_currentWeatherCache.length} weather cache entries');
+        print(
+          '✅ WeatherProvider: Saved $currentCount current, $forecastCount forecast entries to storage',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -193,6 +219,9 @@ class WeatherProvider extends ChangeNotifier {
     GaugeStation station, {
     bool forceRefresh = false,
   }) async {
+    // Ensure cache is loaded from storage
+    await ensureInitialized();
+
     // Check cache
     if (!forceRefresh) {
       final cached = _currentWeatherCache[station.stationId];
@@ -220,12 +249,18 @@ class WeatherProvider extends ChangeNotifier {
 
       final result = await _weatherService.getWeatherForStation(station);
 
-      // Cache the result
+      if (kDebugMode) {
+        print(
+          '✅ WeatherProvider: Got current weather, caching for ${station.stationId}',
+        );
+      }
+
+      // Cache the result in memory
       _currentWeatherCache[station.stationId] = result;
       _currentWeatherCacheTime[station.stationId] = DateTime.now();
 
-      // Save to persistent storage (async, don't await)
-      _saveToStorage();
+      // Save to persistent storage (AWAIT to ensure it completes)
+      await _saveToStorage();
 
       return result;
     } catch (e) {
@@ -246,6 +281,9 @@ class WeatherProvider extends ChangeNotifier {
     int days = 3,
     bool forceRefresh = false,
   }) async {
+    // Ensure cache is loaded from storage
+    await ensureInitialized();
+
     final cacheKey = '${station.stationId}_forecast_$days';
 
     // Check cache
@@ -274,12 +312,18 @@ class WeatherProvider extends ChangeNotifier {
         days: days,
       );
 
-      // Cache the result
+      if (kDebugMode) {
+        print(
+          '✅ WeatherProvider: Got forecast (${result.length} days), caching for ${station.stationId}',
+        );
+      }
+
+      // Cache the result in memory
       _forecastCache[cacheKey] = result;
       _forecastCacheTime[cacheKey] = DateTime.now();
 
-      // Save to persistent storage (async, don't await)
-      _saveToStorage();
+      // Save to persistent storage (AWAIT to ensure it completes)
+      await _saveToStorage();
 
       return result;
     } catch (e) {
