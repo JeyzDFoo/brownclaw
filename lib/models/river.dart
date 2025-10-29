@@ -33,8 +33,9 @@ class River {
     );
   }
 
-  // Convert to Map (for Firestore storage)
-  Map<String, dynamic> toMap() {
+  // Convert to Map (for Firestore storage or JSON cache)
+  // [forCache] - if true, uses ISO strings for timestamps instead of Firestore Timestamp
+  Map<String, dynamic> toMap({bool forCache = false}) {
     final map = <String, dynamic>{
       'name': name,
       'region': region,
@@ -42,8 +43,18 @@ class River {
     };
 
     if (description != null) map['description'] = description;
-    if (createdAt != null) map['createdAt'] = Timestamp.fromDate(createdAt!);
-    if (updatedAt != null) map['updatedAt'] = Timestamp.fromDate(updatedAt!);
+
+    // Handle timestamp serialization based on usage
+    if (createdAt != null) {
+      map['createdAt'] = forCache
+          ? createdAt!.toIso8601String()
+          : Timestamp.fromDate(createdAt!);
+    }
+    if (updatedAt != null) {
+      map['updatedAt'] = forCache
+          ? updatedAt!.toIso8601String()
+          : Timestamp.fromDate(updatedAt!);
+    }
 
     return map;
   }
@@ -53,6 +64,13 @@ class River {
     if (timestamp == null) return null;
     if (timestamp is Timestamp) return timestamp.toDate();
     if (timestamp is DateTime) return timestamp;
+    if (timestamp is String) {
+      try {
+        return DateTime.parse(timestamp); // Handle ISO strings from cache
+      } catch (e) {
+        return null;
+      }
+    }
     return null;
   }
 

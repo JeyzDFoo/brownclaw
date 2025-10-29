@@ -154,11 +154,11 @@ class RiverRunWithStations {
   }
 
   // Serialization for persistent cache
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> toMap({bool forCache = true}) {
     return {
-      'run': run.toMap(),
-      'stations': stations.map((s) => s.toMap()).toList(),
-      'river': river?.toMap(),
+      'run': run.toMap(forCache: forCache),
+      'stations': stations.map((s) => s.toMap(forCache: forCache)).toList(),
+      'river': river?.toMap(forCache: forCache),
     };
   }
 

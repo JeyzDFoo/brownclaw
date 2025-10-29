@@ -178,6 +178,11 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
   /// [stationId] - Station to fetch data for
   /// [forceRefresh] - Bypass cache and fetch fresh data
   /// [includeRealtimeData] - Whether to include real-time data in the timeline
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns stale cache immediately if available
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<Map<String, dynamic>> getCombinedTimeline(
     String stationId, {
     bool forceRefresh = false,
@@ -188,7 +193,7 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
 
     final cacheKey = '${stationId}_realtime_$includeRealtimeData';
 
-    // Check cache
+    // Check cache - stale-while-revalidate pattern
     if (!forceRefresh) {
       final cached = _combinedTimelineCache[cacheKey];
       final cacheTime = _combinedTimelineCacheTime[cacheKey];
@@ -196,15 +201,30 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
       if (cached != null && cacheTime != null) {
         final age = DateTime.now().difference(cacheTime);
         if (age < _combinedTimelineCacheDuration) {
+          // Cache is fresh
           if (kDebugMode) {
             print(
               '💾 HistoricalWaterDataProvider: Cache hit for combined timeline $cacheKey',
             );
           }
           return cached;
+        } else {
+          // Cache is stale - return it but refresh in background
+          if (kDebugMode) {
+            print(
+              '💾 HistoricalWaterDataProvider: Using stale cache for $cacheKey (${age.inMinutes}min old), refreshing...',
+            );
+          }
+          _refreshCombinedTimelineInBackground(
+            stationId,
+            includeRealtimeData: includeRealtimeData,
+          );
+          return cached;
         }
       }
     }
+
+    // No cache - blocking fetch
 
     try {
       if (kDebugMode) {
@@ -250,6 +270,11 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
   /// [daysBack] - Number of days back from endDate (defaults to 365)
   /// [year] - Specific year to fetch data for (e.g., 2024)
   /// [forceRefresh] - Bypass cache and fetch fresh data
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns stale cache immediately if available
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<List<Map<String, dynamic>>> fetchHistoricalData(
     String stationId, {
     DateTime? startDate,
@@ -264,7 +289,7 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
     final cacheKey =
         '${stationId}_${startDate?.millisecondsSinceEpoch}_${endDate?.millisecondsSinceEpoch}_${daysBack}_$year';
 
-    // Check cache
+    // Check cache - stale-while-revalidate pattern
     if (!forceRefresh) {
       final cached = _historicalDataCache[cacheKey];
       final cacheTime = _historicalDataCacheTime[cacheKey];
@@ -272,15 +297,34 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
       if (cached != null && cacheTime != null) {
         final age = DateTime.now().difference(cacheTime);
         if (age < _historicalDataCacheDuration) {
+          // Cache is fresh
           if (kDebugMode) {
             print(
               '💾 HistoricalWaterDataProvider: Cache hit for historical data $cacheKey',
             );
           }
           return cached;
+        } else {
+          // Cache is stale - return it but refresh in background
+          if (kDebugMode) {
+            print(
+              '💾 HistoricalWaterDataProvider: Using stale cache for $cacheKey (${age.inMinutes}min old), refreshing...',
+            );
+          }
+          _refreshHistoricalDataInBackground(
+            stationId,
+            cacheKey: cacheKey,
+            startDate: startDate,
+            endDate: endDate,
+            daysBack: daysBack,
+            year: year,
+          );
+          return cached;
         }
       }
     }
+
+    // No cache - blocking fetch
 
     try {
       if (kDebugMode) {
@@ -318,6 +362,11 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
   /// [recentDays] - Number of recent days to analyze (default: 7)
   /// [historicalDays] - Number of historical days for comparison (default: 30)
   /// [forceRefresh] - Bypass cache and fetch fresh data
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns stale cache immediately if available
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<Map<String, dynamic>> getRecentTrend(
     String stationId, {
     int recentDays = 7,
@@ -329,7 +378,7 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
 
     final cacheKey = '${stationId}_trend_${recentDays}_$historicalDays';
 
-    // Check cache
+    // Check cache - stale-while-revalidate pattern
     if (!forceRefresh) {
       final cached = _recentTrendCache[cacheKey];
       final cacheTime = _recentTrendCacheTime[cacheKey];
@@ -337,15 +386,32 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
       if (cached != null && cacheTime != null) {
         final age = DateTime.now().difference(cacheTime);
         if (age < _recentTrendCacheDuration) {
+          // Cache is fresh
           if (kDebugMode) {
             print(
               '💾 HistoricalWaterDataProvider: Cache hit for recent trend $cacheKey',
             );
           }
           return cached;
+        } else {
+          // Cache is stale - return it but refresh in background
+          if (kDebugMode) {
+            print(
+              '💾 HistoricalWaterDataProvider: Using stale cache for $cacheKey (${age.inMinutes}min old), refreshing...',
+            );
+          }
+          _refreshRecentTrendInBackground(
+            stationId,
+            cacheKey: cacheKey,
+            recentDays: recentDays,
+            historicalDays: historicalDays,
+          );
+          return cached;
         }
       }
     }
+
+    // No cache - blocking fetch
 
     try {
       if (kDebugMode) {
@@ -371,6 +437,135 @@ class HistoricalWaterDataProvider extends ChangeNotifier {
       }
 
       rethrow;
+    }
+  }
+
+  /// Background refresh for combined timeline (stale-while-revalidate pattern)
+  Future<void> _refreshCombinedTimelineInBackground(
+    String stationId, {
+    required bool includeRealtimeData,
+  }) async {
+    final cacheKey = '${stationId}_realtime_$includeRealtimeData';
+
+    try {
+      if (kDebugMode) {
+        print(
+          '🔄 HistoricalWaterDataProvider: Background refresh for $cacheKey',
+        );
+      }
+
+      final result = await HistoricalWaterDataService.getCombinedTimeline(
+        stationId,
+        includeRealtimeData: includeRealtimeData,
+      );
+
+      // Update cache
+      _combinedTimelineCache[cacheKey] = result;
+      _combinedTimelineCacheTime[cacheKey] = DateTime.now();
+
+      // Save to persistent storage
+      await _saveToStorage();
+
+      if (kDebugMode) {
+        print(
+          '✅ HistoricalWaterDataProvider: Background refresh completed for $cacheKey',
+        );
+      }
+
+      notifyListeners(); // Update UI with fresh data
+    } catch (e) {
+      // Silent failure - keep using stale data
+      if (kDebugMode) {
+        print(
+          '❌ HistoricalWaterDataProvider: Background refresh failed for $cacheKey: $e',
+        );
+      }
+    }
+  }
+
+  /// Background refresh for historical data (stale-while-revalidate pattern)
+  Future<void> _refreshHistoricalDataInBackground(
+    String stationId, {
+    required String cacheKey,
+    DateTime? startDate,
+    DateTime? endDate,
+    int? daysBack,
+    int? year,
+  }) async {
+    try {
+      if (kDebugMode) {
+        print(
+          '🔄 HistoricalWaterDataProvider: Background refresh for historical data $cacheKey',
+        );
+      }
+
+      final result = await HistoricalWaterDataService.fetchHistoricalData(
+        stationId,
+        startDate: startDate,
+        endDate: endDate,
+        daysBack: daysBack,
+        year: year,
+      );
+
+      // Update cache
+      _historicalDataCache[cacheKey] = result;
+      _historicalDataCacheTime[cacheKey] = DateTime.now();
+
+      if (kDebugMode) {
+        print(
+          '✅ HistoricalWaterDataProvider: Background refresh completed for $cacheKey',
+        );
+      }
+
+      notifyListeners(); // Update UI with fresh data
+    } catch (e) {
+      // Silent failure - keep using stale data
+      if (kDebugMode) {
+        print(
+          '❌ HistoricalWaterDataProvider: Background refresh failed for $cacheKey: $e',
+        );
+      }
+    }
+  }
+
+  /// Background refresh for recent trend (stale-while-revalidate pattern)
+  Future<void> _refreshRecentTrendInBackground(
+    String stationId, {
+    required String cacheKey,
+    required int recentDays,
+    required int historicalDays,
+  }) async {
+    try {
+      if (kDebugMode) {
+        print(
+          '🔄 HistoricalWaterDataProvider: Background refresh for trend $cacheKey',
+        );
+      }
+
+      final result = await HistoricalWaterDataService.getRecentTrend(
+        stationId,
+        recentDays: recentDays,
+        historicalDays: historicalDays,
+      );
+
+      // Update cache
+      _recentTrendCache[cacheKey] = result;
+      _recentTrendCacheTime[cacheKey] = DateTime.now();
+
+      if (kDebugMode) {
+        print(
+          '✅ HistoricalWaterDataProvider: Background refresh completed for $cacheKey',
+        );
+      }
+
+      notifyListeners(); // Update UI with fresh data
+    } catch (e) {
+      // Silent failure - keep using stale data
+      if (kDebugMode) {
+        print(
+          '❌ HistoricalWaterDataProvider: Background refresh failed for $cacheKey: $e',
+        );
+      }
     }
   }
 

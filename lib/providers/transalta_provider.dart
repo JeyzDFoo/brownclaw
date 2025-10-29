@@ -37,6 +37,11 @@ class TransAltaProvider extends ChangeNotifier {
   /// Fetch flow data from TransAlta API
   ///
   /// [forceRefresh] - Bypass cache and fetch fresh data
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns immediately if cache exists (even if stale)
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<void> fetchFlowData({bool forceRefresh = false}) async {
     // Guard against concurrent fetch calls
     if (_isFetching) {
@@ -46,14 +51,25 @@ class TransAltaProvider extends ChangeNotifier {
       return;
     }
 
-    // Return cached data if valid and not forcing refresh
-    if (!forceRefresh && isCacheValid) {
-      debugPrint(
-        'TransAltaProvider: Using cached data (${cacheAgeMinutes}min old)',
-      );
-      return;
+    // Stale-while-revalidate: Return cached data immediately if available
+    if (!forceRefresh && _flowData != null) {
+      if (isCacheValid) {
+        // Cache is fresh, just return
+        debugPrint(
+          'TransAltaProvider: Using fresh cached data (${cacheAgeMinutes}min old)',
+        );
+        return;
+      } else {
+        // Cache is stale - return it but refresh in background
+        debugPrint(
+          'TransAltaProvider: Using stale cache (${cacheAgeMinutes}min old), refreshing in background...',
+        );
+        _refreshInBackground();
+        return;
+      }
     }
 
+    // No cache available - block and fetch
     _isFetching = true;
     _isLoading = true;
     _error = null;
@@ -94,6 +110,40 @@ class TransAltaProvider extends ChangeNotifier {
       _isLoading = false;
       _isFetching = false;
       notifyListeners();
+    }
+  }
+
+  /// Background refresh for stale-while-revalidate pattern
+  /// Updates cache without blocking the UI or showing loading state
+  Future<void> _refreshInBackground() async {
+    if (_isFetching) {
+      return; // Already refreshing
+    }
+
+    _isFetching = true;
+    // Don't set _isLoading or show error - this is silent background refresh
+
+    try {
+      debugPrint('TransAltaProvider: Background refresh started...');
+      final data = await transAltaService.fetchFlowData(forceRefresh: true);
+
+      if (data != null) {
+        _flowData = data;
+        _lastFetchTime = DateTime.now();
+        _error = null;
+        debugPrint(
+          'TransAltaProvider: Background refresh succeeded (${data.forecasts.length} days)',
+        );
+        notifyListeners(); // Update UI with fresh data
+      } else {
+        // Silent failure - keep using stale data
+        debugPrint('TransAltaProvider: Background refresh returned null');
+      }
+    } catch (e) {
+      // Silent failure - keep using stale data, don't show error to user
+      debugPrint('TransAltaProvider: Background refresh failed: $e');
+    } finally {
+      _isFetching = false;
     }
   }
 

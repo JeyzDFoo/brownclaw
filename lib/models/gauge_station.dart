@@ -74,8 +74,9 @@ class GaugeStation {
     );
   }
 
-  // Convert to Map (for Firestore storage)
-  Map<String, dynamic> toMap() {
+  // Convert to Map (for Firestore storage or JSON cache)
+  // [forCache] - if true, uses ISO strings for timestamps instead of Firestore Timestamp
+  Map<String, dynamic> toMap({bool forCache = false}) {
     final map = <String, dynamic>{
       'stationId': stationId,
       'name': name,
@@ -93,15 +94,28 @@ class GaugeStation {
     if (region != null) map['region'] = region;
     if (country != null) map['country'] = country;
     if (dataUrl != null) map['dataUrl'] = dataUrl;
-    if (createdAt != null) map['createdAt'] = Timestamp.fromDate(createdAt!);
-    if (updatedAt != null) map['updatedAt'] = Timestamp.fromDate(updatedAt!);
+
+    // Handle timestamp serialization based on usage
+    if (createdAt != null) {
+      map['createdAt'] = forCache
+          ? createdAt!.toIso8601String()
+          : Timestamp.fromDate(createdAt!);
+    }
+    if (updatedAt != null) {
+      map['updatedAt'] = forCache
+          ? updatedAt!.toIso8601String()
+          : Timestamp.fromDate(updatedAt!);
+    }
+
     if (currentDischarge != null) map['currentDischarge'] = currentDischarge;
     if (currentWaterLevel != null) map['currentWaterLevel'] = currentWaterLevel;
     if (currentTemperature != null) {
       map['currentTemperature'] = currentTemperature;
     }
     if (lastDataUpdate != null) {
-      map['lastDataUpdate'] = Timestamp.fromDate(lastDataUpdate!);
+      map['lastDataUpdate'] = forCache
+          ? lastDataUpdate!.toIso8601String()
+          : Timestamp.fromDate(lastDataUpdate!);
     }
     if (dataStatus != null) map['dataStatus'] = dataStatus;
 
@@ -127,6 +141,13 @@ class GaugeStation {
     if (timestamp == null) return null;
     if (timestamp is Timestamp) return timestamp.toDate();
     if (timestamp is DateTime) return timestamp;
+    if (timestamp is String) {
+      try {
+        return DateTime.parse(timestamp); // Handle ISO strings from cache
+      } catch (e) {
+        return null;
+      }
+    }
     return null;
   }
 

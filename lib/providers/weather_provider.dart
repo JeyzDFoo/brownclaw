@@ -215,6 +215,11 @@ class WeatherProvider extends ChangeNotifier {
   /// Fetch current weather for a gauge station
   /// [station] - Station to fetch weather for
   /// [forceRefresh] - Bypass cache and fetch fresh data
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns stale cache immediately if available
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<WeatherData?> fetchWeatherForStation(
     GaugeStation station, {
     bool forceRefresh = false,
@@ -222,7 +227,7 @@ class WeatherProvider extends ChangeNotifier {
     // Ensure cache is loaded from storage
     await ensureInitialized();
 
-    // Check cache
+    // Check cache - stale-while-revalidate pattern
     if (!forceRefresh) {
       final cached = _currentWeatherCache[station.stationId];
       final cacheTime = _currentWeatherCacheTime[station.stationId];
@@ -230,15 +235,27 @@ class WeatherProvider extends ChangeNotifier {
       if (cached != null && cacheTime != null) {
         final age = DateTime.now().difference(cacheTime);
         if (age < _cacheDuration) {
+          // Cache is fresh
           if (kDebugMode) {
             print(
               '💾 WeatherProvider: Cache hit for current weather ${station.stationId}',
             );
           }
           return cached;
+        } else {
+          // Cache is stale - return it but refresh in background
+          if (kDebugMode) {
+            print(
+              '💾 WeatherProvider: Using stale cache for ${station.stationId} (${age.inMinutes}min old), refreshing...',
+            );
+          }
+          _refreshWeatherInBackground(station);
+          return cached;
         }
       }
     }
+
+    // No cache - blocking fetch
 
     try {
       if (kDebugMode) {
@@ -276,6 +293,11 @@ class WeatherProvider extends ChangeNotifier {
   /// [station] - Station to fetch forecast for
   /// [days] - Number of days to forecast (default: 3)
   /// [forceRefresh] - Bypass cache and fetch fresh data
+  ///
+  /// Implements stale-while-revalidate pattern:
+  /// - Returns stale cache immediately if available
+  /// - Triggers background refresh if cache is stale
+  /// - Only blocks if no cache exists
   Future<List<WeatherData>> fetchForecastForStation(
     GaugeStation station, {
     int days = 3,
@@ -286,7 +308,7 @@ class WeatherProvider extends ChangeNotifier {
 
     final cacheKey = '${station.stationId}_forecast_$days';
 
-    // Check cache
+    // Check cache - stale-while-revalidate pattern
     if (!forceRefresh) {
       final cached = _forecastCache[cacheKey];
       final cacheTime = _forecastCacheTime[cacheKey];
@@ -294,13 +316,25 @@ class WeatherProvider extends ChangeNotifier {
       if (cached != null && cacheTime != null) {
         final age = DateTime.now().difference(cacheTime);
         if (age < _cacheDuration) {
+          // Cache is fresh
           if (kDebugMode) {
             print('💾 WeatherProvider: Cache hit for forecast $cacheKey');
           }
           return cached;
+        } else {
+          // Cache is stale - return it but refresh in background
+          if (kDebugMode) {
+            print(
+              '💾 WeatherProvider: Using stale cache for $cacheKey (${age.inMinutes}min old), refreshing...',
+            );
+          }
+          _refreshForecastInBackground(station, days: days);
+          return cached;
         }
       }
     }
+
+    // No cache - blocking fetch
 
     try {
       if (kDebugMode) {
@@ -361,6 +395,78 @@ class WeatherProvider extends ChangeNotifier {
         print('❌ WeatherProvider: Error fetching all weather: $e');
       }
       rethrow;
+    }
+  }
+
+  /// Background refresh for current weather (stale-while-revalidate pattern)
+  Future<void> _refreshWeatherInBackground(GaugeStation station) async {
+    try {
+      if (kDebugMode) {
+        print(
+          '🔄 WeatherProvider: Background refresh for ${station.stationId}',
+        );
+      }
+
+      final result = await _weatherService.getWeatherForStation(station);
+
+      // Update cache
+      _currentWeatherCache[station.stationId] = result;
+      _currentWeatherCacheTime[station.stationId] = DateTime.now();
+
+      // Save to persistent storage
+      await _saveToStorage();
+
+      if (kDebugMode) {
+        print(
+          '✅ WeatherProvider: Background refresh completed for ${station.stationId}',
+        );
+      }
+
+      notifyListeners(); // Update UI with fresh data
+    } catch (e) {
+      // Silent failure - keep using stale data
+      if (kDebugMode) {
+        print(
+          '❌ WeatherProvider: Background refresh failed for ${station.stationId}: $e',
+        );
+      }
+    }
+  }
+
+  /// Background refresh for forecast (stale-while-revalidate pattern)
+  Future<void> _refreshForecastInBackground(
+    GaugeStation station, {
+    required int days,
+  }) async {
+    final cacheKey = '${station.stationId}_forecast_$days';
+
+    try {
+      if (kDebugMode) {
+        print('🔄 WeatherProvider: Background refresh for forecast $cacheKey');
+      }
+
+      final result = await _weatherService.getForecastForStation(
+        station,
+        days: days,
+      );
+
+      // Update cache
+      _forecastCache[cacheKey] = result;
+      _forecastCacheTime[cacheKey] = DateTime.now();
+
+      // Save to persistent storage
+      await _saveToStorage();
+
+      if (kDebugMode) {
+        print('✅ WeatherProvider: Background refresh completed for $cacheKey');
+      }
+
+      notifyListeners(); // Update UI with fresh data
+    } catch (e) {
+      // Silent failure - keep using stale data
+      if (kDebugMode) {
+        print('❌ WeatherProvider: Background refresh failed for $cacheKey: $e');
+      }
     }
   }
 

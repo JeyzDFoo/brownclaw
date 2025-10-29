@@ -80,8 +80,9 @@ class RiverStation {
     );
   }
 
-  // Convert to Map (for Firestore storage)
-  Map<String, dynamic> toMap() {
+  // Convert to Map (for Firestore storage or JSON cache)
+  // [forCache] - if true, uses ISO strings for timestamps instead of Firestore Timestamp
+  Map<String, dynamic> toMap({bool forCache = false}) {
     final map = <String, dynamic>{
       'stationId': stationId,
       'name': name,
@@ -96,7 +97,9 @@ class RiverStation {
     };
 
     if (addedAt != null) {
-      map['addedAt'] = Timestamp.fromDate(addedAt!);
+      map['addedAt'] = forCache
+          ? addedAt!.toIso8601String()
+          : Timestamp.fromDate(addedAt!);
     }
 
     // Add live data if available
@@ -129,6 +132,13 @@ class RiverStation {
     if (timestamp == null) return null;
     if (timestamp is Timestamp) return timestamp.toDate();
     if (timestamp is DateTime) return timestamp;
+    if (timestamp is String) {
+      try {
+        return DateTime.parse(timestamp); // Handle ISO strings from cache
+      } catch (e) {
+        return null;
+      }
+    }
     return null;
   }
 

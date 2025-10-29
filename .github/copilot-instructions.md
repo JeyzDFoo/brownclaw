@@ -332,11 +332,23 @@ All endpoints sync premium status to Firestore `users/{userId}` collection with 
 
 ### Adding a New Provider
 1. Create provider class extending `ChangeNotifier` in `lib/providers/`
-2. Implement static cache if data is expensive to fetch:
+2. Implement static cache with **stale-while-revalidate** pattern if data is expensive to fetch:
    ```dart
    static final Map<String, YourData> _cache = {};
    static DateTime? _cacheTime;
    static const _cacheTimeout = Duration(minutes: 10);
+   
+   Future<List<YourData>> getData() async {
+     // Return stale cache immediately
+     if (_cache.isNotEmpty) {
+       if (!_isCacheValid) {
+         _refreshInBackground(); // Async refresh
+       }
+       return _cache.values.toList();
+     }
+     // No cache - blocking fetch
+     return await _fetchAndCache();
+   }
    ```
 3. Register in `lib/main.dart` MultiProvider (order matters - dependencies first)
 4. Add to `lib/providers/providers.dart` export
