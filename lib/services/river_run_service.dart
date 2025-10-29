@@ -761,16 +761,26 @@ class RiverRunService {
       }
 
       // Step 5: Combine into RiverRunWithStations models
-      final result = runs.map((run) {
-        return RiverRunWithStations(
-          run: run,
-          river: riverMap[run.riverId],
-          stations: stationsMap[run.id] ?? [],
-        );
-      }).toList();
+      // 🔥 STABILITY FIX: Build map first, then preserve input order
+      final runsMap = {
+        for (var run in runs)
+          run.id: RiverRunWithStations(
+            run: run,
+            river: riverMap[run.riverId],
+            stations: stationsMap[run.id] ?? [],
+          ),
+      };
+
+      // Return in the same order as input runIds to prevent UI jank
+      final result = runIds
+          .map((id) => runsMap[id])
+          .whereType<RiverRunWithStations>()
+          .toList();
 
       if (kDebugMode) {
-        print('✅ Batch fetch complete: ${result.length} runs with full data');
+        print(
+          '✅ Batch fetch complete: ${result.length} runs with full data (order preserved)',
+        );
       }
 
       return result;

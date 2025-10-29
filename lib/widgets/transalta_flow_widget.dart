@@ -6,7 +6,7 @@ import '../models/gauge_station.dart';
 import '../models/weather_data.dart';
 import '../providers/transalta_provider.dart';
 import '../providers/premium_provider.dart';
-import '../services/weather_service.dart';
+import '../providers/weather_provider.dart';
 import '../services/persistent_cache_service.dart';
 import '../screens/premium_purchase_screen.dart';
 
@@ -25,10 +25,8 @@ class TransAltaFlowWidget extends StatefulWidget {
 
 class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   bool _hasInitialized = false;
-  final WeatherService _weatherService = WeatherService();
   List<WeatherData> _weatherForecast = [];
   List<WeatherData> _hourlyWeather = [];
-  bool _isLoadingWeather = false;
 
   // Static cache for weather data (persists across widget rebuilds)
   static WeatherData? _cachedCurrentWeather;
@@ -119,9 +117,8 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   }
 
   Future<void> _fetchWeather() async {
-    setState(() {
-      _isLoadingWeather = true;
-    });
+    // Don't set _isLoadingWeather here - provider handles caching
+    // Only show spinner if we truly have no data (_weatherForecast.isEmpty)
 
     try {
       // Create a temporary gauge station with Kananaskis coordinates
@@ -134,20 +131,21 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         parameters: const [],
       );
 
-      // Fetch current weather (today), 4-day forecast, and hourly forecast
-      // We want 4 total days: today + next 3 days
-      final weather = await _weatherService.getWeatherForStation(
+      // Use WeatherProvider for stale-while-revalidate caching
+      final weatherProvider = context.read<WeatherProvider>();
+
+      // Fetch current weather (today), 4-day forecast
+      // Provider returns instantly if cached (stale-while-revalidate)
+      final weather = await weatherProvider.fetchWeatherForStation(
         kananaskisStation,
       );
-      final forecast = await _weatherService.getForecastForStation(
+      final forecast = await weatherProvider.fetchForecastForStation(
         kananaskisStation,
         days: 4, // Request 4 days to ensure we get enough data
       );
-      final hourly = await _weatherService.getHourlyForecast(
-        kananaskisStation,
-        days: 4,
-      );
 
+      // Use forecast as hourly weather (hourly data is in the forecast)
+      final hourly = forecast;
       if (mounted) {
         // Combine current weather (today) with forecast (tomorrow onwards)
         // This ensures we always have today's data as the first entry
@@ -190,7 +188,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         setState(() {
           _weatherForecast = combinedForecast;
           _hourlyWeather = hourly;
-          _isLoadingWeather = false;
+          // No longer setting _isLoadingWeather - not needed with provider caching
 
           // Update static cache
           _cachedCurrentWeather = weather;
@@ -207,11 +205,8 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         _saveWeatherToPersistentStorage(combinedForecast, hourly);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingWeather = false;
-        });
-      }
+      debugPrint('TransAltaFlowWidget: Error fetching weather: $e');
+      // Provider handles errors, no need to update local state
     }
   }
 
@@ -365,20 +360,11 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
 
         // All 4 days in a horizontal scrollable row
         if (_weatherForecast.isEmpty) {
-          // Show loading placeholder to prevent layout jump
-          return _isLoadingWeather
-              ? SizedBox(
-                  height: 180, // Approximate height of weather cards
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: isDark
-                          ? Colors.brown.shade200
-                          : Colors.brown.shade700,
-                    ),
-                  ),
-                )
-              : const SizedBox();
+          // Don't show spinner - data will appear instantly when provider returns
+          // Empty state is temporary while provider fetches (if no cache exists)
+          return const SizedBox(
+            height: 180,
+          ); // Reserve space to prevent layout jump
         }
 
         return SingleChildScrollView(

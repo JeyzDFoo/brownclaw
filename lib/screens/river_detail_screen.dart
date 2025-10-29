@@ -50,9 +50,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
   bool _isLoadingWeather = false;
   String? _weatherError;
 
-  // Unified initial loading state - true until critical data loaded
-  bool _isInitialLoad = true;
-
   @override
   void initState() {
     super.initState();
@@ -62,8 +59,9 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     _loadInitialData();
   }
 
-  /// Load critical data first, then secondary data
+  /// Load data in background - no blocking initial load
   Future<void> _loadInitialData() async {
+    // 🔥 STALE-WHILE-REVALIDATE: Show UI immediately, load data in background
     // Trigger background data fetch (provider handles caching)
     final stationId = widget.riverData['stationId'] as String?;
     if (stationId != null) {
@@ -71,17 +69,8 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       context.read<LiveWaterDataProvider>().fetchStationData(stationId);
     }
 
-    // Load historical chart data
-    await _loadHistoricalData();
-
-    // Mark initial load complete
-    if (mounted) {
-      setState(() {
-        _isInitialLoad = false;
-      });
-    }
-
-    // Load secondary data (statistics + weather) in background
+    // Load all data in background (no blocking)
+    _loadHistoricalData();
     _loadStatisticsData();
     _loadWeatherData();
   }
@@ -161,7 +150,6 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
         _weatherForecast = [];
         _isLoadingWeather = true;
         _weatherError = null;
-        _isInitialLoad = true; // Reset initial load state
       });
       _loadInitialData();
     }
@@ -776,98 +764,95 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
           ),
         ],
       ),
-      body: _isInitialLoad
-          ? const Center(child: CircularProgressIndicator(color: Colors.teal))
-          : RefreshIndicator(
-              onRefresh: _refreshAllData,
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header Card with Status
-                    RunHeaderCard(
-                      section: section,
-                      sectionClass: sectionClass,
-                      status: status,
-                      location: location,
-                      difficulty: difficulty,
-                      minRunnable: _currentRiverData['minRunnable'] as double?,
-                      maxSafe: _currentRiverData['maxSafe'] as double?,
-                      totalRuns: _totalRuns,
-                      lastRanDate: _lastRanDate,
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    // River-type-specific content
-                    if (_riverType.isKananaskis)
-                      const KananaskisRiverSection(flowThreshold: 20.0)
-                    else
-                      // 🚀 Use Consumer to reactively display live data from provider
-                      Consumer<LiveWaterDataProvider>(
-                        builder: (context, liveDataProvider, child) {
-                          final stationId =
-                              widget.riverData['stationId'] as String?;
-                          final liveData = stationId != null
-                              ? liveDataProvider.getLiveData(stationId)
-                              : null;
-                          final isLoadingLiveData = stationId != null
-                              ? liveDataProvider.isUpdating(stationId)
-                              : false;
-                          final liveDataError = stationId != null
-                              ? liveDataProvider.getError(stationId)
-                              : _validateStationData();
-
-                          return EnvCanadaRiverSection(
-                            liveData: liveData,
-                            isLoadingLiveData: isLoadingLiveData,
-                            liveDataError: liveDataError,
-                            currentWeather: _currentWeather,
-                            weatherForecast: _weatherForecast,
-                            isLoadingWeather: _isLoadingWeather,
-                            weatherError: _weatherError,
-                            historicalData: _historicalData,
-                            isLoadingChart: _isLoadingChart,
-                            chartError: _chartError,
-                            selectedDays: _selectedDays,
-                            selectedYear: _selectedYear,
-                            flowStatistics: _flowStatistics,
-                            recentTrend: _recentTrend,
-                            isLoadingStats: _isLoadingStats,
-                            onDaysChanged: (days) {
-                              setState(() {
-                                _selectedDays = days;
-                              });
-                              _loadHistoricalData();
-                            },
-                            onYearChanged: (year) {
-                              setState(() {
-                                _selectedYear = year;
-                              });
-                              _loadHistoricalData();
-                            },
-                            formatDateTime: _formatDateTime,
-                          );
-                        },
-                      ),
-
-                    const SizedBox(height: 16),
-
-                    // User's historical runs on this river
-                    if (_currentRiverData['runId'] != null &&
-                        _currentRiverData['runId'].toString().isNotEmpty)
-                      UserRunsHistoryWidget(
-                        riverRunId: _currentRiverData['runId'] as String,
-                        riverName: riverName,
-                      ),
-
-                    const SizedBox(height: 32),
-                  ],
-                ),
+      body: RefreshIndicator(
+        onRefresh: _refreshAllData,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Card with Status
+              RunHeaderCard(
+                section: section,
+                sectionClass: sectionClass,
+                status: status,
+                location: location,
+                difficulty: difficulty,
+                minRunnable: _currentRiverData['minRunnable'] as double?,
+                maxSafe: _currentRiverData['maxSafe'] as double?,
+                totalRuns: _totalRuns,
+                lastRanDate: _lastRanDate,
               ),
-            ),
+
+              const SizedBox(height: 16),
+
+              // River-type-specific content
+              if (_riverType.isKananaskis)
+                const KananaskisRiverSection(flowThreshold: 20.0)
+              else
+                // 🚀 Use Consumer to reactively display live data from provider
+                Consumer<LiveWaterDataProvider>(
+                  builder: (context, liveDataProvider, child) {
+                    final stationId = widget.riverData['stationId'] as String?;
+                    final liveData = stationId != null
+                        ? liveDataProvider.getLiveData(stationId)
+                        : null;
+                    final isLoadingLiveData = stationId != null
+                        ? liveDataProvider.isUpdating(stationId)
+                        : false;
+                    final liveDataError = stationId != null
+                        ? liveDataProvider.getError(stationId)
+                        : _validateStationData();
+
+                    return EnvCanadaRiverSection(
+                      liveData: liveData,
+                      isLoadingLiveData: isLoadingLiveData,
+                      liveDataError: liveDataError,
+                      currentWeather: _currentWeather,
+                      weatherForecast: _weatherForecast,
+                      isLoadingWeather: _isLoadingWeather,
+                      weatherError: _weatherError,
+                      historicalData: _historicalData,
+                      isLoadingChart: _isLoadingChart,
+                      chartError: _chartError,
+                      selectedDays: _selectedDays,
+                      selectedYear: _selectedYear,
+                      flowStatistics: _flowStatistics,
+                      recentTrend: _recentTrend,
+                      isLoadingStats: _isLoadingStats,
+                      onDaysChanged: (days) {
+                        setState(() {
+                          _selectedDays = days;
+                        });
+                        _loadHistoricalData();
+                      },
+                      onYearChanged: (year) {
+                        setState(() {
+                          _selectedYear = year;
+                        });
+                        _loadHistoricalData();
+                      },
+                      formatDateTime: _formatDateTime,
+                    );
+                  },
+                ),
+
+              const SizedBox(height: 16),
+
+              // User's historical runs on this river
+              if (_currentRiverData['runId'] != null &&
+                  _currentRiverData['runId'].toString().isNotEmpty)
+                UserRunsHistoryWidget(
+                  riverRunId: _currentRiverData['runId'] as String,
+                  riverName: riverName,
+                ),
+
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         heroTag: 'river_detail_fab',
         onPressed: () async {

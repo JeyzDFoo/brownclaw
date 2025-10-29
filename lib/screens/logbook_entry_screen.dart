@@ -5,7 +5,6 @@ import '../providers/providers.dart';
 import '../models/models.dart';
 import '../services/river_service.dart';
 import '../services/river_run_service.dart';
-import '../services/historical_water_data_service.dart';
 
 class LogbookEntryScreen extends StatefulWidget {
   final RiverRunWithStations? prefilledRun;
@@ -248,40 +247,18 @@ class _LogbookEntryScreenState extends State<LogbookEntryScreen> {
     });
 
     try {
-      final now = DateTime.now();
-      final daysDifference = now.difference(_selectedDate).inDays;
+      // Use HistoricalWaterDataProvider for stale-while-revalidate caching
+      final historicalProvider = context.read<HistoricalWaterDataProvider>();
 
       List<Map<String, dynamic>> data;
 
-      if (daysDifference <= 30) {
-        // Use realtime API for recent data (last 30 days)
-        data = await HistoricalWaterDataService.fetchRealtimeAsHistorical(
-          _selectedRun!.stationId!,
-          limitDays:
-              35, // Get a bit more data to ensure we have the target date
-        );
-
-        // Filter to find data for the specific date
-        final targetDateStr = _selectedDate.toIso8601String().substring(
-          0,
-          10,
-        ); // YYYY-MM-DD format
-        data = data.where((entry) {
-          final entryDate = entry['date'];
-          if (entryDate != null) {
-            final entryDateStr = entryDate.toString().substring(0, 10);
-            return entryDateStr == targetDateStr;
-          }
-          return false;
-        }).toList();
-      } else {
-        // Use historical API for older data (more than 30 days)
-        data = await HistoricalWaterDataService.fetchHistoricalData(
-          _selectedRun!.stationId!,
-          startDate: _selectedDate,
-          endDate: _selectedDate,
-        );
-      }
+      // Fetch historical data for the selected date
+      // Provider handles caching and uses appropriate API based on date
+      data = await historicalProvider.fetchHistoricalData(
+        _selectedRun!.stationId!,
+        startDate: _selectedDate,
+        endDate: _selectedDate,
+      );
 
       if (data.isNotEmpty) {
         final dayData = data.first;

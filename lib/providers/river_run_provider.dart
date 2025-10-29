@@ -237,11 +237,23 @@ class RiverRunProvider extends ChangeNotifier {
     // This ensures the cache is populated on initial app launch
     await ensureInitialized();
 
+    // 🔥 STALE-WHILE-REVALIDATE: Check cache first and return immediately
+    bool hasStaleCache = false;
+
     // 🔥 PERFORMANCE: Check if we can use the all-runs cache
-    if (_riverRuns.isNotEmpty && _isCacheValid) {
+    if (_riverRuns.isNotEmpty) {
       // We already have all runs loaded, just filter for favorites
-      final favoriteRuns = _riverRuns
-          .where((run) => favoriteRunIds.contains(run.run.id))
+      // 🔥 STABILITY FIX: Preserve order from favoriteRunIds to prevent jank
+      final favoriteRunsMap = {
+        for (var run in _riverRuns.where(
+          (run) => favoriteRunIds.contains(run.run.id),
+        ))
+          run.run.id: run,
+      };
+
+      final favoriteRuns = favoriteRunIds
+          .map((id) => favoriteRunsMap[id])
+          .whereType<RiverRunWithStations>()
           .toList();
 
       if (favoriteRuns.length == favoriteRunIds.length) {
@@ -251,39 +263,58 @@ class RiverRunProvider extends ChangeNotifier {
           );
         }
         _favoriteRuns = favoriteRuns;
-        // Only notify if favorites actually changed to avoid unnecessary rebuilds
-        if (_favoriteRuns != favoriteRuns) {
-          notifyListeners();
+        notifyListeners(); // Show cached data immediately
+
+        // If cache is still valid, we're done
+        if (_isCacheValid) {
+          return;
         }
-        return; // Done! No Firestore calls needed
+        // Cache is stale - continue to background refresh
+        hasStaleCache = true;
       }
     }
 
-    // Check individual cache entries
-    if (_isCacheValid) {
+    // Check individual cache entries if all-runs cache didn't have everything
+    if (!hasStaleCache) {
+      // 🔥 STABILITY FIX: Preserve order from favoriteRunIds to prevent jank
       final cached = favoriteRunIds
           .map((id) => _cache[id])
           .whereType<RiverRunWithStations>()
           .toList();
 
-      if (cached.length == favoriteRunIds.length) {
+      if (cached.isNotEmpty) {
         if (kDebugMode) {
-          print('⚡ CACHE HIT: All ${favoriteRunIds.length} runs from cache');
+          print(
+            '⚡ PARTIAL CACHE HIT: Found ${cached.length}/${favoriteRunIds.length} runs from cache',
+          );
         }
         _favoriteRuns = cached;
-        // Only notify if favorites actually changed to avoid unnecessary rebuilds
-        if (_favoriteRuns != cached) {
-          notifyListeners();
+        notifyListeners(); // Show partial cached data immediately
+
+        // If we have all favorites and cache is valid, we're done
+        if (cached.length == favoriteRunIds.length && _isCacheValid) {
+          return;
         }
-        return; // Done! No Firestore calls needed
+        // Cache is partial or stale - continue to background refresh
+        hasStaleCache = cached.isNotEmpty;
       }
     }
 
-    // 🔥 FIX: Only set loading state if we actually need to fetch from Firestore
-    setLoading(true);
+    // 🔥 STALE-WHILE-REVALIDATE: Only show spinner if we have NO cached data
+    if (!hasStaleCache) {
+      setLoading(true);
+    }
     setError(null);
 
     try {
+      if (kDebugMode) {
+        print(
+          hasStaleCache
+              ? '🔄 Background refresh for ${favoriteRunIds.length} favorites...'
+              : '🌊 Cache miss, fetching ${favoriteRunIds.length} favorites from Firestore...',
+        );
+      }
+
       // 🚀 USE NEW BATCH METHOD - 90% fewer queries!
       final favoriteRuns = await RiverRunService.batchGetFavoriteRuns(
         favoriteRunIds.toList(),
@@ -296,11 +327,22 @@ class RiverRunProvider extends ChangeNotifier {
       _cacheTime = DateTime.now();
 
       _favoriteRuns = favoriteRuns;
-      notifyListeners();
+      notifyListeners(); // Update UI with fresh data
+
+      if (kDebugMode && hasStaleCache) {
+        print('✅ Background refresh complete');
+      }
     } catch (e) {
-      setError(e.toString());
+      // Only show error if we don't have cached data to fall back on
+      if (!hasStaleCache) {
+        setError(e.toString());
+      }
       if (kDebugMode) {
-        print('Error loading favorite runs: $e');
+        print(
+          hasStaleCache
+              ? '⚠️ Background refresh failed (cached data still shown): $e'
+              : 'Error loading favorite runs: $e',
+        );
       }
     } finally {
       setLoading(false);
