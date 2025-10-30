@@ -40,18 +40,16 @@ class WeatherForecastWidget extends StatelessWidget {
     return Colors.grey;
   }
 
-  String _formatDay(DateTime date) {
+  /// Format day label by index to avoid stale cached date issues
+  String _formatDayByIndex(int index) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final tomorrow = today.add(const Duration(days: 1));
-    final checkDate = DateTime(date.year, date.month, date.day);
+    final targetDate = now.add(Duration(days: index));
 
-    if (checkDate == today) return 'Today';
-    if (checkDate == tomorrow) return 'Tomorrow';
+    if (index == 0) return 'Today';
 
-    // Return day of week
+    // For all other days, show the actual day of the week
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return days[date.weekday - 1];
+    return days[targetDate.weekday - 1];
   }
 
   @override
@@ -140,7 +138,6 @@ class WeatherForecastWidget extends StatelessWidget {
                   itemCount: forecast.length,
                   itemBuilder: (context, index) {
                     final day = forecast[index];
-                    final date = day.forecastTime ?? DateTime.now();
 
                     return Container(
                       width: 100,
@@ -158,7 +155,7 @@ class WeatherForecastWidget extends StatelessWidget {
                         children: [
                           // Day label
                           Text(
-                            _formatDay(date),
+                            _formatDayByIndex(index),
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: Colors.grey[700],

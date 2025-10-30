@@ -29,7 +29,6 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   List<WeatherData> _hourlyWeather = [];
 
   // Static cache for weather data (persists across widget rebuilds)
-  static WeatherData? _cachedCurrentWeather;
   static List<WeatherData> _cachedWeatherForecast = [];
   static List<WeatherData> _cachedHourlyWeather = [];
   static DateTime? _weatherCacheTime;
@@ -48,6 +47,78 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     return age < _weatherCacheTimeout;
   }
 
+  /// Force clear all weather caches to fetch fresh data
+  static void clearAllWeatherCaches() {
+    _cachedWeatherForecast.clear();
+    _cachedHourlyWeather.clear();
+    _weatherCacheTime = null;
+
+    // Also clear persistent storage
+    PersistentCacheService.clearWeatherCache();
+
+    debugPrint('TransAltaFlowWidget: Cleared all weather caches');
+  }
+
+  /// Debug method to check current cached forecast dates
+  static void debugCachedDates() {
+    if (_cachedWeatherForecast.isEmpty) {
+      debugPrint('TransAltaFlowWidget: No cached forecast data');
+      return;
+    }
+
+    final now = DateTime.now();
+    debugPrint(
+      'TransAltaFlowWidget: Current date: ${now.day}/${now.month}/${now.year}',
+    );
+    debugPrint('TransAltaFlowWidget: Cached forecast dates:');
+
+    for (int i = 0; i < _cachedWeatherForecast.length; i++) {
+      final forecast = _cachedWeatherForecast[i];
+      final forecastTime = forecast.forecastTime;
+      if (forecastTime != null) {
+        final daysDiff = forecastTime
+            .difference(DateTime(now.year, now.month, now.day))
+            .inDays;
+        debugPrint(
+          '  Day $i: ${forecastTime.day}/${forecastTime.month}/${forecastTime.year} (${daysDiff} days from today)',
+        );
+      }
+    }
+  }
+
+  /// Update forecast dates in cached data to be relative to current date
+  /// This fixes stale cached data that has old forecastTime dates
+  List<WeatherData> _updateForecastDates(List<WeatherData> cachedForecast) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final updatedForecast = <WeatherData>[];
+
+    for (int i = 0; i < cachedForecast.length && i < 4; i++) {
+      final originalData = cachedForecast[i];
+      final newForecastTime = today.add(Duration(days: i));
+
+      // Create new WeatherData with updated forecastTime
+      final updatedData = WeatherData(
+        latitude: originalData.latitude,
+        longitude: originalData.longitude,
+        temperature: originalData.temperature,
+        conditions: originalData.conditions,
+        precipitation: originalData.precipitation,
+        forecastTime: newForecastTime, // Update to current date + index
+        temperatureUnit: originalData.temperatureUnit,
+      );
+
+      updatedForecast.add(updatedData);
+    }
+
+    debugPrint(
+      'TransAltaFlowWidget: Updated ${updatedForecast.length} forecast dates to current date sequence',
+    );
+
+    return updatedForecast;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -58,8 +129,11 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
   Future<void> _loadWeatherData() async {
     // First check in-memory static cache
     if (_isWeatherCacheValid) {
+      // Fix stale dates in cached forecast data
+      final updatedForecast = _updateForecastDates(_cachedWeatherForecast);
+
       setState(() {
-        _weatherForecast = _cachedWeatherForecast;
+        _weatherForecast = updatedForecast;
         _hourlyWeather = _cachedHourlyWeather;
       });
       debugPrint(
@@ -88,8 +162,11 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
               .map((json) => WeatherData.fromMap(json as Map<String, dynamic>))
               .toList();
 
+          // Fix stale dates in cached forecast data
+          final updatedForecast = _updateForecastDates(forecast);
+
           setState(() {
-            _weatherForecast = forecast;
+            _weatherForecast = updatedForecast;
             _hourlyWeather = hourly;
           });
 
@@ -191,7 +268,6 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
           // No longer setting _isLoadingWeather - not needed with provider caching
 
           // Update static cache
-          _cachedCurrentWeather = weather;
           _cachedWeatherForecast = combinedForecast;
           _cachedHourlyWeather = hourly;
           _weatherCacheTime = DateTime.now();
@@ -372,20 +448,18 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
           scrollDirection: Axis.horizontal,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
-            children: _weatherForecast.take(4).map((day) {
-              final dayName = _getDayName(day.forecastTime);
+            children: _weatherForecast.take(4).toList().asMap().entries.map((
+              entry,
+            ) {
+              final index = entry.key;
+              final day = entry.value;
+
+              // Use index-based day labels to avoid stale cache issues
+              final dayName = _getDayLabelByIndex(index);
 
               // Get the day number (0=today, 1=tomorrow, 2=day after)
-              final now = DateTime.now();
-              final today = DateTime(now.year, now.month, now.day);
-              final forecastDate = day.forecastTime != null
-                  ? DateTime(
-                      day.forecastTime!.year,
-                      day.forecastTime!.month,
-                      day.forecastTime!.day,
-                    )
-                  : today;
-              final dayNumber = forecastDate.difference(today).inDays;
+              final dayNumber =
+                  index; // Use index directly since it represents days from today
 
               // Get flow periods for this day
               final dayFlowPeriods = periodsByDay[dayNumber] ?? [];
@@ -590,21 +664,16 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     return '🌤️';
   }
 
-  String _getDayName(DateTime? dateTime) {
-    if (dateTime == null) return '';
-
+  /// Get dynamic day label based on forecast index (for cached data with stale dates)
+  String _getDayLabelByIndex(int dayIndex) {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+    final targetDate = now.add(Duration(days: dayIndex));
 
-    final difference = date.difference(today).inDays;
-
-    if (difference == 0) return 'Today';
-    if (difference == 1) return 'Tomorrow';
+    if (dayIndex == 0) return 'Today';
 
     // For all other days, show the actual day of the week
     final weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return weekdays[dateTime.weekday - 1];
+    return weekdays[targetDate.weekday - 1];
   }
 
   Widget _buildHighFlowSchedule(
@@ -923,21 +992,6 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
         ),
       ),
     );
-  }
-
-  Color _getFlowStatusColor(FlowStatus status) {
-    switch (status) {
-      case FlowStatus.offline:
-        return Colors.grey;
-      case FlowStatus.tooLow:
-        return Colors.brown.shade300;
-      case FlowStatus.low:
-        return Colors.brown.shade400;
-      case FlowStatus.moderate:
-        return Colors.green;
-      case FlowStatus.high:
-        return Colors.brown.shade600;
-    }
   }
 
   /// Get weather conditions for a specific release window
