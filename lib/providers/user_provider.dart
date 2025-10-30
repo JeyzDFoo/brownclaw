@@ -11,12 +11,17 @@ class UserProvider extends ChangeNotifier {
   bool get isAuthenticated => _user != null;
 
   // Check if current user is an admin
-  // Currently set to make all users admin by default
+  // Uses the same UIDs as defined in firestore.rules
   bool get isAdmin {
-    return true; // All users are admin by default
-    // To use email-based admin check, replace with:
-    // if (_user == null || _user!.email == null) return false;
-    // return _adminEmails.contains(_user!.email!.toLowerCase());
+    if (_user == null) return false;
+
+    // Admin UIDs from firestore.rules
+    final adminUids = {
+      "08y0oUgfD2aWOgScPJRDdyfehsv2",
+      "Ela2Ijh7kedHFLFMNGuKSaygWE02",
+    };
+
+    return adminUids.contains(_user!.uid);
   }
 
   UserProvider() {

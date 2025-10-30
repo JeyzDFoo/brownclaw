@@ -9,6 +9,7 @@ import 'logbook_screen.dart';
 import 'favourites_screen.dart';
 import 'river_run_search_screen.dart';
 import 'premium_settings_screen.dart';
+import 'admin_control_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -115,6 +116,13 @@ class _MainScreenState extends State<MainScreen> {
                         if (context.mounted) {
                           Navigator.pushReplacementNamed(context, '/');
                         }
+                      } else if (value == 'admin') {
+                        await AnalyticsService.logMenuAction('admin_panel');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const AdminControlScreen(),
+                          ),
+                        );
                       } else if (value == 'delete_account') {
                         await AnalyticsService.logMenuAction('delete_account');
                         _showDeleteAccountDialog(context, userProvider);
@@ -168,6 +176,21 @@ class _MainScreenState extends State<MainScreen> {
                                 ],
                               );
                             },
+                          ),
+                        ),
+                      // Admin menu item - only show for admin users
+                      if (userProvider.isAdmin)
+                        const PopupMenuItem(
+                          value: 'admin',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.admin_panel_settings,
+                                color: Colors.red,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Admin Panel'),
+                            ],
                           ),
                         ),
                       const PopupMenuItem(
