@@ -1,13 +1,36 @@
-# PWA Version Control & Update Strategy
+# BrownClaw Version Control & PWA Update Strategy
+
+## 🔥 Firestore-Based Version Checking (NEW)
+BrownClaw now uses **Firestore** for version checking instead of static JSON files, completely solving PWA caching issues!
+
+### How It Works:
+- **Version Storage**: `app_config/version` document in Firestore
+- **Update Check**: App queries Firestore directly (bypasses all caching)
+- **PWA Compatible**: Works perfectly with installed PWAs
+- **Real-time**: Admins can update version info instantly
+
+### Version Document Structure:
+```json
+{
+  "version": "1.1.2",
+  "buildNumber": 5,
+  "buildDate": "2025-10-30", 
+  "updateMessage": "New version available!",
+  "changelog": ["🔇 Production print suppression", "⚡ Performance improvements"],
+  "isUpdateRequired": false
+}
+```
 
 ## Codebase Versioning
 - Use Git for all source control and release management.
-- Tag each production release (e.g., v1.0.0) for traceability.
+- Tag each production release (e.g., v1.0.0) for traceability. 
 - Update `pubspec.yaml` version for every release.
+- **NEW**: Deploy script auto-updates Firestore version document
 
 ## User-Facing Versioning
 - Display the app version in the UI (e.g., About or Settings screen).
 - Maintain a changelog for transparency and debugging.
+- **NEW**: Update banners work in PWAs and regular web browsers
 
 ## Service Worker & Cache Management
 - Ensure the service worker updates and clears old caches on new deployments.

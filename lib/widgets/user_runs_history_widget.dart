@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
 import '../models/river_descent.dart';
+import '../utils/debug_logger.dart';
 
 /// Widget to display the user's historical runs on a specific river
 class UserRunsHistoryWidget extends StatelessWidget {
@@ -21,17 +22,13 @@ class UserRunsHistoryWidget extends StatelessWidget {
     final user = context.watch<UserProvider>().user;
 
     if (user == null) {
-      if (kDebugMode) {
-        print('🚫 UserRunsHistoryWidget: No user authenticated');
-      }
+      DebugLogger.warning('UserRunsHistoryWidget: No user authenticated');
       return const SizedBox.shrink();
     }
 
-    if (kDebugMode) {
-      print(
-        '🔍 UserRunsHistoryWidget: Fetching runs for riverRunId: $riverRunId, userId: ${user.uid}',
-      );
-    }
+    DebugLogger.log(
+      'UserRunsHistoryWidget: Fetching runs for riverRunId: $riverRunId, userId: ${user.uid}',
+    );
 
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -42,13 +39,13 @@ class UserRunsHistoryWidget extends StatelessWidget {
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          if (kDebugMode) {
-            print('❌ UserRunsHistoryWidget: Error fetching runs');
-            print('   Error type: ${snapshot.error.runtimeType}');
-            print('   Error message: ${snapshot.error}');
-            print('   RiverRunId: $riverRunId');
-            print('   UserId: ${user.uid}');
-          }
+          DebugLogger.error(
+            'UserRunsHistoryWidget: Error fetching runs\n'
+            '   Error type: ${snapshot.error.runtimeType}\n'
+            '   Error message: ${snapshot.error}\n'
+            '   RiverRunId: $riverRunId\n'
+            '   UserId: ${user.uid}',
+          );
           return _buildErrorCard(context, snapshot.error.toString());
         }
 

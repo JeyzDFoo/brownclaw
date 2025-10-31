@@ -130,6 +130,16 @@ service cloud.firestore {
       allow delete: if false;
     }
     
+    // App configuration collection - for version checking, feature flags, etc.
+    match /app_config/{docId} {
+      // Version document should be readable by all authenticated users
+      // This enables PWA-compatible version checking via Firestore
+      allow read: if isAuthenticated() && docId == 'version';
+      
+      // Only admins can write app configuration
+      allow create, update, delete: if isAdmin();
+    }
+    
     // Catch-all rule - deny access to any other collections
     match /{document=**} {
       allow read, write: if false;

@@ -66,12 +66,34 @@ sed -i '' "s/version = '[0-9]*\.[0-9]*\.[0-9]*'/version = '$NEW_VERSION'/" lib/v
 sed -i '' "s/buildNumber = $CURRENT_BUILD/buildNumber = $NEW_BUILD/" lib/version.dart
 sed -i '' "s/buildDate = '[0-9-]*'/buildDate = '$DATE'/" lib/version.dart
 
-# Update version.json
+# Update version.json (legacy - still used for web caching)
 sed -i '' "s/\"version\": \"[0-9]*\.[0-9]*\.[0-9]*\"/\"version\": \"$NEW_VERSION\"/" web/version.json
 sed -i '' "s/\"buildNumber\": $CURRENT_BUILD/\"buildNumber\": $NEW_BUILD/" web/version.json
 sed -i '' "s/\"buildDate\": \"[0-9-]*\"/\"buildDate\": \"$DATE\"/" web/version.json
 
 echo "✅ Version files updated"
+
+echo "🔥 Updating Firestore version document..."
+python3 setup_firestore_version.py > /dev/null 2>&1
+
+# Try to update Firestore using Node.js script if available
+if command -v node >/dev/null 2>&1; then
+    if node upload_version_to_firestore.js 2>/dev/null; then
+        echo "✅ Firestore version document updated automatically"
+    else
+        echo "⚠️  Could not auto-update Firestore - please update manually:"
+        echo "   Collection: app_config"
+        echo "   Document: version"
+        echo "   Build Number: $NEW_BUILD"
+        echo "   Version: $NEW_VERSION"
+    fi
+else
+    echo "⚠️  Node.js not available - please update Firestore manually:"
+    echo "   Collection: app_config"
+    echo "   Document: version" 
+    echo "   Build Number: $NEW_BUILD"
+    echo "   Version: $NEW_VERSION"
+fi
 echo ""
 
 echo "🧪 Running tests..."

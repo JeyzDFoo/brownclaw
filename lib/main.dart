@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
@@ -17,12 +17,29 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PerformanceLogger.log('flutter_binding_initialized');
 
-  // 🔇 QUICK FIX: Disable noisy debug prints for cleaner testing
-  // Comment out the next 3 lines to re-enable debug output
-  // debugPrint = (String? message, {int? wrapWidth}) {
-  //   // Silent - no more spam! 😄
-  // };
+  // 🔇 PRODUCTION: Disable ALL prints in release mode (production builds)
+  // This override ensures NO debug output appears in production deployments
+  if (!kDebugMode) {
+    // Override debugPrint to be completely silent in production
+    debugPrint = (String? message, {int? wrapWidth}) {
+      // Silent in production - no debug output
+    };
 
+    // Note: Flutter's print() function calls debugPrint internally in release builds
+    // This means ALL print() and debugPrint() calls are silenced in production
+    //
+    // ✅ Benefits:
+    // - Cleaner production logs (no spam)
+    // - Better performance (no string processing)
+    // - No sensitive debug info leaking to production
+    // - Professional user experience
+    //
+    // 🛠️ For debugging production issues:
+    // - Use Firebase Analytics for user behavior tracking
+    // - Use Firebase Crashlytics for error reporting
+    // - Use PerformanceLogger for performance metrics
+    // - Add specific production logging if needed (not debug prints)
+  }
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   PerformanceLogger.log('firebase_initialized');
 

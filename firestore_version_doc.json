@@ -1,0 +1,17 @@
+{
+  "version": "1.1.2",
+  "buildNumber": 5,
+  "buildDate": "2025-10-30",
+  "minRequiredBuild": 1,
+  "updateMessage": "New version available with production print suppression and improved performance! Please refresh to update.",
+  "changelog": [
+    "\ud83d\udd07 Production print suppression (clean logs)",
+    "\u26a1 Improved performance and debugging",
+    "\ud83d\udee0\ufe0f Enhanced version checking via Firestore",
+    "\ud83d\udcf1 Better PWA compatibility",
+    "\u2728 Previous: Launch screen and optimized assets"
+  ],
+  "isUpdateRequired": false,
+  "createdAt": "2025-10-30T17:57:39.883650",
+  "updatedAt": "2025-10-30T17:57:39.883666"
+}

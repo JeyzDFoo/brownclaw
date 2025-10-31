@@ -1,17 +1,26 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../version.dart';
 
-/// Service to check for app updates
+/// Service to check for app updates via Firestore
 ///
-/// Compares local build number with server version.json
+/// Compares local build number with Firestore app_config/version document
 /// Shows update prompt when new version is available
+///
+/// ✅ Benefits over static JSON:
+/// - Bypasses PWA caching completely
+/// - Real-time updates via Firestore
+/// - No HTTP cache issues
+/// - Admin can update version info instantly
 class VersionCheckerService {
-  static const String _versionEndpoint = '/version.json';
+  static const String _versionCollection = 'app_config';
+  static const String _versionDocument = 'version';
 
   DateTime? _lastCheckTime;
   static const Duration _checkInterval = Duration(hours: 1);
+
+  // Debug override - set to true to bypass rate limiting for testing
+  static const bool _debugMode = kDebugMode;
 
   bool _updateAvailable = false;
   String _updateMessage = 'A new version is available. Please refresh.';
@@ -27,14 +36,18 @@ class VersionCheckerService {
   ///
   /// Returns true if a newer version exists on the server
   Future<bool> checkForUpdate() async {
-    // Only run on web platform
+    // Only run on web platform (but allow debug override)
     if (!kIsWeb) {
-      debugPrint('VersionChecker: Not running on web, skipping check');
+      debugPrint(
+        'VersionChecker: Not running on web platform (kIsWeb=$kIsWeb), skipping check',
+      );
       return false;
     }
 
-    // Rate limit checks to once per hour
-    if (_lastCheckTime != null) {
+    debugPrint('VersionChecker: Running on web platform (kIsWeb=$kIsWeb)');
+
+    // Rate limit checks to once per hour (bypass in debug mode)
+    if (_lastCheckTime != null && !_debugMode) {
       final timeSinceLastCheck = DateTime.now().difference(_lastCheckTime!);
       if (timeSinceLastCheck < _checkInterval) {
         debugPrint(
@@ -44,22 +57,30 @@ class VersionCheckerService {
       }
     }
 
+    if (_debugMode) {
+      debugPrint('VersionChecker: Debug mode - bypassing rate limiting');
+    }
+
     try {
-      debugPrint('VersionChecker: Checking for updates...');
+      debugPrint('VersionChecker: Checking for updates via Firestore...');
       debugPrint('VersionChecker: Current build: ${AppVersion.buildNumber}');
 
-      // Add timestamp to prevent caching
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final url = '$_versionEndpoint?t=$timestamp';
-
-      final response = await http
-          .get(Uri.parse(url))
+      // Fetch version info from Firestore (bypasses all caching)
+      final versionDoc = await FirebaseFirestore.instance
+          .collection(_versionCollection)
+          .doc(_versionDocument)
+          .get()
           .timeout(const Duration(seconds: 10));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body) as Map<String, dynamic>;
+      if (versionDoc.exists) {
+        final data = versionDoc.data()!;
+        debugPrint('VersionChecker: Firestore document data: $data');
+
         _latestBuildNumber = data['buildNumber'] as int?;
         _updateMessage = data['updateMessage'] as String? ?? _updateMessage;
+
+        debugPrint('VersionChecker: Parsed latest build: $_latestBuildNumber');
+        debugPrint('VersionChecker: Current build: ${AppVersion.buildNumber}');
 
         // Parse changelog if available
         if (data['changelog'] is List) {
@@ -70,6 +91,9 @@ class VersionCheckerService {
 
         if (_latestBuildNumber != null) {
           _updateAvailable = _latestBuildNumber! > AppVersion.buildNumber;
+          debugPrint(
+            'VersionChecker: Update available? $_updateAvailable ($_latestBuildNumber > ${AppVersion.buildNumber})',
+          );
 
           if (_updateAvailable) {
             debugPrint(
@@ -91,7 +115,7 @@ class VersionCheckerService {
         _lastCheckTime = DateTime.now();
         return _updateAvailable;
       } else {
-        debugPrint('VersionChecker: HTTP ${response.statusCode}');
+        debugPrint('VersionChecker: Version document not found in Firestore');
         return false;
       }
     } catch (e) {
