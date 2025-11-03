@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/transalta_flow_data.dart';
 import '../services/transalta_service.dart';
+import '../services/sun_times_service.dart';
 
 /// Provider for managing TransAlta Barrier Dam flow data
 ///
@@ -12,6 +13,9 @@ class TransAltaProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _error;
   bool _isFetching = false; // Guard against concurrent fetch calls
+
+  // Civil twilight cache (date string -> DateTime)
+  final Map<String, DateTime> _civilTwilightCache = {};
 
   // Cache duration - matches service cache
   static const Duration _cacheDuration = Duration(minutes: 15);
@@ -88,6 +92,10 @@ class TransAltaProvider extends ChangeNotifier {
         debugPrint(
           'TransAltaProvider: Successfully fetched ${data.forecasts.length} days of data',
         );
+
+        // Pre-fetch civil twilight times for all forecast dates
+        await ensureTwilightCached();
+        debugPrint('TransAltaProvider: Civil twilight times cached');
       } else {
         // Check if we have cached data to fall back on
         if (_flowData != null && _lastFetchTime != null) {
@@ -134,6 +142,10 @@ class TransAltaProvider extends ChangeNotifier {
         debugPrint(
           'TransAltaProvider: Background refresh succeeded (${data.forecasts.length} days)',
         );
+
+        // Pre-fetch civil twilight times for all forecast dates
+        await ensureTwilightCached();
+
         notifyListeners(); // Update UI with fresh data
       } else {
         // Silent failure - keep using stale data
@@ -197,6 +209,58 @@ class TransAltaProvider extends ChangeNotifier {
     _lastFetchTime = null;
     _error = null;
     _isLoading = false;
+    _civilTwilightCache.clear();
+
+    // Also clear service-level caches
+    transAltaService.clearCache();
+    SunTimesService.clearCache();
+
+    debugPrint('TransAltaProvider: All caches cleared');
     notifyListeners();
+  }
+
+  /// Get civil twilight end time for a specific date
+  /// Caches results within the provider to avoid repeated API calls
+  /// Returns null if not yet fetched - call ensureTwilightCached first
+  DateTime? getCivilTwilight(DateTime date) {
+    final dateKey = '${date.year}-${date.month}-${date.day}';
+    return _civilTwilightCache[dateKey];
+  }
+
+  /// Ensure civil twilight times are cached for the forecast period
+  /// Call this during fetchFlowData to pre-populate the cache
+  Future<void> ensureTwilightCached() async {
+    if (_flowData == null) return;
+
+    // Get all unique dates from the forecast
+    final dates = <String>{};
+    for (final forecast in _flowData!.forecasts) {
+      for (final entry in forecast.entries) {
+        final date = entry.dateTime;
+        final dateKey = '${date.year}-${date.month}-${date.day}';
+        dates.add(dateKey);
+      }
+    }
+
+    // Fetch twilight times for any missing dates
+    for (final dateKey in dates) {
+      if (!_civilTwilightCache.containsKey(dateKey)) {
+        final parts = dateKey.split('-');
+        final date = DateTime(
+          int.parse(parts[0]),
+          int.parse(parts[1]),
+          int.parse(parts[2]),
+        );
+
+        try {
+          final twilight = await SunTimesService.getCivilTwilightEnd(date);
+          _civilTwilightCache[dateKey] = twilight;
+        } catch (e) {
+          debugPrint(
+            'TransAltaProvider: Failed to fetch twilight for $dateKey: $e',
+          );
+        }
+      }
+    }
   }
 }

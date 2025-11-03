@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transalta_flow_data.dart';
@@ -473,18 +472,37 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                   // Get arrival times with 15min travel time
                   final firstEntry = period.entries.first;
                   final lastEntry = period.entries.last;
-                  final startTime = firstEntry.getArrivalTimeString(
-                    travelTimeMinutes: 15,
+
+                  debugPrint(
+                    'Day $dayNumber has ${period.entries.length} entries',
+                  );
+                  debugPrint(
+                    'First entry: ${firstEntry.period}, Last entry: ${lastEntry.period}',
                   );
 
-                  // Cap end time at civil twilight if it extends past
-                  final rawEndTime = lastEntry.getWaterArrivalTime(
+                  final startArrival = firstEntry.getWaterArrivalTime(
                     travelTimeMinutes: 15,
                   );
+                  final startTime = _formatTimeShort(startArrival);
+
+                  // For single-hour releases, add 1 hour to the end time
+                  // Otherwise use the last entry's arrival time
+                  final rawEndTime = period.entries.length == 1
+                      ? lastEntry
+                            .getWaterArrivalTime(travelTimeMinutes: 15)
+                            .add(const Duration(hours: 1))
+                      : lastEntry.getWaterArrivalTime(travelTimeMinutes: 15);
+
+                  // Cap end time at civil twilight if it extends past
                   final twilight = _getCivilTwilight(rawEndTime);
-                  final cappedEndTime = rawEndTime.isAfter(twilight)
+                  final cappedEndTime =
+                      (twilight != null && rawEndTime.isAfter(twilight))
                       ? twilight
                       : rawEndTime;
+
+                  debugPrint(
+                    'Raw end time: $rawEndTime, Capped: $cappedEndTime',
+                  );
 
                   final hour12 = cappedEndTime.hour == 0
                       ? 12
@@ -509,15 +527,24 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                   // Show each period on a separate line with weather
                   final periodTimes = dayFlowPeriods
                       .map((period) {
-                        final start = period.entries.first.getArrivalTimeString(
-                          travelTimeMinutes: 15,
-                        );
+                        final startArrival = period.entries.first
+                            .getWaterArrivalTime(travelTimeMinutes: 15);
+                        final start = _formatTimeShort(startArrival);
+
+                        // For single-hour releases, add 1 hour to the end time
+                        // Otherwise use the last entry's arrival time
+                        final rawEndTime = period.entries.length == 1
+                            ? period.entries.last
+                                  .getWaterArrivalTime(travelTimeMinutes: 15)
+                                  .add(const Duration(hours: 1))
+                            : period.entries.last.getWaterArrivalTime(
+                                travelTimeMinutes: 15,
+                              );
 
                         // Cap end time at civil twilight if it extends past
-                        final rawEndTime = period.entries.last
-                            .getWaterArrivalTime(travelTimeMinutes: 15);
                         final twilight = _getCivilTwilight(rawEndTime);
-                        final cappedEndTime = rawEndTime.isAfter(twilight)
+                        final cappedEndTime =
+                            (twilight != null && rawEndTime.isAfter(twilight))
                             ? twilight
                             : rawEndTime;
 
@@ -627,7 +654,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                           Text(
                             flowInfo,
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 10,
                               color: hasFlow
                                   ? (isDark
                                         ? Colors.blue.shade100
@@ -637,7 +664,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                                         : Colors.grey.shade600),
                             ),
                             textAlign: TextAlign.center,
-                            maxLines: 2,
+                            maxLines: 4,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
@@ -960,6 +987,11 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                             travelTimeMinutes: 15,
                           );
                           final twilight = _getCivilTwilight(endTime);
+
+                          if (twilight == null) {
+                            return const SizedBox.shrink(); // No twilight data available
+                          }
+
                           final twilightStr =
                               '${twilight.hour > 12 ? twilight.hour - 12 : twilight.hour}:${twilight.minute.toString().padLeft(2, '0')}${twilight.hour >= 12 ? 'pm' : 'am'}';
 
@@ -1029,38 +1061,20 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     return '';
   }
 
-  /// Calculate approximate civil twilight (sunset) time for Kananaskis
-  /// Civil twilight is when sun is 6° below horizon (safe paddling limit)
-  /// Returns approximate sunset time for the given date
-  DateTime _getCivilTwilight(DateTime date) {
-    // Kananaskis is at 51.1°N, 115.0°W
-    // Approximate sunset times for this latitude (Mountain Time)
-    // These are rough estimates - civil twilight is ~30min after sunset
+  /// Format time without am/pm (e.g., "5:15")
+  String _formatTimeShort(DateTime time) {
+    final hour12 = time.hour == 0
+        ? 12
+        : (time.hour > 12 ? time.hour - 12 : time.hour);
+    final minuteStr = time.minute.toString().padLeft(2, '0');
+    return '$hour12:$minuteStr';
+  }
 
-    final dayOfYear = DateTime(
-      date.year,
-      date.month,
-      date.day,
-    ).difference(DateTime(date.year, 1, 1)).inDays;
-
-    // Simplified sunset calculation for 51°N latitude
-    // Summer solstice (June 21, day 172): ~9:30 PM civil twilight
-    // Winter solstice (Dec 21, day 355): ~4:30 PM civil twilight
-    // Spring/Fall equinox (Mar 20/Sep 22): ~7:00 PM civil twilight
-
-    // Peak to trough amplitude is about 2.5 hours (150 minutes)
-    // Centered around 6:30 PM (18.5 hours)
-    final baseHour = 18.5; // 6:30 PM
-    final amplitude = 2.5; // hours
-
-    // Sine wave with peak around day 172 (summer solstice)
-    final angle = 2 * math.pi * (dayOfYear - 172) / 365;
-    final offsetHours = amplitude * (-1) * math.cos(angle);
-
-    final twilightHours = baseHour + offsetHours;
-    final hour = twilightHours.floor();
-    final minute = ((twilightHours - hour) * 60).round();
-    return DateTime(date.year, date.month, date.day, hour, minute);
+  /// Get civil twilight end time for Kananaskis from provider cache
+  /// Provider pre-fetches these when loading flow data
+  DateTime? _getCivilTwilight(DateTime date) {
+    final provider = Provider.of<TransAltaProvider>(context, listen: false);
+    return provider.getCivilTwilight(date);
   }
 
   /// Check if a release period extends past civil twilight
@@ -1071,6 +1085,7 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
     final endTime = lastEntry.getWaterArrivalTime(travelTimeMinutes: 15);
     final twilight = _getCivilTwilight(endTime);
 
+    if (twilight == null) return false; // No twilight data available
     return endTime.isAfter(twilight);
   }
 }
