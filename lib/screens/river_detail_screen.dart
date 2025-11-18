@@ -546,36 +546,70 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
 
     try {
-      // Get the station ID from river data
+      // Get GPS coordinates - prefer run coordinates if available, fallback to gauge_station
+      double? latitude;
+      double? longitude;
+      String? stationName;
       final stationId = widget.riverData['stationId'] as String?;
-      if (stationId == null || stationId.isEmpty) {
-        setState(() {
-          _weatherError = 'No station linked';
-          _isLoadingWeather = false;
-        });
-        return;
+
+      // Check if run has coordinates field (BC runs)
+      final coordinates = widget.riverData['coordinates'];
+      if (coordinates is Map<String, dynamic>) {
+        latitude = coordinates['latitude'] as double?;
+        longitude = coordinates['longitude'] as double?;
+        stationName = widget.riverData['riverName'] as String? ?? 'Unknown';
+
+        if (kDebugMode) {
+          print('🌤️ Using run coordinates: $latitude, $longitude');
+        }
       }
 
-      // Fetch the gauge station to get GPS coordinates
-      final station = await GaugeStationService.getStationById(stationId);
-      if (station == null) {
-        setState(() {
-          _weatherError = 'Station not found';
-          _isLoadingWeather = false;
-        });
-        return;
+      // Fallback to gauge_station lookup (existing runs)
+      if (latitude == null || longitude == null) {
+        if (stationId == null || stationId.isEmpty) {
+          setState(() {
+            _weatherError = 'No station linked';
+            _isLoadingWeather = false;
+          });
+          return;
+        }
+
+        final station = await GaugeStationService.getStationById(stationId);
+        if (station == null) {
+          setState(() {
+            _weatherError = 'Station not found';
+            _isLoadingWeather = false;
+          });
+          return;
+        }
+
+        latitude = station.latitude;
+        longitude = station.longitude;
+        stationName = station.name;
+
+        if (kDebugMode) {
+          print('🌤️ Using gauge_station coordinates: $latitude, $longitude');
+        }
       }
 
       if (kDebugMode) {
-        print(
-          '🌤️ Loading weather for station ${station.name} at ${station.latitude}, ${station.longitude}',
-        );
+        print('🌤️ Loading weather for $stationName at $latitude, $longitude');
       }
+
+      // Create a minimal GaugeStation object for weather fetching
+      final weatherStation = GaugeStation(
+        stationId: stationId ?? 'unknown',
+        name: stationName ?? 'Unknown',
+        latitude: latitude,
+        longitude: longitude,
+        isActive: true,
+        parameters: [],
+      );
 
       // Fetch current weather and 5-day forecast using provider
       final weatherProvider = context.read<WeatherProvider>();
       final results = await weatherProvider.fetchAllWeather(
-        station,
+        weatherStation,
         forecastDays: 5,
       );
 

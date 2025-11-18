@@ -62,6 +62,7 @@ class _RiverRunSearchScreenState extends State<RiverRunSearchScreen>
       'dataSource': runWithStations.hasLiveData ? 'live' : 'unavailable',
       'isLive': runWithStations.hasLiveData,
       'status': runWithStations.flowStatus,
+      'coordinates': runWithStations.run.coordinates,
     };
   }
 

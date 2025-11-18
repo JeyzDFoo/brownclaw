@@ -141,6 +141,7 @@ class GaugeStationService {
         return cached;
       }
 
+      // Try fetching by document ID first (legacy behavior)
       final doc = await _stationsCollection.doc(stationId).get();
       if (doc.exists) {
         final station = GaugeStation.fromMap(
@@ -153,6 +154,27 @@ class GaugeStationService {
 
         return station;
       }
+
+      // If not found by doc ID, try querying by stationId field (for BC runs)
+      // This handles the case where stationId is a Gov Canada ID like "08GA072"
+      final querySnapshot = await _stationsCollection
+          .where('stationId', isEqualTo: stationId)
+          .where('isActive', isEqualTo: true)
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        final station = GaugeStation.fromMap(
+          querySnapshot.docs.first.data() as Map<String, dynamic>,
+          docId: querySnapshot.docs.first.id,
+        );
+
+        // Cache using the Gov Canada stationId
+        _addToCache(stationId, station);
+
+        return station;
+      }
+
       return null;
     } catch (e) {
       if (kDebugMode) {

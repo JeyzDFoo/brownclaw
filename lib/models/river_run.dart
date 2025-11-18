@@ -20,6 +20,8 @@ class RiverRun {
   final double? optimalFlowMax; // Optimal flow range maximum
   final String? flowUnit; // 'cms', 'cfs', etc.
   final String? stationId; // Associated gauge station ID (if any)
+  final Map<String, double>?
+  coordinates; // GPS coordinates {latitude, longitude}
   final String? createdBy; // User who created this section
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -43,6 +45,7 @@ class RiverRun {
     this.optimalFlowMax,
     this.flowUnit,
     this.stationId,
+    this.coordinates,
     this.createdBy,
     this.createdAt,
     this.updatedAt,
@@ -69,6 +72,13 @@ class RiverRun {
       optimalFlowMax: _safeToDouble(map['optimalFlowMax']),
       flowUnit: map['flowUnit'] as String?,
       stationId: map['stationId'] as String?,
+      coordinates: map['coordinates'] != null
+          ? Map<String, double>.from({
+              'latitude': _safeToDouble(map['coordinates']['latitude']) ?? 0.0,
+              'longitude':
+                  _safeToDouble(map['coordinates']['longitude']) ?? 0.0,
+            })
+          : null,
       createdBy: map['createdBy'] as String?,
       createdAt: _timestampToDateTime(map['createdAt']),
       updatedAt: _timestampToDateTime(map['updatedAt']),
@@ -102,6 +112,7 @@ class RiverRun {
     if (optimalFlowMax != null) map['optimalFlowMax'] = optimalFlowMax;
     if (flowUnit != null) map['flowUnit'] = flowUnit;
     if (stationId != null) map['stationId'] = stationId;
+    if (coordinates != null) map['coordinates'] = coordinates;
     if (createdBy != null) map['createdBy'] = createdBy;
 
     // Handle timestamp serialization based on usage

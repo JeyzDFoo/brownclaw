@@ -217,6 +217,7 @@ class _FavouritesScreenState extends State<FavouritesScreen>
           : 'unavailable',
       'isLive': _hasLiveData(runWithStations, liveData),
       'status': _getFlowStatus(runWithStations, liveData, liveDataProvider),
+      'coordinates': runWithStations.run.coordinates,
     };
   }
 
