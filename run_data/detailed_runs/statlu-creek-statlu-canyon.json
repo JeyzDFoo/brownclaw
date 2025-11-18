@@ -1,0 +1,46 @@
+{
+  "id": "statlu-creek-statlu-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/statlu-creek-statlu-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:12.687255Z",
+  "title": "Statlu Creek - Statlu Canyon",
+  "river_name": "Statlu Creek",
+  "section_name": "Statlu Canyon",
+  "whats_it_like": "Short but high quality, creamy smooth granite bedrock and boulders deep in the Fraser Valley.",
+  "difficulty": {
+    "text": "V at medium levels.",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours + possible hike in."
+  },
+  "when_to_go": "After rainfall or snowmelt in early summer.",
+  "gauge_stations": [
+    {
+      "station_id": "08MH103",
+      "name": "Chilliwack River above Slesse",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH103"
+    },
+    {
+      "station_id": "08MH005",
+      "name": "Alouette River",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH005"
+    },
+    {
+      "station_id": "08MF068",
+      "name": "Coquihalla River",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MF068"
+    },
+    {
+      "station_id": "08MH147",
+      "name": "Stave River",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH147"
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "muelville-creek-falls",
+  "url": "https://www.bcwhitewater.org/reaches/muelville-creek-falls",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:15.944051Z",
+  "title": "Muelville Creek falls",
+  "river_name": "Muelville Creek falls",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "Two park and hucks in a beautiful canyon",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy scouting and portaging on well maintained trails",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Early spring and summer",
+  "gauge": "0.866cms↓ (Oct 21 06:10)\n!"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "skookumchuck",
+  "url": "https://www.bcwhitewater.org/reaches/skookumchuck",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:56.055800Z",
+  "title": "Skookumchuck",
+  "river_name": "Skookumchuck",
+  "whats_it_like": "Classic tidal rapid surfing.  Character changes with the speed of the current.  Awesome surroundings.",
+  "difficulty": {
+    "text": "III, massive volume.",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "N/A.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "The wave will be in good form for 2-4 hours, depending on the tide exchange."
+  },
+  "when_to_go": "Spring through fall.  Usually runs during the night in the winter."
+}

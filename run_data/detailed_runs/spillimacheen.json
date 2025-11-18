@@ -1,0 +1,25 @@
+{
+  "id": "spillimacheen",
+  "url": "https://www.bcwhitewater.org/reaches/spillimacheen",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:08.411444Z",
+  "title": "Spillimacheen",
+  "river_name": "Spillimacheen",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Short and sweet, Spilli has 5 major rapids with quality boogie water in between.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Everything is scoutable and nearly everything is portageable.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "20 minutes to 3 hours, depending on time spent scouting and/or lapping rapids"
+  },
+  "when_to_go": "Spring and fall - low water season",
+  "gauge": "7.58cms↓ (Oct 21 05:30)\n!"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "big-mouth-creek",
+  "url": "https://www.bcwhitewater.org/reaches/big-mouth-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:22.125470Z",
+  "title": "Big Mouth Creek",
+  "river_name": "Big Mouth Creek",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "A beautiful wilderness adventure, cruising down continuous rapids, surrounded by many unique rock features and old growth forests.",
+  "difficulty": {
+    "text": "III-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Everything is boat scoutable",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2 - 4 hours"
+  },
+  "when_to_go": "Spring and early summer",
+  "gauge": "13.5cms↓ (Oct 21 05:25)\n!"
+}

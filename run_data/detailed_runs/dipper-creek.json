@@ -1,0 +1,28 @@
+{
+  "id": "dipper-creek",
+  "url": "https://www.bcwhitewater.org/reaches/dipper-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:41.691317Z",
+  "title": "Dipper Creek",
+  "river_name": "Dipper Creek",
+  "whats_it_like": "Big waterfalls, mandatory class V, huge commitment.  Top tier adventure boating in a fantastic canyon.",
+  "difficulty": {
+    "text": "V+",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult to impossible. Portaging or even walking out for much of the creek is not an option.",
+  "time": {
+    "hours_min": 24,
+    "hours_max": 24,
+    "original": "At minimum 1 day.  Probably multiple days if you want to descend the whole creek without previous knowledge."
+  },
+  "when_to_go": "Late fall - usually October.",
+  "gauge": "85.8cms↑ (Oct 21 06:05)\n!",
+  "flow_range": {
+    "max": 80.0,
+    "unit": "cms"
+  }
+}

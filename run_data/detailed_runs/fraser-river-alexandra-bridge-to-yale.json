@@ -1,0 +1,32 @@
+{
+  "id": "fraser-river-alexandra-bridge-to-yale",
+  "url": "https://www.bcwhitewater.org/reaches/fraser-river-alexandra-bridge-to-yale",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:00.792254Z",
+  "title": "Fraser River – Alexandra Bridge to Yale",
+  "river_name": "Fraser River – Alexandra Bridge to Yale",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Huge volume, pool drop, big crashing waves and swirly eddies, lots of floating. The road is high above the river and accessible only in a few spots.",
+  "difficulty": {
+    "text": "II-III, one IV-",
+    "min": 2,
+    "max": 4
+  },
+  "scouting_portaging": "Scout Saddle Rock rapid. It takes some exploring to see it from the road. Portage is possible over big boulders (but not very pleasant).",
+  "time": {
+    "original": "Long (its 20km)"
+  },
+  "when_to_go": "When everything else is too low. Winter and before the snow melt in spring (January to March) and occasionally in fall after a long drought.",
+  "gauge": "1260.0cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "min": 700.0,
+    "max": 1300.0,
+    "unit": "cms"
+  },
+  "coordinates": {
+    "latitude": -1.0,
+    "longitude": 300.0
+  }
+}

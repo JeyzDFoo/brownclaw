@@ -1,0 +1,28 @@
+{
+  "id": "seymour-river-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/seymour-river-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:45.173637Z",
+  "title": "Seymour River Canyon",
+  "river_name": "Seymour River Canyon",
+  "whats_it_like": "Classic kayaking in a deep box canyon.  You would never know it's in the heart of North Van.",
+  "difficulty": {
+    "text": "Highly level dependent - ranges from fun class IV to raging class V.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate scouting, difficult to impossible portaging.",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 5,
+    "original": "1.5 hours including the hike for a first run."
+  },
+  "when_to_go": "Rain-fed all year, snowmelt in the spring and summer.",
+  "gauge": "19.751cms↓ (Nov 18 11:00)",
+  "coordinates": {
+    "latitude": 7.0,
+    "longitude": 2014.0
+  }
+}

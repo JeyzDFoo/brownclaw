@@ -1,0 +1,24 @@
+{
+  "id": "pamela-creek",
+  "url": "https://www.bcwhitewater.org/reaches/pamela-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:25.636905Z",
+  "title": "Pamela Creek",
+  "river_name": "Pamela Creek",
+  "whats_it_like": "One of the better creeks in Gold River - excellent bedrock ledges and waterfalls, with some classic Island mank.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours."
+  },
+  "when_to_go": "Rain fed all year, snow melt in the spring.",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!"
+}

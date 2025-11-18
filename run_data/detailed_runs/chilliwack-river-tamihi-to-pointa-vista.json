@@ -1,0 +1,26 @@
+{
+  "id": "chilliwack-river-tamihi-to-pointa-vista",
+  "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-tamihi-to-pointa-vista",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:22.515305Z",
+  "title": "Chilliwack River - Tamihi to Pointa Vista",
+  "river_name": "Chilliwack River",
+  "section_name": "Tamihi to Pointa Vista",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Some continuous boulder gardens especially at higher levels, pool drop, gravel bed, medium volume.",
+  "difficulty": {
+    "text": "III, one IV- @ Tamihi",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Easy to scout",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Year round, possibly too low in winter and late summer if it does not rain.",
+  "gauge": "11.7cms↓ (Oct 21 06:05)\n!"
+}

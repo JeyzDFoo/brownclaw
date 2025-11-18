@@ -1,0 +1,34 @@
+{
+  "id": "puntledge-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/puntledge-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:33.666029Z",
+  "title": "Puntledge River - Upper",
+  "river_name": "Puntledge River",
+  "section_name": "Upper",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A unique section consisting entirely of massive slides. Unpredictable dam releases.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is often not practical due to forested banks and very long rapids.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "Rare dam releases Oct-June, usually during heavy rains or big snowmelt years.",
+  "gauge": "15.5cms↓ (Oct 21 05:20)\n!",
+  "flow_range": {
+    "min": 80.0,
+    "max": 120.0,
+    "unit": "cms"
+  },
+  "flows_description": "Flows in the Upper Puntledge are released from the BC Hydro's Comox Dam (PUNTLEDGE RIVER BELOW DIVERSION 08HB084).  Recommended flows for the Upper Puntledge are 80-120cms. BC Hydro provides release forecasts for the Comox Dam for the upcoming 3-4 days on its website. Use the \"Forecast Puntledge River Gauge 6 Flow,\" not the \"Forecast Comox Discharge.\" https://www.bchydro.com/energy-in-bc/operations/transmission-reservoir-data/reservoir-discharges/comox-dam.html The dam releases are most common just before and during big rain events, to make room in the reservoir for the incoming water. Releases are often timed for low tide to prevent flooding in town. High tide or the upcoming end of a storm can sometimes cause the release to end abruptly.  In years past, BC Hydro coordinated a dam release for one weekend in May or June for the Puntledge River Paddle Festival. 2010 hydrograph, maximum, median and minimum flows for the PUNTLEDGE RIVER BELOW DIVERSION (08HB084). The maximum values (green) should give an impression of what time of year the river be more likely to have a dam release. The 2010 values (red) give an example year and also show the unpredictable nature of these releases. An example of the BC Hydro discharge forecast chart. Use the \"Forecast Puntledge River Gauge 6 Flow,\" not the \"Forecast Comox Discharge.\" The difference is going through the pipe.",
+  "shuttle_description": "Access to the take out for the Lower Puntledge (III+) is easy, with many options located in downtown Courtenay, a common one being at the bridge on Condensory Road. Access to the put in for the Upper Puntledge (V) is found off Forbidden Plateau Road at Barber's Hole Parking for Nymph Falls Regional Nature Park. From the parking lot, which is located next to a huge field/airstrip, walk ~500m upstream to the southwest along trails and an old road to a put in on river left, just below the diversion dam. The dam release sirens will probably be going off. BC Hydro map of Puntledge recreation area.",
+  "on_the_water_description": "Find a guide to show you down. Scouting is not practical due to very long rapids with forested banks, and would often be trespassing on private property. The run consists of several complex and sometimes shallow slides, often with huge ledge holes at the end. Fish ladders have been constructed within many of these slides, and must be avoided. Logs are often sprinkled around the wide riverbed and hung up on the slides. In addition to the slides, there are two notably larger drops: Nymph Falls and Stotan Falls. Located fairly early on in the run, Nymph Falls is usually run down the right channel, which is a steep and fast slide about 10m tall with an undercut right wall. Trails on river left give a partial view of the approach to this slide, but the crux remains out of view behind the island. Further downstream just after the second road bridge (Duncan Bay Mainline), Stotan Falls is a very fun multi-tiered drop run down the left channel: a couple vertical 5m drops combined with holes and slides. Shortly after Stotan Falls, the confluence with the Browns River is on the left, which marks the beginning of the play run. Most paddlers finish by paddling out the Lower Puntledge play run (III+) to Courtenay, watching out for the riverwide weir at the hatchery. The left channel at Nymph Falls is not recommended. The right channel that is usually run is in the far background. Stotan Falls looking downstream."
+}

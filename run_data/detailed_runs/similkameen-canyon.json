@@ -1,0 +1,25 @@
+{
+  "id": "similkameen-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/similkameen-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:51.276980Z",
+  "title": "Similkameen Canyon",
+  "river_name": "Similkameen Canyon",
+  "contributor": "David Wortley",
+  "whats_it_like": "Beautiful Deep Canyon running through some unique scenery",
+  "difficulty": {
+    "text": "III+/IV-/IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Mostly easy",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 6,
+    "original": "1.5 or 3-6 hours"
+  },
+  "when_to_go": "Spring/summer",
+  "gauge": "3.81cms↓ (Oct 21 04:15)\n!"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "soo-river-railroad-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/soo-river-railroad-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:06.777191Z",
+  "title": "Soo River - Railroad Canyon",
+  "river_name": "Soo River",
+  "section_name": "Railroad Canyon",
+  "whats_it_like": "A short, stout addition to the classic section of the Soo.  Easy access canyon with big holes.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour."
+  },
+  "when_to_go": "Summer - preferred when the Soo is medium and lower."
+}

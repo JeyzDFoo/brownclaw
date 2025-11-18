@@ -1,0 +1,24 @@
+{
+  "id": "gamsby-river",
+  "url": "https://www.bcwhitewater.org/reaches/gamsby-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:03.975480Z",
+  "title": "Gamsby River",
+  "river_name": "Gamsby River",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "Ultra-classic, coastal wilderness multiday.  3 days of white water.  2 days of flat.",
+  "difficulty": {
+    "text": "III-V",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "All rapids can be scouted/portaged.  Walking the canyons due to high water would be a major undertaking.",
+  "time": {
+    "hours_min": 120,
+    "hours_max": 120,
+    "original": "5 days minimum.  6 or 7 are recommended in case of high water portaging or for enjoying the area."
+  },
+  "when_to_go": "Late August, early September.  Getting the correct level is one of the most challenging logistics to this trip."
+}

@@ -1,0 +1,26 @@
+{
+  "id": "heber-river-lower",
+  "url": "https://www.bcwhitewater.org/reaches/heber-river-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:23.100582Z",
+  "title": "Heber River - Lower",
+  "river_name": "Heber River",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A box canyon ending at a baseball diamond",
+  "difficulty": {
+    "text": "IV-V (P)",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Not a bad idea to scout the crux rapid before putting on.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "After rainfall October-March, snowmelt April-June",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!"
+}

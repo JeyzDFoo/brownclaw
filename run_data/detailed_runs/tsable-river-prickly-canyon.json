@@ -1,0 +1,34 @@
+{
+  "id": "tsable-river-prickly-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/tsable-river-prickly-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:38.301224Z",
+  "title": "Tsable River - Prickly Canyon",
+  "river_name": "Tsable River",
+  "section_name": "Prickly Canyon",
+  "contributor": "David Wortley",
+  "whats_it_like": "Steep, continuous and committing with various slides and drops.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Prickly",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours"
+  },
+  "when_to_go": "Winter - In when most other things around there are too low",
+  "flow_range": {
+    "min": 10.0,
+    "max": 12.0,
+    "unit": "cms"
+  },
+  "coordinates": {
+    "latitude": 49.5251663691617,
+    "longitude": -124.84815684737005
+  }
+}

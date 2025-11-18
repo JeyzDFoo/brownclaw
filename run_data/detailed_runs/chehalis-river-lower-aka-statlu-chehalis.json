@@ -1,0 +1,25 @@
+{
+  "id": "chehalis-river-lower-aka-statlu-chehalis",
+  "url": "https://www.bcwhitewater.org/reaches/chehalis-river-lower-aka-statlu-chehalis",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:08.202411Z",
+  "title": "Chehalis River - Lower (aka Statlu-Chehalis)",
+  "river_name": "Chehalis River",
+  "section_name": "Lower (aka Statlu-Chehalis)",
+  "contributor": "Scott McBride",
+  "whats_it_like": "The best intermediate run in the Fraser Valley, down a wilderness canyon",
+  "difficulty": {
+    "text": "III-IV-",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "The IV- rapids can be scouted and portaged at low water",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour at high water; 4 hours at low water with scouting"
+  },
+  "when_to_go": "During or after rainfall October-March, snowmelt April-June"
+}

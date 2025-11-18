@@ -1,0 +1,35 @@
+{
+  "id": "cameron-river",
+  "url": "https://www.bcwhitewater.org/reaches/cameron-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:47.819774Z",
+  "title": "Cameron River",
+  "river_name": "Cameron River",
+  "whats_it_like": "Excellent river-running with small canyons and bedrock rapids.",
+  "difficulty": {
+    "text": "IV at medium levels",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Moderate - a few rapids would be difficult to walk.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 3,
+    "original": "1-3 hours."
+  },
+  "when_to_go": "After rain.  Short snowmelt season in the spring.",
+  "gauge_stations": [
+    {
+      "station_id": "08HB002",
+      "name": "Englishman River gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HB002"
+    },
+    {
+      "station_id": "08HB029",
+      "name": "Little Qualicum River gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HB029"
+    }
+  ]
+}

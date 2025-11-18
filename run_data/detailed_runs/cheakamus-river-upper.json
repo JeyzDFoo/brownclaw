@@ -1,0 +1,32 @@
+{
+  "id": "cheakamus-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:06.609098Z",
+  "title": "Cheakamus River - Upper",
+  "river_name": "Cheakamus River",
+  "section_name": "Upper",
+  "whats_it_like": "Classic. Continuous river running at its finest.",
+  "difficulty": {
+    "text": "IV at 2.5, continuous.  Gets harder as levels rise.",
+    "min": 2,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate - good boat scouting skills will make things go much faster.",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 5,
+    "original": "1.5 hours if you really take your time.  A casual 20 minutes when it's familiar."
+  },
+  "when_to_go": "Long season - spring, summer and fall.",
+  "gauge": "1.875m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA072",
+      "name": "1.875m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA072"
+    }
+  ]
+}

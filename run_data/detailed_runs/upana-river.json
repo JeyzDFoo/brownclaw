@@ -1,0 +1,29 @@
+{
+  "id": "upana-river",
+  "url": "https://www.bcwhitewater.org/reaches/upana-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:44.582568Z",
+  "title": "Upana River",
+  "river_name": "Upana River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A short creek run in Gold River with a blind 20 footer",
+  "difficulty": {
+    "text": "IV+ to V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "The canyon section including the waterfall is not easily scoutable",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "After rainfall October-March, snowmelt April-June",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!",
+  "flow_range": {
+    "max": 100.0,
+    "unit": "cms"
+  }
+}

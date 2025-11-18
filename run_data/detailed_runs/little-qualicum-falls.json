@@ -1,0 +1,34 @@
+{
+  "id": "little-qualicum-falls",
+  "url": "https://www.bcwhitewater.org/reaches/little-qualicum-falls",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:55.254509Z",
+  "title": "Little Qualicum Falls",
+  "river_name": "Little Qualicum Falls",
+  "whats_it_like": "An exciting double drop draped in mystical Vancouver Island rainforest.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy - scout from the trail network.",
+  "time": {
+    "original": "Park and huck; scouting + 2 minutes of paddling."
+  },
+  "when_to_go": "Rain fed in the fall/winter, snowmelt in the spring.",
+  "gauge": "4.25cms↓ (Oct 21 05:20)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08HB029",
+      "name": "Little Qualicum online gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HB029"
+    }
+  ],
+  "flow_range": {
+    "min": 10.0,
+    "max": 15.0,
+    "unit": "cms"
+  }
+}

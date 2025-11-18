@@ -1,0 +1,31 @@
+{
+  "id": "koksilah-river-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/koksilah-river-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:48.899010Z",
+  "title": "Koksilah River - Canyon",
+  "river_name": "Koksilah River",
+  "section_name": "Canyon",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A good introductory creeking run near Victoria",
+  "difficulty": {
+    "text": "III-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Mostly reasonable to scout and portage, Marble Falls is tricky.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "October-April during or after rain",
+  "gauge": "1.69cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "min": 20.0,
+    "max": 30.0,
+    "unit": "cms"
+  }
+}

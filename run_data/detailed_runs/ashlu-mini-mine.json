@@ -1,0 +1,30 @@
+{
+  "id": "ashlu-mini-mine",
+  "url": "https://www.bcwhitewater.org/reaches/ashlu-mini-mine",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:08.761900Z",
+  "title": "Ashlu Mini Mine",
+  "river_name": "Ashlu Mini Mine",
+  "contributor": "David Wortley",
+  "whats_it_like": "A short intro to Ashlu paddling, bedrock rapids, boulder gardens and optional waterfall.",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Mostly only boat-scouting required with a few places you can take a look before if you so wish. Everything is scoutable even at higher flows but portaging some rapids would take a great deal of effort. The final waterfall can be scouted from the takeout bridge, or optionally not run.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "20mins - 1 hour"
+  },
+  "when_to_go": "July-September, See Ashlu Release Schedule",
+  "gauge": "3.29cms↑ (Feb 14 11:44)\n!",
+  "flow_range": {
+    "min": 20.0,
+    "max": 30.0,
+    "unit": "cms"
+  }
+}

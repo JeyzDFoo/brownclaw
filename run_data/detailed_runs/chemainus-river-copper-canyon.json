@@ -1,0 +1,25 @@
+{
+  "id": "chemainus-river-copper-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/chemainus-river-copper-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:11.504900Z",
+  "title": "Chemainus River - Copper Canyon",
+  "river_name": "Chemainus River",
+  "section_name": "Copper Canyon",
+  "whats_it_like": "Good moderate difficulty whitewater with some beautiful canyons.",
+  "difficulty": {
+    "text": "III-IV+ at medium levels.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Varies.  Some difficult portage options in spots; the hardest rapids have desperate portage options.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "3 hours."
+  },
+  "when_to_go": "Winter rainy season.",
+  "gauge": "6.91cms↓ (Oct 21 05:20)\n!"
+}

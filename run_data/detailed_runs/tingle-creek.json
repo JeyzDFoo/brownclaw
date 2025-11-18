@@ -1,0 +1,24 @@
+{
+  "id": "tingle-creek",
+  "url": "https://www.bcwhitewater.org/reaches/tingle-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:30.340072Z",
+  "title": "Tingle Creek",
+  "river_name": "Tingle Creek",
+  "contributor": "Ian Collings",
+  "whats_it_like": "Beautiful clear turquoise waters, south of the Stave Valley.  The secluded Tingle Valley runs between Mount Robbie Reid, and the Justice Group (Judge Howay & The Defendant).",
+  "difficulty": {
+    "text": "II-III",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Mostly boat scout-able, but quite a bit a wood.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 4,
+    "original": "4 hours, but there are considerable logistics in accessing and leaving the river."
+  },
+  "when_to_go": "Spring/Early Summer"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "tulameen-river",
+  "url": "https://www.bcwhitewater.org/reaches/tulameen-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:39.799130Z",
+  "title": "Tulameen River",
+  "river_name": "Tulameen River",
+  "contributor": "David Wortley",
+  "whats_it_like": "A chill run with an out of character class IV drop.",
+  "difficulty": {
+    "text": "II-III (IV for \"Tulameanie Drop\"",
+    "min": 2,
+    "max": 4
+  },
+  "scouting_portaging": "Scout / portage the main drop on the left",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "Early Summer",
+  "gauge": "3.19cms↓ (Oct 21 05:20)\n!"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "cascade-creek",
+  "url": "https://www.bcwhitewater.org/reaches/cascade-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:54.031681Z",
+  "title": "Cascade Creek",
+  "river_name": "Cascade Creek",
+  "whats_it_like": "Steep, manky boulder rapids, a good bedrock canyon and some enormous waterfalls at the take out.",
+  "difficulty": {
+    "text": "IV-V (V+)",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 5,
+    "original": "4-5 hours."
+  },
+  "when_to_go": "After rain or early season snowmelt."
+}

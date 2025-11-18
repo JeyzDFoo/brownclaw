@@ -1,0 +1,25 @@
+{
+  "id": "adam-river",
+  "url": "https://www.bcwhitewater.org/reaches/adam-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:07:58.567057Z",
+  "title": "Adam River",
+  "river_name": "Adam River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Short quality intermediate granite canyon",
+  "difficulty": {
+    "text": "III+ with one optional V-",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to portage the crux ledge",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 3,
+    "original": "1-3 hours"
+  },
+  "when_to_go": "During or after rainfall October-March, snowmelt April-June",
+  "gauge": "75.4cms↓ (Oct 21 06:10)\n!"
+}

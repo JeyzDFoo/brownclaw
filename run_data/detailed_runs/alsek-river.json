@@ -1,0 +1,29 @@
+{
+  "id": "alsek-river",
+  "url": "https://www.bcwhitewater.org/reaches/alsek-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:00.343531Z",
+  "title": "Alsek River",
+  "river_name": "Alsek River",
+  "contributor": "Ali Marshall and Maxi Kniewasser",
+  "whats_it_like": "One of the most spectacular northern wilderness trips in the world.  Challenging logistics, epic glaciers.",
+  "difficulty": {
+    "text": "III-IV (V through Turnback Canyon)",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy, except if you can't run Turnback Canyon then you face one of the most grueling portages out there.                                  It's a 6 km, day long hike over the terminal moraine of the Tweedsmuir Glacier.",
+  "time": {
+    "hours_min": 192,
+    "hours_max": 240,
+    "original": "8-10 days (depends on how much hiking and exploring you want to do)."
+  },
+  "when_to_go": "September or October if you want to attempt the canyon.  You need cold and dry weather. If you commit to                       portaging Turnback, go in July-September.",
+  "gauge": "164.0cms↓ (Oct 21 06:05)\n!",
+  "coordinates": {
+    "latitude": 97.0,
+    "longitude": 0.0
+  }
+}

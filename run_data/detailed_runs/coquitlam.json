@@ -1,0 +1,30 @@
+{
+  "id": "coquitlam",
+  "url": "https://www.bcwhitewater.org/reaches/coquitlam",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:36.803841Z",
+  "title": "Coquitlam",
+  "river_name": "Coquitlam",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "'Novelty' run. A few boulder gardens, gravel bars and flat water. Rarely paddled because its usually too low. Watch for wood.",
+  "difficulty": {
+    "text": "III (IV-)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Check the two boulder garden rapids near the put-in for wood and decide if you want to skip them",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "After a lot of rain",
+  "gauge": "10.8cms↓ (Oct 21 06:15)\n!",
+  "flow_range": {
+    "min": 50.0,
+    "max": 70.0,
+    "unit": "cms"
+  }
+}

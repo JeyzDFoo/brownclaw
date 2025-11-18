@@ -1,0 +1,30 @@
+{
+  "id": "kicking-horse-palliser-to-kicking-horse-rest-area",
+  "url": "https://www.bcwhitewater.org/reaches/kicking-horse-palliser-to-kicking-horse-rest-area",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:36.042668Z",
+  "title": "Kicking Horse - Palliser to Kicking Horse Rest Area",
+  "river_name": "Kicking Horse",
+  "section_name": "Palliser to Kicking Horse Rest Area",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "12 km of high quality river running",
+  "difficulty": {
+    "text": "III+/IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "All rapids are boat-scoutable except \"portage/shotgun\" which has a sign to alert paddlers of where to scout from.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours on the water (15 min. at flood stage)"
+  },
+  "when_to_go": "April to November",
+  "gauge": "10.9cms↓ (Oct 21 05:40)\n!",
+  "flow_range": {
+    "max": 150.0,
+    "unit": "cms"
+  }
+}

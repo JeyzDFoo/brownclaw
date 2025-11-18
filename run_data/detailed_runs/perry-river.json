@@ -1,0 +1,25 @@
+{
+  "id": "perry-river",
+  "url": "https://www.bcwhitewater.org/reaches/perry-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:27.211106Z",
+  "title": "Perry River",
+  "river_name": "Perry River",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "« Old Faithful » for the revelstoke paddler. One of the first runs to thaw and the last ones to dry up.",
+  "difficulty": {
+    "text": "III-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting and portaging are challenging at times but do not require rope work. Only the greatest pf beaters drop their brand new tuna2’s into this river while portaging.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "All spring and summer",
+  "gauge": "8.26cms↓ (Oct 21 06:15)\n!"
+}

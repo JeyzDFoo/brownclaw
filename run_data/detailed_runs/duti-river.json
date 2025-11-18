@@ -1,0 +1,24 @@
+{
+  "id": "duti-river",
+  "url": "https://www.bcwhitewater.org/reaches/duti-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:46.422517Z",
+  "title": "Duti River",
+  "river_name": "Duti River",
+  "contributor": "Daniel Helm",
+  "whats_it_like": "The Duti offers challenging whitewater in a spectacular remote wilderness setting.",
+  "difficulty": {
+    "text": "IV+, depending on the level",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Everything can be portaged with varying levels of difficulty.",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 72,
+    "original": "3 days on the Duti and another 3-6 days on the Skeena depending on your choice of takeout."
+  },
+  "when_to_go": "August / September. The first descent crew went in July at higher water. The first 2 days were full-on continuous class IV at this level and the lower canyons were very serious. Later in the year (August / Sept) the upper sections are a bit bonier but the main canyon becomes more manageable."
+}

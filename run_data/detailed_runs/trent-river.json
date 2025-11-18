@@ -1,0 +1,28 @@
+{
+  "id": "trent-river",
+  "url": "https://www.bcwhitewater.org/reaches/trent-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:33.453013Z",
+  "title": "Trent River",
+  "river_name": "Trent River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Park and huck waterfall and a mellow paddle out to the ocean",
+  "difficulty": {
+    "text": "V for the waterfall; III for the paddle out",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Scout the waterfall from the trail beforehand.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours for the full run."
+  },
+  "when_to_go": "Oct-April after heavy rains",
+  "gauge": "2.94cms↓ (Oct 21 06:15)\n!",
+  "flows_description": "The Trent needs heavy rains to come in. The minumum flow is 15 cms on BROWNS RIVER NEAR COURTENAY (08HB026). This gauge is in a different watershed so is only an approximation. The waterfall will be better higher, maybe around 50cms (see pictures below). For the lower run, the only high water limiting factor is the significant wood hazard.",
+  "shuttle_description": "The trail to scout the waterfall is located just south of Cumberland on Highway 19, on the north side of the bridge (river left). There are small pullouts on either side of the freeway, but they come up quick at 110km/h. The trail leaves the highway about 200m north of the bridge, follow it about 400m downstream on river left to the waterfall. The put in for the lower run is at the base of the waterfall, ropework may be needed to lower boats. To get to the takeout, head north on Highway 19 for 4km and take the exit for Cumberland. Turn left onto Cumberland Road, left again on Union Road, and left again onto Royston Road. Follow Royston Road over the highway and all the way down to the beach, where there are several parking options. Another takeout option is the abandoned railway bridge in Royston, this is a bit of a hike from either Cameron Road or Hatton Road.",
+  "on_the_water_description": "The put in for the waterfall can either be at the highway or from a branch off the scouting trail."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "goldstream-falls",
+  "url": "https://www.bcwhitewater.org/reaches/goldstream-falls",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:07.077385Z",
+  "title": "Goldstream Falls",
+  "river_name": "Goldstream Falls",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "Four sweet park and huck water",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting and portaging are easy at river level",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Late fall",
+  "gauge": "13.5cms↓ (Oct 21 05:25)\n!"
+}

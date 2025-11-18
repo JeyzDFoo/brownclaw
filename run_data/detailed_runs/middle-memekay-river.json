@@ -1,0 +1,25 @@
+{
+  "id": "middle-memekay-river",
+  "url": "https://www.bcwhitewater.org/reaches/middle-memekay-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:12.746066Z",
+  "title": "Middle Memekay River",
+  "river_name": "Middle Memekay River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Nice long intermediate canyon run from a small creek down into a river.",
+  "difficulty": {
+    "text": "III+ with one IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "The only class IV rapid can be scouted and portaged. Some of the other canyons are mandatory and wood-prone.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "During and just after rainfall October-May.",
+  "gauge": "75.4cms↓ (Oct 21 06:10)\n!"
+}

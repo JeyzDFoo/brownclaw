@@ -1,0 +1,37 @@
+{
+  "id": "elk-river-middle",
+  "url": "https://www.bcwhitewater.org/reaches/elk-river-middle",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:56.051534Z",
+  "title": "Elk River - Middle",
+  "river_name": "Elk River",
+  "section_name": "Middle",
+  "whats_it_like": "Great moderate whitewater in a classic Rockies canyon.",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Moderate.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours."
+  },
+  "when_to_go": "Spring through fall - runs in the winter in mild years.",
+  "gauge": "13.5cms↑ (Oct 21 05:40)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08NK002",
+      "name": "Elk River at Fernie gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NK002"
+    }
+  ],
+  "flow_range": {
+    "min": 20.0,
+    "max": 30.0,
+    "unit": "cms"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "id": "iskut-river",
+  "url": "https://www.bcwhitewater.org/reaches/iskut-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:29.783534Z",
+  "title": "Iskut River",
+  "river_name": "Iskut River",
+  "contributor": "Ali Marshall and Steve Arns",
+  "whats_it_like": "A fantastic northern BC multiday with a long hike out.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Most rapids can be scouted and portaged with some difficulty.",
+  "time": {
+    "hours_min": 48,
+    "hours_max": 72,
+    "original": "2-3 days"
+  },
+  "when_to_go": "July to September",
+  "gauge": "396.0cms↑ (Oct 21 05:25)\n!",
+  "flow_range": {
+    "min": 400.0,
+    "max": 600.0,
+    "unit": "cms"
+  }
+}

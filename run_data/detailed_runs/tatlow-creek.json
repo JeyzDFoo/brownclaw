@@ -1,0 +1,24 @@
+{
+  "id": "tatlow-creek",
+  "url": "https://www.bcwhitewater.org/reaches/tatlow-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:25.722151Z",
+  "title": "Tatlow Creek",
+  "river_name": "Tatlow Creek",
+  "whats_it_like": "One of the best class V runs in SW BC.  Waterfalls, slides, electric blue water and difficult access.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult to virtually impossible.  One common portage requires ropes to lower boats and down climb.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 6,
+    "original": "4-6 hours."
+  },
+  "when_to_go": "Late season run, usually in August.",
+  "gauge": "3.29cms↑ (Feb 14 11:44)\n!"
+}

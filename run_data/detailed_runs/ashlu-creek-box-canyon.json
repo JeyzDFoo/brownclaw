@@ -1,0 +1,30 @@
+{
+  "id": "ashlu-creek-box-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-box-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:04.067231Z",
+  "title": "Ashlu Creek - Box Canyon",
+  "river_name": "Ashlu Creek",
+  "section_name": "Box Canyon",
+  "whats_it_like": "The signature run of southwest BC - clean bedrock in a deep box canyon.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult - impossible to scout or portage in spots.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours.  Sub 30 min laps when you know it."
+  },
+  "when_to_go": "This river is now dammed - has releases in May, August and September.  Possible when the dam spills over at times of high flow.",
+  "gauge": "3.29cms↑ (Feb 14 11:44)\n!",
+  "flow_range": {
+    "min": 16.0,
+    "max": 32.0,
+    "unit": "cms"
+  }
+}

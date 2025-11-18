@@ -1,0 +1,23 @@
+{
+  "id": "lynn-creek",
+  "url": "https://www.bcwhitewater.org/reaches/lynn-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:59.876522Z",
+  "title": "Lynn Creek",
+  "river_name": "Lynn Creek",
+  "whats_it_like": "A popular urban run with a picturesque canyon and fun rapids.  Optional waterfall at the start.",
+  "difficulty": {
+    "text": "III at low levels, IV when the water is high.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Varied - some of the river is in a deep canyon.  Wood is often a problem.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours."
+  },
+  "when_to_go": "After heavy rain, usually in the fall/winter."
+}

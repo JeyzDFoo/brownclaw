@@ -1,0 +1,26 @@
+{
+  "id": "chilko-bidwell-to-taseko",
+  "url": "https://www.bcwhitewater.org/reaches/chilko-bidwell-to-taseko",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:15.134761Z",
+  "title": "Chilko - Bidwell to Taseko",
+  "river_name": "Chilko",
+  "section_name": "Bidwell to Taseko",
+  "contributor": "David Wortley",
+  "whats_it_like": "Remote, beautiful clear water, big volume.",
+  "difficulty": {
+    "text": "IV-",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy scouting for major rapids",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours"
+  },
+  "when_to_go": "Summer and Late Summer",
+  "gauge": "32.8cms↓ (Oct 21 05:15)\n!"
+}

@@ -1,0 +1,37 @@
+{
+  "id": "upper-pingston",
+  "url": "https://www.bcwhitewater.org/reaches/upper-pingston",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:47.906815Z",
+  "title": "Upper Pingston",
+  "river_name": "Upper Pingston",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "One of B.C.'s best steep creeks. Classic whitewater; continuous, clean, few portages and a handful of bigger rapids. Not much is \"must run\", but be prepared to run a good amount of class 5 if you put on as either too much portaging or hiking out would be a lot of work and probably end in the dark. If the upper is too high the middle is a good back up option.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scout whenever you think you should. Everything has been run except one short canyon that is portaged on the right.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 8,
+    "original": "4-8 hours depending on group size and familiarity."
+  },
+  "when_to_go": "Late June to mid to late July. Usually run as things are coming down from peak runoff.",
+  "gauge": "0.36cms↓ (Feb 28 22:00)",
+  "gauge_stations": [
+    {
+      "station_id": "08NE123",
+      "name": "Cranberry Creek gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NE123"
+    }
+  ],
+  "flow_range": {
+    "min": 8.0,
+    "max": 15.0,
+    "unit": "cms"
+  }
+}

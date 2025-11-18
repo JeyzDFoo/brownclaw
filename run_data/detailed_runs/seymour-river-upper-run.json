@@ -1,0 +1,25 @@
+{
+  "id": "seymour-river-upper-run",
+  "url": "https://www.bcwhitewater.org/reaches/seymour-river-upper-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:48.113572Z",
+  "title": "Seymour River – Upper Run",
+  "river_name": "Seymour River – Upper Run",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Pool-drop, some flat sections, gravel bed, low volume",
+  "difficulty": {
+    "text": "III-",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Scouting is easy, no portages required",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "3 hours"
+  },
+  "when_to_go": "Spring run-off and rain",
+  "gauge": "19.751cms↓ (Nov 18 11:00)"
+}

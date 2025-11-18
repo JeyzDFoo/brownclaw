@@ -1,0 +1,24 @@
+{
+  "id": "tamihi-creek-lower",
+  "url": "https://www.bcwhitewater.org/reaches/tamihi-creek-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:22.349547Z",
+  "title": "Tamihi Creek (Lower)",
+  "river_name": "Tamihi Creek (Lower)",
+  "contributor": "David Wortley",
+  "whats_it_like": "Manky boulder garden turning into steep committing canyon with fun class IV drops towards the end.",
+  "difficulty": {
+    "text": "IV+ with a mandatory portage",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Everything is scoutable but portaging is tricky in some areas.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 5,
+    "original": "3-5 hours, if you knew where the wood is and the lines could be as short as 1.5 hours"
+  },
+  "when_to_go": "Fall/Winter/Spring"
+}

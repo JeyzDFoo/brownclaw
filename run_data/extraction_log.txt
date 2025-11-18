@@ -1,0 +1,2702 @@
+/Users/jeyzdfoo/Desktop/code/brownclaw/python_scripts/extract_run_details.py:137: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  'last_updated': datetime.utcnow().isoformat() + 'Z'
+/Users/jeyzdfoo/Desktop/code/brownclaw/python_scripts/extract_run_details.py:157: DeprecationWarning: The 'text' argument to find()-type methods is deprecated. Use 'string' instead.
+  contributor = soup.find(text=re.compile(r'Contributed by', re.IGNORECASE))
+BC Whitewater Run Detail Extractor - Processing All Runs
+============================================================
+
+Found 190 runs to process
+
+[1/190] Processing: adam-river
+
+Crawling: https://www.bcwhitewater.org/reaches/adam-river
+Title: Adam River
+Contributor: Scott McBride
+What It's Like: Short quality intermediate granite canyon...
+Difficulty: III+ with one optional V- (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: During or after rainfall October-March, snowmelt April-June
+Gauge: 75.4cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to adam-river.json
+
+[2/190] Processing: alsek-river
+
+Crawling: https://www.bcwhitewater.org/reaches/alsek-river
+Title: Alsek River
+Contributor: Ali Marshall and Maxi Kniewasser
+What It's Like: One of the most spectacular northern wilderness tr...
+Difficulty: III-IV (V through Turnback Canyon) (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 192-240 hours
+When to Go: September or October if you want to attempt the canyon.  You need cold and dry weather. If you commit to                       portaging Turnback, go in July-September.
+Gauge: 164.0cms↓ (Oct 21 06:05)
+!...
+Coordinates: {'latitude': 97.0, 'longitude': 0.0}
+  ✅ Saved to alsek-river.json
+
+[3/190] Processing: ashlu-creek-bottom-mile
+
+Crawling: https://www.bcwhitewater.org/reaches/ashlu-creek-bottom-mile
+Title: Ashlu Creek - Bottom Mile
+What It's Like: The last hurrah of the Ashlu.  Steep boulder piles...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: No definite window - whenever water spills over the dam.
+Gauge: 3.29cms↑ (Feb 14 11:44)
+!...
+Flow range: 2.0-5.0 cms
+  ✅ Saved to ashlu-creek-bottom-mile.json
+
+[4/190] Processing: ashlu-creek-box-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/ashlu-creek-box-canyon
+Title: Ashlu Creek - Box Canyon
+What It's Like: The signature run of southwest BC - clean bedrock ...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: This river is now dammed - has releases in May, August and September.  Possible when the dam spills over at times of high flow.
+Gauge: 3.29cms↑ (Feb 14 11:44)
+!...
+Flow range: 16.0-32.0 cms
+  ✅ Saved to ashlu-creek-box-canyon.json
+
+[5/190] Processing: ashlu-creek-mine-run
+
+Crawling: https://www.bcwhitewater.org/reaches/ashlu-creek-mine-run
+Title: Ashlu Creek - Mine Run
+What It's Like: An under-rated classic - bedrock rapids, many big ...
+Difficulty: IV-V at medium levels. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: July through early September.
+Gauge: 3.29cms↑ (Feb 14 11:44)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA071: Elaho gauge
+Flow range: 5.0-10.0 cms
+  ✅ Saved to ashlu-creek-mine-run.json
+
+[6/190] Processing: ashlu-creek-play-run
+
+Crawling: https://www.bcwhitewater.org/reaches/ashlu-creek-play-run
+Title: Ashlu Creek - Play Run
+Contributor: David Wortley
+What It's Like: Boulder Garden fun which is now sadly tricky to ac...
+Difficulty: III+ (IV-) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: A big day out
+When to Go: Summer/Fall
+  ✅ Saved to ashlu-creek-play-run.json
+
+[7/190] Processing: ashlu-mini-mine
+
+Crawling: https://www.bcwhitewater.org/reaches/ashlu-mini-mine
+Title: Ashlu Mini Mine
+Contributor: David Wortley
+What It's Like: A short intro to Ashlu paddling, bedrock rapids, b...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: July-September, See Ashlu Release Schedule
+Gauge: 3.29cms↑ (Feb 14 11:44)
+!...
+Flow range: 20.0-30.0 cms
+  ✅ Saved to ashlu-mini-mine.json
+
+[8/190] Processing: ashnola-river
+
+Crawling: https://www.bcwhitewater.org/reaches/ashnola-river
+Title: Ashnola River
+What It's Like: Continuous river running in the hot and sunny Okan...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: Early season high water snowmelt in May/June.
+Gauge: 1.89cms↓ (Oct 21 05:10)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08NL004: online gauge for the Ashnola
+  ✅ Saved to ashnola-river.json
+
+[9/190] Processing: babine-river
+
+Crawling: https://www.bcwhitewater.org/reaches/babine-river
+Title: Babine River
+Contributor: Ali Marshall
+What It's Like: A classic, class 3/4 wilderness multiday.  Big wat...
+Difficulty: III+-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 72-96 hours
+When to Go: May – October.  Early summer for the most fun
+Gauge: 0.252m↓ (Oct 21 05:55)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08EC013: 0.252m↓ (Oct 21 05:55)
+Coordinates: {'latitude': 13.0, 'longitude': 5.0}
+  ✅ Saved to babine-river.json
+
+[10/190] Processing: beaver-river-kinbasket-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/beaver-river-kinbasket-canyon
+Title: Beaver River (Kinbasket Canyon)
+Contributor: Michael Reeder
+What It's Like: Early season warm up run with a linear class I to ...
+Difficulty: IV/IV+ (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Early Spring
+Gauge: BEAVER RIVER NEAR THE MOUTH
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08NB019: BEAVER RIVER NEAR THE MOUTH
+  ✅ Saved to beaver-river-kinbasket-canyon.json
+
+[11/190] Processing: bedwell-river
+
+Crawling: https://www.bcwhitewater.org/reaches/bedwell-river
+Title: Bedwell River
+Contributor: Scott McBride
+What It's Like: A hike in multiday through the heart of Vancouver ...
+Difficulty: IV+ (P) (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1 very long day to hike in, 2 more days to paddle out
+When to Go: Spring snowmelt May-June
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+Flows description: 379 chars
+Shuttle description: 365 chars
+  ✅ Saved to bedwell-river.json
+
+[12/190] Processing: benson-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/benson-river-lower
+Title: Benson River - Lower
+Contributor: Scott McBride
+What It's Like: A sketchy caving trip in your kayak...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 4-4 hours
+When to Go: October to April in between rain storms. Spring snowmelt possible
+Flow range: 10.0-20.0 cms
+Flows description: 771 chars
+Shuttle description: 687 chars
+On the water description: 2438 chars
+  ✅ Saved to benson-river-lower.json
+
+[13/190] Processing: benson-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/benson-river-upper
+Title: Benson River - Upper
+Contributor: Scott McBride
+What It's Like: A short low volume canyon in the middle of nowhere...
+Difficulty: IV+ at low water (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: October to April with moderate rain. Spring snowmelt possible
+Flows description: 574 chars
+Shuttle description: 228 chars
+On the water description: 755 chars
+  ✅ Saved to benson-river-upper.json
+
+[14/190] Processing: big-creek-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/big-creek-lower
+Title: Big Creek - Lower
+Contributor: Scott McBride
+What It's Like: Scrappy, dangerous whitewater through a remote can...
+Difficulty: V with a big portage (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 24-48 hours
+When to Go: Snowmelt May-July
+Gauge: 2.13cms↑ (Oct 21 06:10)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08MB006: BIG CREEK ABOVE GROUNDHOG CREEK (08MB006)
+Flow range: 10.0-20.0 cms
+Flows description: 992 chars
+Shuttle description: 940 chars
+On the water description: 278 chars
+Coordinates: {'latitude': 51.78594, 'longitude': -122.77957}
+  ✅ Saved to big-creek-lower.json
+
+[15/190] Processing: big-mouth-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/big-mouth-creek
+Title: Big Mouth Creek
+Contributor: Richard Maggs
+What It's Like: A beautiful wilderness adventure, cruising down co...
+Difficulty: III-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Spring and early summer
+Gauge: 13.5cms↓ (Oct 21 05:25)
+!...
+  ✅ Saved to big-mouth-creek.json
+
+[16/190] Processing: big-silver-creek-middle
+
+Crawling: https://www.bcwhitewater.org/reaches/big-silver-creek-middle
+Title: Big Silver Creek - Middle
+What It's Like: Very committing granite gorge with big rapids, mar...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: Full day trip.
+When to Go: When water spills over the dam at peak snowmelt, or releases in July/August.
+Gauge: 2.04cms↓ (Feb 14 11:47)
+!...
+  ✅ Saved to big-silver-creek-middle.json
+
+[17/190] Processing: big-silver-creek-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/big-silver-creek-upper
+Title: Big Silver Creek - Upper
+What It's Like: Boulder rapids in deep gorges, one clean waterfall...
+Difficulty: IV-IV+ at medium levels (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Early/mid season run - May through July.  Will get too high at peak snowmelt and too low in mid/late summer.
+Gauge: 11.5cms↓ (Oct 21 06:10)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08MF065: Nahatlatch online gauge
+  ✅ Saved to big-silver-creek-upper.json
+
+[18/190] Processing: birkenhead-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/birkenhead-river-lower
+Title: Birkenhead River - Lower
+Contributor: David Wortley
+What It's Like: A fun play run with an optional bigger rapid at th...
+Difficulty: III(+), IV if doing the first rapids (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Summer
+  ✅ Saved to birkenhead-river-lower.json
+
+[19/190] Processing: birkenhead-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/birkenhead-river-upper
+Title: Birkenhead River - Upper
+What It's Like: Endless, top notch boulder drops that only get bet...
+Difficulty: IV-V at medium, V at medium-high and up. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: July-August snow melt.
+  ✅ Saved to birkenhead-river-upper.json
+
+[20/190] Processing: blaeberry-river-split-creek-to-thompson-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/blaeberry-river-split-creek-to-thompson-falls
+Title: Blaeberry River - Split Creek to Thompson Falls
+Contributor: Michael Reeder
+What It's Like: A seldom run, but decent quality intermediate run....
+Difficulty: III+ to IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Late May to late August, best above 30cms
+Gauge: 5.02cms↓ (Oct 21 05:30)
+!...
+Flow range: {'min': 30.0, 'unit': 'cms'}
+  ✅ Saved to blaeberry-river-split-creek-to-thompson-falls.json
+
+[21/190] Processing: blaeberry-river-thompson-falls-section
+
+Crawling: https://www.bcwhitewater.org/reaches/blaeberry-river-thompson-falls-section
+Title: Blaeberry River - Thompson Falls Section
+Contributor: Michael Reeder
+What It's Like: 2 short canyons. The first is a gorgeous class 2 s...
+Difficulty: IV+ to V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: Half a day. It would only take ~30 minutes of paddling if you knew the run and that it was clear of wood, however, there is lots of wood movement, so expect to take half a day.
+When to Go: September
+Gauge: 5.02cms↓ (Oct 21 05:30)
+!...
+  ✅ Saved to blaeberry-river-thompson-falls-section.json
+
+[22/190] Processing: blanket-creek-sutherland-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/blanket-creek-sutherland-falls
+Title: Blanket Creek (Sutherland Falls)
+Contributor: Richard Maggs
+What It's Like: A classic BC park and huck; one of the friendliest...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1 second of freefall with 30 minutes of prep
+When to Go: Early spring/summer and fall with rain
+Gauge: 0.866cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to blanket-creek-sutherland-falls.json
+
+[23/190] Processing: bobbie-burns-creek-into-spillimacheen-river
+
+Crawling: https://www.bcwhitewater.org/reaches/bobbie-burns-creek-into-spillimacheen-river
+Title: Bobbie Burns Creek into Spillimacheen River
+Contributor: Michael Reeder
+What It's Like: Lovely class 4 river running. Starts out as boulde...
+Difficulty: III+ to IV (V) (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: June-August
+Gauge: 7.58cms↓ (Oct 21 05:30)
+!...
+Gradient: 4.0
+  ✅ Saved to bobbie-burns-creek-into-spillimacheen-river.json
+
+[24/190] Processing: boston-bar-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/boston-bar-creek
+Title: Boston Bar Creek
+Contributor: Scott McBride
+What It's Like: A park and huck next to the Coquihalla Highway...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: May-June
+Gauge: 0.497cms↓ (Oct 21 04:35)
+!...
+  ✅ Saved to boston-bar-creek.json
+
+[25/190] Processing: bowser-river
+
+Crawling: https://www.bcwhitewater.org/reaches/bowser-river
+Title: Bowser River
+Contributor: Scott McBride
+What It's Like: Paddle up close to several glaciers on this chain ...
+Difficulty: II-III with one long IV+ rapid (min: 2, max: 4)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: Summer (June-Sept).
+Gauge: 600.0cms↓ (Oct 21 06:10)
+!...
+Flow range: {'min': 800.0, 'unit': 'cms'}
+Permit required: Yes
+  ✅ Saved to bowser-river.json
+
+[26/190] Processing: bridge-river
+
+Crawling: https://www.bcwhitewater.org/reaches/bridge-river
+Title: Bridge River
+Contributor: Claudia Schwab
+What It's Like: Pool drop with big boulders + flat long scenic can...
+Difficulty: III+-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 5-5 hours
+When to Go: July-August
+Gauge: 3.994cms↓ (Oct 21 04:10)
+!...
+  ✅ Saved to bridge-river.json
+
+[27/190] Processing: bridge-river-terzaghi-dam-to-yalakom
+
+Crawling: https://www.bcwhitewater.org/reaches/bridge-river-terzaghi-dam-to-yalakom
+Title: Bridge River - Terzaghi Dam to Yalakom
+Contributor: David Wortley
+What It's Like: Low Water Boulder garden run which occasionally ha...
+Difficulty: III-IV (IV+ at big releases) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Early Summer
+Gauge: 1.783cms↑ (Nov 18 09:10)...
+Length: 15.0 km
+  ✅ Saved to bridge-river-terzaghi-dam-to-yalakom.json
+
+[28/190] Processing: brittania-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/brittania-creek
+Title: Brittania Creek
+What It's Like: A roadside double drop park and huck attraction wi...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: After rain or snowmelt - runs frequently.
+  ✅ Saved to brittania-creek.json
+
+[29/190] Processing: bulkley-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/bulkley-canyon
+Title: Bulkley Canyon
+Contributor: Daniel Helm
+What It's Like: The Smithers classic run. Big water canyons with '...
+Difficulty: III+ to IV- (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 4-6 hours
+When to Go: Runnable all season once the ice is off. Typically run after freshet recedes (~ mid-late June) until ~ August.
+Gauge: 75.6cms↓ (Oct 21 05:55)
+!...
+  ✅ Saved to bulkley-canyon.json
+
+[30/190] Processing: callaghan-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/callaghan-creek
+Title: Callaghan Creek
+What It's Like: Whistler's ultra classic.  Clean waterfalls, bedro...
+Difficulty: IV-V at medium levels. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 30 minutes to a few hours.
+When to Go: Reliable season from May through August - runs after rain in the off season.
+  ✅ Saved to callaghan-creek.json
+
+[31/190] Processing: cameron-river
+
+Crawling: https://www.bcwhitewater.org/reaches/cameron-river
+Title: Cameron River
+What It's Like: Excellent river-running with small canyons and bed...
+Difficulty: IV at medium levels (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: After rain.  Short snowmelt season in the spring.
+Found 2 Environment Canada gauge station(s)
+  - 08HB002: Englishman River gauge
+  - 08HB029: Little Qualicum River gauge
+  ✅ Saved to cameron-river.json
+
+[32/190] Processing: capilano-river
+
+Crawling: https://www.bcwhitewater.org/reaches/capilano-river
+Title: Capilano River
+What It's Like: A short run in North Vancouver flowing through a s...
+Difficulty: III (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: After heavy rain.  Runs at low water during snowmelt.
+Gauge: 23.735cms↓ (Nov 18 11:00)...
+Flow range: 30.0-40.0 cms
+  ✅ Saved to capilano-river.json
+
+[33/190] Processing: cariboo-river-lower-run
+
+Crawling: https://www.bcwhitewater.org/reaches/cariboo-river-lower-run
+Title: Cariboo River - Lower Run
+Contributor: David Wortley
+What It's Like: Big waves, some holes and boulders, a canyon, and ...
+Difficulty: II to III (III+ at high water) (min: 2, max: 3)
+Time: 2-3 hours
+When to Go: Summer and Fall
+  ✅ Saved to cariboo-river-lower-run.json
+
+[34/190] Processing: cariboo-river-upper-run
+
+Crawling: https://www.bcwhitewater.org/reaches/cariboo-river-upper-run
+Title: Cariboo River - Upper Run
+Contributor: David Wortley
+What It's Like: Big waves, big holes, continuous, mellower towards...
+Difficulty: III+ to IV- (IV in high water) (min: 3, max: 4)
+Time: 1-2 hours
+When to Go: Summer and Fall
+  ✅ Saved to cariboo-river-upper-run.json
+
+[35/190] Processing: cascade-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/cascade-creek
+Title: Cascade Creek
+What It's Like: Steep, manky boulder rapids, a good bedrock canyon...
+Difficulty: IV-V (V+) (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 4-5 hours
+When to Go: After rain or early season snowmelt.
+  ✅ Saved to cascade-creek.json
+
+[36/190] Processing: cayoosh-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/cayoosh-creek
+Title: Cayoosh Creek
+What It's Like: Nice river running through a deep, arid canyon.  C...
+Difficulty: IV+ at medium levels. (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Later half of the SW BC season - July-August.  Spring is possible.
+  ✅ Saved to cayoosh-creek.json
+
+[37/190] Processing: cheakamus-paradise-valley
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-paradise-valley
+Title: Cheakamus – Paradise Valley
+Contributor: Claudia Schwab
+What It's Like: Fun beginner run...
+Difficulty: II (III) (min: 2, max: 3)
+Time: 2-2 hours
+When to Go: Nearly always runnable
+Gauge: 23.3cms↓ (Oct 21 06:05)
+!...
+Flows description: 45 chars
+  ✅ Saved to cheakamus-paradise-valley.json
+
+[38/190] Processing: cheakamus-river-balls-to-the-wall
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-balls-to-the-wall
+Title: Cheakamus River - Balls To The Wall
+What It's Like: Extension of the Upper Cheak - great class IV-IV+ ...
+Difficulty: IV-IV+ (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: All season, very pushy at high flows.  Reasonable minimum is 2.1.
+Gauge: 1.875m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA072: 1.875m↓ (Oct 21 06:05)
+  ✅ Saved to cheakamus-river-balls-to-the-wall.json
+
+[39/190] Processing: cheakamus-river-cal-cheak-callaghan-into-cheakamus
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-cal-cheak-callaghan-into-cheakamus
+Title: Cheakamus River - Cal-Cheak (Callaghan into Cheakamus)
+Contributor: David Wortley
+What It's Like: A great short run for intermediate paddlers with s...
+Difficulty: III (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 20-45mins
+When to Go: Spring-Fall
+Gauge: 6.34cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to cheakamus-river-cal-cheak-callaghan-into-cheakamus.json
+
+[40/190] Processing: cheakamus-river-cheakamus-lake-down
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-cheakamus-lake-down
+Title: Cheakamus River - Cheakamus Lake Down
+Contributor: Scott McBride
+What It's Like: Paddle out of a beautiful mountain lake into a con...
+Difficulty: Continuous III+ (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Early or late summer - May, August, September. Peak snowmelt not recommended.
+Gauge: 1.875m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA072: 1.875m↓ (Oct 21 06:05)
+  ✅ Saved to cheakamus-river-cheakamus-lake-down.json
+
+[41/190] Processing: cheakamus-river-daisy-lake-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-daisy-lake-canyon
+Title: Cheakamus River - Daisy Lake Canyon
+What It's Like: The hardest regularly run section of the Cheak - e...
+Difficulty: V at medium levels. (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Early or late season.
+Gauge: 1.875m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA072: 1.875m↓ (Oct 21 06:05)
+  ✅ Saved to cheakamus-river-daisy-lake-canyon.json
+
+[42/190] Processing: cheakamus-river-dam-run
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-dam-run
+Title: Cheakamus River - Dam Run
+What It's Like: A fun, roadside class III with a short portage aro...
+Difficulty: III (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Spring for highest flows. All year depending on your low water tolerance.
+Gauge: 23.3cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to cheakamus-river-dam-run.json
+
+[43/190] Processing: cheakamus-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/cheakamus-river-upper
+Title: Cheakamus River - Upper
+What It's Like: Classic. Continuous river running at its finest....
+Difficulty: IV at 2.5, continuous.  Gets harder as levels rise. (min: 2, max: 5)
+Scouting/Portaging info found
+Time: 5-5 hours
+When to Go: Long season - spring, summer and fall.
+Gauge: 1.875m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA072: 1.875m↓ (Oct 21 06:05)
+  ✅ Saved to cheakamus-river-upper.json
+
+[44/190] Processing: chehalis-river-lower-aka-statlu-chehalis
+
+Crawling: https://www.bcwhitewater.org/reaches/chehalis-river-lower-aka-statlu-chehalis
+Title: Chehalis River - Lower (aka Statlu-Chehalis)
+Contributor: Scott McBride
+What It's Like: The best intermediate run in the Fraser Valley, do...
+Difficulty: III-IV- (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: During or after rainfall October-March, snowmelt April-June
+  ✅ Saved to chehalis-river-lower-aka-statlu-chehalis.json
+
+[45/190] Processing: chehalis-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/chehalis-river-upper
+Title: Chehalis River - Upper
+Contributor: Scott McBride
+What It's Like: A full day adventure through a series of canyons...
+Difficulty: IV with optional V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 4-6 hours
+When to Go: Rainfall October-March, snowmelt April-June
+  ✅ Saved to chehalis-river-upper.json
+
+[46/190] Processing: chemainus-river-copper-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/chemainus-river-copper-canyon
+Title: Chemainus River - Copper Canyon
+What It's Like: Good moderate difficulty whitewater with some beau...
+Difficulty: III-IV+ at medium levels. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Winter rainy season.
+Gauge: 6.91cms↓ (Oct 21 05:20)
+!...
+  ✅ Saved to chemainus-river-copper-canyon.json
+
+[47/190] Processing: chilcotin-river-chilko-chilcotin-fraser
+
+Crawling: https://www.bcwhitewater.org/reaches/chilcotin-river-chilko-chilcotin-fraser
+Title: Chilcotin River  (Chilko-Chilcotin-Fraser)
+Contributor: Scott McBride
+What It's Like: Classic multiday raft trip across the Chilcotin Pl...
+Difficulty: II-IV (min: 2, max: 4)
+Scouting/Portaging info found
+Time: 72-168 hours
+When to Go: Most popular once water levels drop in late August and September. Runnable at high water all summer.
+Gauge: 78.8cms↑ (Oct 21 05:45)
+!...
+Flow range: 50.0-70.0 cms
+Flows description: 135 chars
+Shuttle description: 2943 chars
+On the water description: 427 chars
+Coordinates: {'latitude': 2.0, 'longitude': 500.0}
+  ✅ Saved to chilcotin-river-chilko-chilcotin-fraser.json
+
+[48/190] Processing: chilko-bidwell-to-taseko
+
+Crawling: https://www.bcwhitewater.org/reaches/chilko-bidwell-to-taseko
+Title: Chilko - Bidwell to Taseko
+Contributor: David Wortley
+What It's Like: Remote, beautiful clear water, big volume....
+Difficulty: IV- (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Summer and Late Summer
+Gauge: 32.8cms↓ (Oct 21 05:15)
+!...
+  ✅ Saved to chilko-bidwell-to-taseko.json
+
+[49/190] Processing: chilliwack-canyon-camp-foley-to-slesse
+
+Crawling: https://www.bcwhitewater.org/reaches/chilliwack-canyon-camp-foley-to-slesse
+Title: Chilliwack Canyon - Camp Foley to Slesse
+Contributor: Claudia Schwab
+What It's Like: Pool-drop at low and medium, continuous at higher ...
+Difficulty: III-IV low, IV- medium, IV high (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Year round, may be too low in winter and late summer if it does not rain.
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to chilliwack-canyon-camp-foley-to-slesse.json
+
+[50/190] Processing: chilliwack-river-pointa-vista-to-vedder-bridge
+
+Crawling: https://www.bcwhitewater.org/reaches/chilliwack-river-pointa-vista-to-vedder-bridge
+Title: Chilliwack River - Pointa Vista to Vedder Bridge
+Contributor: Claudia Schwab
+What It's Like: Braided gravel bed, pool drop, medium volume...
+Difficulty: II (min: 2, max: 2)
+Scouting/Portaging info found
+Time: 2-3 h
+When to Go: Year round. Could be too low in late summer, fall and winter if it doesn’t rain for a while.
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to chilliwack-river-pointa-vista-to-vedder-bridge.json
+
+[51/190] Processing: chilliwack-river-post-creek-to-camp-foley
+
+Crawling: https://www.bcwhitewater.org/reaches/chilliwack-river-post-creek-to-camp-foley
+Title: Chilliwack River – Post Creek to Camp Foley
+Contributor: Claudia Schwab
+What It's Like: Continuous boulder gardens, medium volum, rarely p...
+Difficulty: III+ (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-3
+When to Go: Late spring and early summer, and after rain
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to chilliwack-river-post-creek-to-camp-foley.json
+
+[52/190] Processing: chilliwack-river-slesse-to-tamihi
+
+Crawling: https://www.bcwhitewater.org/reaches/chilliwack-river-slesse-to-tamihi
+Title: Chilliwack River - Slesse to Tamihi
+Contributor: Claudia Schwab
+What It's Like: Gravel bars, pool drop, some floating...
+Difficulty: III, one IV- @ Tamihi (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Year round, may be too low in winter and late summer if it hasn't rained for a while
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to chilliwack-river-slesse-to-tamihi.json
+
+[53/190] Processing: chilliwack-river-tamihi-to-pointa-vista
+
+Crawling: https://www.bcwhitewater.org/reaches/chilliwack-river-tamihi-to-pointa-vista
+Title: Chilliwack River - Tamihi to Pointa Vista
+Contributor: Claudia Schwab
+What It's Like: Some continuous boulder gardens especially at high...
+Difficulty: III, one IV- @ Tamihi (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Year round, possibly too low in winter and late summer if it does not rain.
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to chilliwack-river-tamihi-to-pointa-vista.json
+
+[54/190] Processing: clearwater-river-gatling-gorge
+
+Crawling: https://www.bcwhitewater.org/reaches/clearwater-river-gatling-gorge
+Title: Clearwater River - Gatling Gorge
+Contributor: David Wortley
+What It's Like: Big water canyon with a lot of flat paddling!...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 4-4 hours
+When to Go: Mid to late summer
+Gauge: 96.4cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to clearwater-river-gatling-gorge.json
+
+[55/190] Processing: clearwater-river-play-run
+
+Crawling: https://www.bcwhitewater.org/reaches/clearwater-river-play-run
+Title: Clearwater River - Play Run
+Contributor: David Wortley
+What It's Like: The Ottawa of BC? Big volume, warm, playboating wi...
+Difficulty: III+ (IV) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: All Summer into Fall
+Gauge: 2.384m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08LA001: 2.384m↓ (Oct 21 06:05)
+  ✅ Saved to clearwater-river-play-run.json
+
+[56/190] Processing: clearwater-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/clearwater-river-upper
+Title: Clearwater River - Upper
+Contributor: David Wortley
+What It's Like: Sabretooth Rapid to The Kettle...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Summer
+Gauge: 96.4cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to clearwater-river-upper.json
+
+[57/190] Processing: clearwater-river-upper-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/clearwater-river-upper-upper
+Title: Clearwater River - Upper Upper
+Contributor: David Wortley
+What It's Like: Big Volume Wave train and Big Waterfalls on the sa...
+Difficulty: IV- with optional V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Later Summer
+Gauge: 2.384m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08LA001: 2.384m↓ (Oct 21 06:05)
+  ✅ Saved to clearwater-river-upper-upper.json
+
+[58/190] Processing: clendinning-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/clendinning-creek
+Title: Clendinning Creek
+What It's Like: Quality 2 day boulder run with very continuous whi...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 48-48 hours
+When to Go: Late August through September.
+Gauge: 53.7cms↑ (Oct 21 05:45)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA071: Elaho gauge
+Flow range: 60.0-70.0 cms
+Coordinates: {'latitude': 29.0, 'longitude': 2010.0}
+  ✅ Saved to clendinning-creek.json
+
+[59/190] Processing: clore-river-grand-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/clore-river-grand-canyon
+Title: Clore River - Grand Canyon
+Contributor: Ali Marshall
+What It's Like: A classic fly in multiday.  Steep, continuous rapi...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: August and September.
+Gauge: 89.4cms↑ (Oct 21 05:40)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08EF005: online gauge
+Flow range: 100.0-150.0 cms
+  ✅ Saved to clore-river-grand-canyon.json
+
+[60/190] Processing: coal-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/coal-river-lower
+Title: Coal River - Lower
+Contributor: Scott McBride
+What It's Like: A floaty wilderness multiday with an nice whitewat...
+Difficulty: I-III (IV) (min: 1, max: 4)
+Scouting/Portaging info found
+Time: 48-120 hours
+When to Go: Summer (June-Sept).
+Gauge: 733.0cms↓ (Oct 21 04:30)
+!...
+Flow range: 1100.0-1700.0 cms
+Flows description: 676 chars
+  ✅ Saved to coal-river-lower.json
+
+[61/190] Processing: coquihalla-river
+
+Crawling: https://www.bcwhitewater.org/reaches/coquihalla-river
+Title: Coquihalla River
+Contributor: Claudia Schwab
+What It's Like: Continuous boulder gardens, pool-drop, gravel bed,...
+Difficulty: III+ (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Spring snow-melt (May and early June)
+Gauge: 15.1cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to coquihalla-river.json
+
+[62/190] Processing: coquitlam
+
+Crawling: https://www.bcwhitewater.org/reaches/coquitlam
+Title: Coquitlam
+Contributor: Claudia Schwab
+What It's Like: 'Novelty' run. A few boulder gardens, gravel bars ...
+Difficulty: III (IV-) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: After a lot of rain
+Gauge: 10.8cms↓ (Oct 21 06:15)
+!...
+Flow range: 50.0-70.0 cms
+  ✅ Saved to coquitlam.json
+
+[63/190] Processing: cowichan-river-skutz-falls-to-marie-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/cowichan-river-skutz-falls-to-marie-canyon
+Title: Cowichan River - Skutz Falls to Marie Canyon
+Contributor: Scott McBride
+What It's Like: Consistently flowing class III canyon....
+Difficulty: III (IV) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Year round, but very low during summer.
+Gauge: 10.8cms↓ (Oct 21 06:05)
+!...
+Flow range: 20.0-30.0 cms
+Flows description: 602 chars
+  ✅ Saved to cowichan-river-skutz-falls-to-marie-canyon.json
+
+[64/190] Processing: cummins-river
+
+Crawling: https://www.bcwhitewater.org/reaches/cummins-river
+Title: Cummins River
+Contributor: Ralph Burden
+What It's Like: Remote, multi-day packraft trip through wild old g...
+Difficulty: II-III (with portages) (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 72-120 hours
+When to Go: Probably best in late summer / early fall
+  ✅ Saved to cummins-river.json
+
+[65/190] Processing: dipper-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/dipper-creek
+Title: Dipper Creek
+What It's Like: Big waterfalls, mandatory class V, huge commitment...
+Difficulty: V+ (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 24-24 hours
+When to Go: Late fall - usually October.
+Gauge: 85.8cms↑ (Oct 21 06:05)
+!...
+Flow range: {'max': 80.0, 'unit': 'cms'}
+  ✅ Saved to dipper-creek.json
+
+[66/190] Processing: douglas-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/douglas-creek
+Title: Douglas Creek
+Contributor: Ian Collings
+What It's Like: A short exciting run, with more to explore upstrea...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Spring/Summer
+  ✅ Saved to douglas-creek.json
+
+[67/190] Processing: downie-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/downie-canyon
+Title: Downie Canyon
+Contributor: Richard Maggs
+What It's Like: A short committing canyon with some fun technical ...
+Difficulty: IV with a portage (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Late fall
+Gauge: 13.5cms↓ (Oct 21 05:25)
+!...
+  ✅ Saved to downie-canyon.json
+
+[68/190] Processing: duti-river
+
+Crawling: https://www.bcwhitewater.org/reaches/duti-river
+Title: Duti River
+Contributor: Daniel Helm
+What It's Like: The Duti offers challenging whitewater in a specta...
+Difficulty: IV+, depending on the level (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: August / September. The first descent crew went in July at higher water. The first 2 days were full-on continuous class IV at this level and the lower canyons were very serious. Later in the year (August / Sept) the upper sections are a bit bonier but the main canyon becomes more manageable.
+  ✅ Saved to duti-river.json
+
+[69/190] Processing: eagle-river
+
+Crawling: https://www.bcwhitewater.org/reaches/eagle-river
+Title: Eagle River
+Contributor: Scott McBride
+What It's Like: Remote wilderness expedition with easy whitewater...
+Difficulty: I-III with one portage (min: 1, max: 3)
+Scouting/Portaging info found
+Time: 72-240 hours
+When to Go: Early Summer (May-July)
+Gauge: 13.2cms↓ (Oct 21 05:40)
+!...
+Flows description: 460 chars
+Shuttle description: 298 chars
+On the water description: 851 chars
+  ✅ Saved to eagle-river.json
+
+[70/190] Processing: east-boulder-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/east-boulder-creek
+Title: East Boulder Creek
+Contributor: Ali Marshall, Tania Millen and Todd James
+What It's Like: A fantastic steep creek....
+Difficulty: IV+ to V, level dependent. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1 hr.
+When to Go: Late May through July and after fall rain.
+  ✅ Saved to east-boulder-creek.json
+
+[71/190] Processing: elaho-river-fear-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/elaho-river-fear-canyon
+Title: Elaho River - Fear Canyon
+What It's Like: A big river with many faces.  Best known as a clas...
+Difficulty: IV-V depending on level (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Year round (often snowed in during winter).
+Gauge: 53.7cms↑ (Oct 21 05:45)
+!...
+Flow range: 20.0-40.0 cms
+  ✅ Saved to elaho-river-fear-canyon.json
+
+[72/190] Processing: elaho-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/elaho-river-upper
+Title: Elaho River - Upper
+What It's Like: A late season canyon run with fun whitewater at th...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Late season - September or later.
+Gauge: 53.7cms↑ (Oct 21 05:45)
+!...
+  ✅ Saved to elaho-river-upper.json
+
+[73/190] Processing: elaho-squamish
+
+Crawling: https://www.bcwhitewater.org/reaches/elaho-squamish
+Title: Elaho-Squamish
+Contributor: Claudia Schwab
+What It's Like: Cold water and big waves...
+Difficulty: III (IV-) (min: 3, max: 4)
+Time: 2-3 h
+When to Go: Summer and fall
+Gauge: 53.7cms↑ (Oct 21 05:45)
+!...
+Flows description: 118 chars
+  ✅ Saved to elaho-squamish.json
+
+[74/190] Processing: elk-river-middle
+
+Crawling: https://www.bcwhitewater.org/reaches/elk-river-middle
+Title: Elk River - Middle
+What It's Like: Great moderate whitewater in a classic Rockies can...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Spring through fall - runs in the winter in mild years.
+Gauge: 13.5cms↑ (Oct 21 05:40)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08NK002: Elk River at Fernie gauge
+Flow range: 20.0-30.0 cms
+  ✅ Saved to elk-river-middle.json
+
+[75/190] Processing: elk-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/elk-river-upper
+Title: Elk River - Upper
+What It's Like: A short, stout run with challenging rapids and a c...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Low water - early spring and late summer/fall.
+Gauge: 13.5cms↑ (Oct 21 05:40)
+!...
+Flow range: 20.0-25.0 cms
+  ✅ Saved to elk-river-upper.json
+
+[76/190] Processing: foley-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/foley-creek
+Title: Foley Creek
+Contributor: David Wortley
+What It's Like: An alternative start to the Chilliwack Canyon...
+Difficulty: III(+) with potential IV moves with wood. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 30-45mins
+When to Go: Fall-Spring
+
+
+
+
+
+
+
+
+
+
+
+
+
+"A wood-filled ditch barely wide enough for a creekboat sideways." That was the beta I had been given before but upon actually running this creek there was potential for much more from this little tributary of the Chilliwack.  This creek is basically an alternative put-on for the Chilliwack Canyon which gives you 3.5km extra river running.  It is mostly Class III with some spots that require some sharp maneuvers and below the Bench Road Bridge it is slightly harder and probably with high water it would be Class IV. Be aware that when this creek is in, the Chilliwack Canyon is probably going to be high enough to be continuous Class IV whitewater.  Luckily doing this run after a large storm most of the river was clear of wood, but you can inspect most of the run as you drive up.   There is only one larger rapid which isn't visible from the road but you can scout it easily.Don't expect wonders from this creek, you need quite high flows in the Chilliwack to even give you enough water to consider this 'in'.   I would have liked another 6inches or so water in the run to clean it up and make some of the bigger stuff nicer! The Chilliwack was running at 1.5m after about 30mm of rain overnight that also left a very visible snow-line, but it also had stopped raining for a few hours. Typically it'll be in when the Chilliwack has climbed quickly due to rain, but can also be in on snowmelt alone.  To get there drive to the Chiliwack Canyon take-out at Slesse Creek, that is the normal take-out of this run including the Class IV run.  Continue to the canyon put-on, cross over the Chilliwack, turn left down Bench Forest Service Road.  Drive until you go passed the main Chilliwack and see a smaller creek on your left.  Take a look as you drive up and stop at the bridge and have a look at the gauge rock.  If water is just going over this rock then it's on the good side of low, but has been paddled/rock-bashed lower. Make your own assessment, if you like the look of this section then you'll probably enjoy the rest of the run too.  If you don't like the look of it, turn around and go to the regular Chilliwack Canyon put-on instead.
+
+
+      The gauge rock, the middle of the big rocks.
+  ✅ Saved to foley-creek.json
+
+[77/190] Processing: fraser-river-alexandra-bridge-to-yale
+
+Crawling: https://www.bcwhitewater.org/reaches/fraser-river-alexandra-bridge-to-yale
+Title: Fraser River – Alexandra Bridge to Yale
+Contributor: Claudia Schwab
+What It's Like: Huge volume, pool drop, big crashing waves and swi...
+Difficulty: II-III, one IV- (min: 2, max: 4)
+Scouting/Portaging info found
+Time: Long (its 20km)
+When to Go: When everything else is too low. Winter and before the snow melt in spring (January to March) and occasionally in fall after a long drought.
+Gauge: 1260.0cms↓ (Oct 21 06:10)
+!...
+Flow range: 700.0-1300.0 cms
+Coordinates: {'latitude': -1.0, 'longitude': 300.0}
+  ✅ Saved to fraser-river-alexandra-bridge-to-yale.json
+
+[78/190] Processing: furry-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/furry-creek
+Title: Furry Creek
+What It's Like: Short and stout park-n-huck waterfalls....
+Difficulty: V-V+ (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Can be hard to catch because of a tight flow window - after rain or snowmelt all year.
+  ✅ Saved to furry-creek.json
+
+[79/190] Processing: gamsby-river
+
+Crawling: https://www.bcwhitewater.org/reaches/gamsby-river
+Title: Gamsby River
+Contributor: Ali Marshall
+What It's Like: Ultra-classic, coastal wilderness multiday.  3 day...
+Difficulty: III-V (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 120-120 hours
+When to Go: Late August, early September.  Getting the correct level is one of the most challenging logistics to this trip.
+  ✅ Saved to gamsby-river.json
+
+[80/190] Processing: gilttoyees-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/gilttoyees-creek
+Title: Gilttoyees Creek
+Contributor: Ali Marshall
+What It's Like: Coastal wilderness adventure with breathtaking sce...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: Late August.
+  ✅ Saved to gilttoyees-creek.json
+
+[81/190] Processing: goldstream-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/goldstream-falls
+Title: Goldstream Falls
+Contributor: Richard Maggs
+What It's Like: Four sweet park and huck water...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Late fall
+Gauge: 13.5cms↓ (Oct 21 05:25)
+!...
+  ✅ Saved to goldstream-falls.json
+
+[82/190] Processing: gordon-river-flood-run
+
+Crawling: https://www.bcwhitewater.org/reaches/gordon-river-flood-run
+Title: Gordon River - Flood Run
+What It's Like: A high water alternative to paddle when everything...
+Difficulty: III-IV (V). (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Fall/winter after heavy rainfall.
+Gauge: 1.25cms↓ (Oct 21 06:20)
+!...
+  ✅ Saved to gordon-river-flood-run.json
+
+[83/190] Processing: gordon-river-middle-gordon
+
+Crawling: https://www.bcwhitewater.org/reaches/gordon-river-middle-gordon
+Title: Gordon River - Middle Gordon
+What It's Like: Good pool-drop whitewater with big ledges and clea...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Rain fed in the fall and winter.
+Gauge: 1.25cms↓ (Oct 21 06:20)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08HA070: Harris Creek
+Flow range: 2.0-6.0 cms
+  ✅ Saved to gordon-river-middle-gordon.json
+
+[84/190] Processing: gordon-river-upper-gordon
+
+Crawling: https://www.bcwhitewater.org/reaches/gordon-river-upper-gordon
+Title: Gordon River - Upper Gordon
+What It's Like: Bedrock pool-drop.  Fun, clean rapids and clear wa...
+Difficulty: IV at medium water. (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: After rain, all year.  Best chance in the fall and winter.
+Gauge: 1.25cms↓ (Oct 21 06:20)
+!...
+Flow range: 4.0-6.0 cms
+  ✅ Saved to gordon-river-upper-gordon.json
+
+[85/190] Processing: grand-canyon-of-the-stikine
+
+Crawling: https://www.bcwhitewater.org/reaches/grand-canyon-of-the-stikine
+Title: Grand Canyon of the Stikine
+Contributor: Ali Marshall and Ben Marr
+What It's Like: The most famous class 5 multiday in North America....
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: August to September.  Snow pack and rain dependant.
+Gauge: 218.0cms↓ (Oct 21 05:40)
+!...
+  ✅ Saved to grand-canyon-of-the-stikine.json
+
+[86/190] Processing: granite-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/granite-creek
+Title: Granite Creek
+What It's Like: Waterfalls.  A great waterfall run with some bould...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 5-8 hours
+When to Go: After rain in the fall and winter.
+Gauge: 2.19cms↑ (Oct 21 06:15)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08HA069: Renfrew Creek
+  ✅ Saved to granite-creek.json
+
+[87/190] Processing: granite-creek-tulameen
+
+Crawling: https://www.bcwhitewater.org/reaches/granite-creek-tulameen
+Title: Granite Creek (Tulameen)
+Contributor: Scott McBride
+What It's Like: A decent low volume canyon run, but not recommende...
+Difficulty: IV+ (P) (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 8-8 hours
+When to Go: Late Spring - May-June
+Gauge: 3.19cms↓ (Oct 21 05:20)
+!...
+Flows description: 537 chars
+Shuttle description: 1129 chars
+On the water description: 2078 chars
+  ✅ Saved to granite-creek-tulameen.json
+
+[88/190] Processing: green-river-middle
+
+Crawling: https://www.bcwhitewater.org/reaches/green-river-middle
+Title: Green River - Middle
+What It's Like: Surprisingly good whitewater on a Whistler run tha...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 3-5 hours
+When to Go: Mid-season snowmelt - June through early August.
+  ✅ Saved to green-river-middle.json
+
+[89/190] Processing: gun-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/gun-creek
+Title: Gun Creek
+What It's Like: A 12 km long rapid.  Very continuous and splashy w...
+Difficulty: III-IV.  Slightly stressful because of wood, and a lack of good eddies. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: High water snowmelt season in May and June. July is possible in big snow years.
+  ✅ Saved to gun-creek.json
+
+[90/190] Processing: harris-creek-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/harris-creek-canyon
+Title: Harris Creek - Canyon
+What It's Like: A short run in a small canyon on the southern end ...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Rain fed, fall through spring.
+Gauge: 1.25cms↓ (Oct 21 06:20)
+!...
+Flow range: 4.5-5.0 cms
+  ✅ Saved to harris-creek-canyon.json
+
+[91/190] Processing: heber-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/heber-river-lower
+Title: Heber River - Lower
+Contributor: Scott McBride
+What It's Like: A box canyon ending at a baseball diamond...
+Difficulty: IV-V (P) (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: After rainfall October-March, snowmelt April-June
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+  ✅ Saved to heber-river-lower.json
+
+[92/190] Processing: hirsch-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/hirsch-creek
+Title: Hirsch Creek
+Contributor: Ali Marshall and Louis Bissonnette
+What It's Like: Great whitewater with a deep and committing canyon...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: May-October, when other creeks in the area are getting low.
+Gauge: 80.7cms↑ (Oct 21 06:00)
+!...
+  ✅ Saved to hirsch-creek.json
+
+[93/190] Processing: homathko-river
+
+Crawling: https://www.bcwhitewater.org/reaches/homathko-river
+Title: Homathko River
+What It's Like: Big water wilderness multiday trip - world class....
+Difficulty: V (V+) (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 96-96 hours
+When to Go: Early to late fall.  Spring windows are rare but possible.
+Gauge: 126.0cms↓ (Oct 21 06:15)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GD004: this gauge
+Flow range: 150.0-350.0 cms
+  ✅ Saved to homathko-river.json
+
+[94/190] Processing: hurley-river-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/hurley-river-canyon
+Title: Hurley River - Canyon
+What It's Like: An impressive canyon with good class V whitewater....
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-5 hours
+When to Go: A mid to late season run - July/August.
+Gauge: 3.83cms↓ (Oct 21 04:25)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08ME027: a convenient online gauge
+  ✅ Saved to hurley-river-canyon.json
+
+[95/190] Processing: iskut-river
+
+Crawling: https://www.bcwhitewater.org/reaches/iskut-river
+Title: Iskut River
+Contributor: Ali Marshall and Steve Arns
+What It's Like: A fantastic northern BC multiday with a long hike ...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 48-72 hours
+When to Go: July to September
+Gauge: 396.0cms↑ (Oct 21 05:25)
+!...
+Flow range: 400.0-600.0 cms
+  ✅ Saved to iskut-river.json
+
+[96/190] Processing: iskut-river-kinaskan-lake-down
+
+Crawling: https://www.bcwhitewater.org/reaches/iskut-river-kinaskan-lake-down
+Title: Iskut River - Kinaskan Lake down
+Contributor: Scott McBride
+What It's Like: An easy roadside float...
+Difficulty: II (min: 2, max: 2)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Summer
+Flows description: 156 chars
+Shuttle description: 292 chars
+On the water description: 730 chars
+  ✅ Saved to iskut-river-kinaskan-lake-down.json
+
+[97/190] Processing: jordan-river
+
+Crawling: https://www.bcwhitewater.org/reaches/jordan-river
+Title: Jordan River
+Contributor: Richard Maggs
+What It's Like: The crown jewel of Revelstoke. « BC Class 4 » at i...
+Difficulty: IV+ (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: July-August. Spring is possible
+Gauge: 8.26cms↓ (Oct 21 06:15)
+!...
+  ✅ Saved to jordan-river.json
+
+[98/190] Processing: khtada-river
+
+Crawling: https://www.bcwhitewater.org/reaches/khtada-river
+Title: Khtada River
+Contributor: Ali Marshall
+What It's Like: A classic North Coast hike in mission. Large bedro...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: Day mission.  30 min paddle across Skeena, and a few hours each of hiking and paddling.
+When to Go: May/June for the main runoff season.  Responds well to rainfall.
+  ✅ Saved to khtada-river.json
+
+[99/190] Processing: kicking-horse-palliser-to-kicking-horse-rest-area
+
+Crawling: https://www.bcwhitewater.org/reaches/kicking-horse-palliser-to-kicking-horse-rest-area
+Title: Kicking Horse - Palliser to Kicking Horse Rest Area
+Contributor: Michael Reeder
+What It's Like: 12 km of high quality river running...
+Difficulty: III+/IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: April to November
+Gauge: 10.9cms↓ (Oct 21 05:40)
+!...
+Flow range: {'max': 150.0, 'unit': 'cms'}
+  ✅ Saved to kicking-horse-palliser-to-kicking-horse-rest-area.json
+
+[100/190] Processing: kicking-horse-river-kicking-horse-rest-area-to-lower-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/kicking-horse-river-kicking-horse-rest-area-to-lower-canyon
+Title: Kicking Horse River - Kicking Horse Rest Area to Lower Canyon
+Contributor: Michael Reeder
+What It's Like: Continuous, steep river running....
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: April to November
+Gauge: 10.9cms↓ (Oct 21 05:40)
+!...
+  ✅ Saved to kicking-horse-river-kicking-horse-rest-area-to-lower-canyon.json
+
+[101/190] Processing: kicking-horse-river-lower-canyon-to-downtown-golden
+
+Crawling: https://www.bcwhitewater.org/reaches/kicking-horse-river-lower-canyon-to-downtown-golden
+Title: Kicking Horse River - Lower Canyon to Downtown Golden
+Contributor: Michael Reeder
+What It's Like: Classic, continuous river running. Fast, surging w...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Any time the river isn't frozen.
+Gauge: 10.9cms↓ (Oct 21 05:40)
+!...
+Flow range: {'max': 180.0, 'unit': 'cms'}
+  ✅ Saved to kicking-horse-river-lower-canyon-to-downtown-golden.json
+
+[102/190] Processing: kicking-horse-yoho-park-boundary-to-palliser
+
+Crawling: https://www.bcwhitewater.org/reaches/kicking-horse-yoho-park-boundary-to-palliser
+Title: Kicking Horse - Yoho Park Boundary to Palliser
+Contributor: Michael Reeder
+What It's Like: Scenic river running with significant wood hazard...
+Difficulty: II+ (min: 2, max: 2)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Spring to Fall
+Gauge: 10.9cms↓ (Oct 21 05:40)
+!...
+  ✅ Saved to kicking-horse-yoho-park-boundary-to-palliser.json
+
+[103/190] Processing: kitsumkalum-kalum-river
+
+Crawling: https://www.bcwhitewater.org/reaches/kitsumkalum-kalum-river
+Title: Kitsumkalum (Kalum) River
+Contributor: Ali Marshall and Tania Millen
+What It's Like: Big water play run.  At high water, one of the bes...
+Difficulty: III+ to IV.  Pushy at high water - a swim would be unpleasant. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 30 min - 2 hr.  Level dependent.  Are you stopping to surf?
+When to Go: All year.  May-June for high water snowmelt and best Dog Dish levels.  Fall rain provides frequent high water.
+Gauge: 83.7cms↑ (Oct 21 06:05)
+!...
+  ✅ Saved to kitsumkalum-kalum-river.json
+
+[104/190] Processing: klastline
+
+Crawling: https://www.bcwhitewater.org/reaches/klastline
+Title: Klastline
+Contributor: Michael Reeder
+What It's Like: A northern BC adventure. Remote and with only a ha...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 72-72 hours
+When to Go: Late August - early September, when the Stikine is in.
+Gauge: 218.0cms↓ (Oct 21 05:40)
+!...
+  ✅ Saved to klastline.json
+
+[105/190] Processing: kleanza-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/kleanza-creek
+Title: Kleanza Creek
+Contributor: Ali Marshall
+What It's Like: A fantastic North Coast creek run.  High caliber w...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: May – June with snowmelt.  After a rain event.
+Coordinates: {'latitude': 16.0, 'longitude': 15.7}
+  ✅ Saved to kleanza-creek.json
+
+[106/190] Processing: kokish-river
+
+Crawling: https://www.bcwhitewater.org/reaches/kokish-river
+Title: Kokish River
+What It's Like: One of the greatest class V runs on the Island.  A...
+Difficulty: V at medium levels. (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-8 hours
+When to Go: Runs unpredictably after heavy rain.  4 possible days of releases per year.
+Gauge: Kokish
+!...
+Flow range: 15.0-25.0 cms
+  ✅ Saved to kokish-river.json
+
+[107/190] Processing: koksilah-river-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/koksilah-river-canyon
+Title: Koksilah River - Canyon
+Contributor: Scott McBride
+What It's Like: A good introductory creeking run near Victoria...
+Difficulty: III-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: October-April during or after rain
+Gauge: 1.69cms↓ (Oct 21 06:10)
+!...
+Flow range: 20.0-30.0 cms
+  ✅ Saved to koksilah-river-canyon.json
+
+[108/190] Processing: lens-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/lens-creek
+Title: Lens Creek
+What It's Like: A local favorite on southern Vancouver Island.  An...
+Difficulty: IV-V at low to medium flows (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 4-6 hours
+When to Go: Fall through spring after rain.  Runs when most other things are low.
+Gauge: 1.25cms↓ (Oct 21 06:20)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08HA070: Harris Creek gauge
+Flow range: 2.5-4.5 cms
+  ✅ Saved to lens-creek.json
+
+[109/190] Processing: lillooet-river-between-the-lakes
+
+Crawling: https://www.bcwhitewater.org/reaches/lillooet-river-between-the-lakes
+Title: Lillooet River - Between the Lakes
+Contributor: David Wortley
+What It's Like: Stunning scenery multi-day option not far from Van...
+Difficulty: Class II/III+ (IV) (min: 2, max: 4)
+Scouting/Portaging info found
+Time: 2-7 hours
+When to Go: Summer or mid-winter
+Gauge: 85.2cms↓ (Oct 21 04:20)
+!...
+  ✅ Saved to lillooet-river-between-the-lakes.json
+
+[110/190] Processing: link-river
+
+Crawling: https://www.bcwhitewater.org/reaches/link-river
+Title: Link River
+Contributor: Scott McBride
+What It's Like: The shortest river on Vancouver Island...
+Difficulty: III below the slides (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: October through May except for dry spells.
+Flow range: {'max': 10.0, 'unit': 'cms'}
+Flows description: 517 chars
+Shuttle description: 677 chars
+On the water description: 410 chars
+  ✅ Saved to link-river.json
+
+[111/190] Processing: little-qualicum-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/little-qualicum-falls
+Title: Little Qualicum Falls
+What It's Like: An exciting double drop draped in mystical Vancouv...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: Park and huck; scouting + 2 minutes of paddling.
+When to Go: Rain fed in the fall/winter, snowmelt in the spring.
+Gauge: 4.25cms↓ (Oct 21 05:20)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08HB029: Little Qualicum online gauge
+Flow range: 10.0-15.0 cms
+  ✅ Saved to little-qualicum-falls.json
+
+[112/190] Processing: lower-mamquam
+
+Crawling: https://www.bcwhitewater.org/reaches/lower-mamquam
+Title: Lower Mamquam
+Contributor: Claudia Schwab
+What It's Like: Good beginner run with small rock garden...
+Difficulty: II+ (min: 2, max: 2)
+Time: 1-1 hours
+When to Go: Snowmelt until summer, fall after rain
+Gauge: 16.6cms↑ (Oct 21 06:05)
+!...
+  ✅ Saved to lower-mamquam.json
+
+[113/190] Processing: lower-pingston
+
+Crawling: https://www.bcwhitewater.org/reaches/lower-pingston
+Title: Lower Pingston
+Contributor: Richard Maggs
+What It's Like: Hard charging BC creeking at its gnarliest. Hectic...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Early spring or late June
+Gauge: 0.36cms↓ (Feb 28 22:00)...
+Found 1 Environment Canada gauge station(s)
+  - 08NE123: Cranberry Creek gauge
+Flows description: 285 chars
+Shuttle description: 208 chars
+  ✅ Saved to lower-pingston.json
+
+[114/190] Processing: lynn-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/lynn-creek
+Title: Lynn Creek
+What It's Like: A popular urban run with a picturesque canyon and ...
+Difficulty: III at low levels, IV when the water is high. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: After heavy rain, usually in the fall/winter.
+  ✅ Saved to lynn-creek.json
+
+[115/190] Processing: mahatta-river
+
+Crawling: https://www.bcwhitewater.org/reaches/mahatta-river
+Title: Mahatta River
+Contributor: Scott McBride
+What It's Like: A fun west coast canyon hidden at the end of the i...
+Difficulty: IV with one harder rapid (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 4-5 hours
+When to Go: October to April. Needs a good amount of rain.
+Flows description: 669 chars
+Shuttle description: 694 chars
+On the water description: 808 chars
+  ✅ Saved to mahatta-river.json
+
+[116/190] Processing: mamquam-river-mamquam-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/mamquam-river-mamquam-falls
+Title: Mamquam River - Mamquam Falls
+What It's Like: One of the world's most sought after big waterfall...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: A few hours.
+When to Go: Peak snowmelt or after rain.  Flow is negatively impacted by a power project and needs high water to be possible.
+Gauge: 16.6cms↑ (Oct 21 06:05)
+!...
+  ✅ Saved to mamquam-river-mamquam-falls.json
+
+[117/190] Processing: mamquam-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/mamquam-river-upper
+Title: Mamquam River - Upper
+What It's Like: A fun and scenic class III+ stretch on the Upper M...
+Difficulty: III-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Early summer or after rainfall. The last 2km can be run year-round.
+Gauge: 16.6cms↑ (Oct 21 06:05)
+!...
+Flow range: 45.0-55.0 cms
+Flows description: 306 chars
+  ✅ Saved to mamquam-river-upper.json
+
+[118/190] Processing: marble-river
+
+Crawling: https://www.bcwhitewater.org/reaches/marble-river
+Title: Marble River
+Contributor: Scott McBride
+What It's Like: A scenic full day paddle with optional class V dro...
+Difficulty: II-III with optional V (min: 2, max: 5)
+Scouting/Portaging info found
+Time: 3-6 hours
+When to Go: October through June, consistent flow from a large lake.
+Flow range: 20.0-50.0 cms
+Flows description: 834 chars
+Shuttle description: 585 chars
+On the water description: 1464 chars
+  ✅ Saved to marble-river.json
+
+[119/190] Processing: mcdame-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/mcdame-creek
+Title: McDame Creek
+Contributor: Scott McBride
+What It's Like: An easy roadside creek...
+Difficulty: II-III (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Summer
+Gauge: 13.2cms↓ (Oct 21 05:40)
+!...
+Flows description: 609 chars
+Shuttle description: 716 chars
+On the water description: 497 chars
+  ✅ Saved to mcdame-creek.json
+
+[120/190] Processing: mcgregor-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/mcgregor-canyon
+Title: McGregor Canyon
+Contributor: Michael Reeder
+What It's Like: A really nice 5km (ish) canyon located northeast o...
+Difficulty: IV+-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: A full day, especially if you include the driving time.
+When to Go: Fall, or anytime the river is low.
+Gauge: 201.0cms↑ (Oct 21 06:20)
+!...
+  ✅ Saved to mcgregor-canyon.json
+
+[121/190] Processing: meager-creek-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/meager-creek-lower
+Title: Meager Creek - Lower
+Contributor: Scott McBride
+What It's Like: A glacial read and run blitz underneath one of Can...
+Difficulty: IV(+), very continuous (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Summer (June-Sept). Can probably scrape down at other times of year.
+Gauge: 36.0cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to meager-creek-lower.json
+
+[122/190] Processing: middle-memekay-river
+
+Crawling: https://www.bcwhitewater.org/reaches/middle-memekay-river
+Title: Middle Memekay River
+Contributor: Scott McBride
+What It's Like: Nice long intermediate canyon run from a small cre...
+Difficulty: III+ with one IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: During and just after rainfall October-May.
+Gauge: 75.4cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to middle-memekay-river.json
+
+[123/190] Processing: moyeha-river
+
+Crawling: https://www.bcwhitewater.org/reaches/moyeha-river
+Title: Moyeha River
+Contributor: Scott McBride
+What It's Like: A difficult traverse of a pristine watershed...
+Difficulty: Scenic I-III packrafting, or manky IV-V creeking (min: 1, max: 5)
+Scouting/Portaging info found
+Time: 72-96 hours
+When to Go: Spring snowmelt - May-June
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+Flows description: 286 chars
+Shuttle description: 398 chars
+  ✅ Saved to moyeha-river.json
+
+[124/190] Processing: muelville-creek-falls
+
+Crawling: https://www.bcwhitewater.org/reaches/muelville-creek-falls
+Title: Muelville Creek falls
+Contributor: Richard Maggs
+What It's Like: Two park and hucks in a beautiful canyon...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Early spring and summer
+Gauge: 0.866cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to muelville-creek-falls.json
+
+[125/190] Processing: nahatlach-river-francis-lake-to-apocynum-campground
+
+Crawling: https://www.bcwhitewater.org/reaches/nahatlach-river-francis-lake-to-apocynum-campground
+Title: Nahatlach River – Francis Lake to Apocynum Campground
+Contributor: Claudia Schwab
+What It's Like: Medium volume, continuous boulder gardens, big hol...
+Difficulty: III+(IV) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: July and August
+Gauge: 11.5cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to nahatlach-river-francis-lake-to-apocynum-campground.json
+
+[126/190] Processing: nahatlatch-river-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/nahatlatch-river-canyon
+Title: Nahatlatch River - Canyon
+What It's Like: A short but fun medium volume run on the dry side ...
+Difficulty: IV at medium levels. (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: July-August in a normal year.  Earlier for high water runs.
+Gauge: 11.5cms↓ (Oct 21 06:10)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08MF065: online
+Flow range: 40.0-80.0 cms
+  ✅ Saved to nahatlatch-river-canyon.json
+
+[127/190] Processing: nass-river
+
+Crawling: https://www.bcwhitewater.org/reaches/nass-river
+Title: Nass River
+Contributor: Ali Marshall
+What It's Like: Everything from a 5-6 day wilderness trip to a big...
+Difficulty: III-V (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 24-216 hours
+Gauge: 600.0cms↓ (Oct 21 06:10)
+!...
+Flow range: {'max': 1800.0, 'unit': 'cms'}
+Coordinates: {'latitude': 37.0, 'longitude': 386.0}
+  ✅ Saved to nass-river.json
+
+[128/190] Processing: norrish-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/norrish-creek
+Title: Norrish Creek
+What It's Like: Clean-ish boulders and bedrock with some very tigh...
+Difficulty: IV-IV+ at medium levels.  Mainly class III-IV but one unportagable rapid is tricky and dangerous. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: After rain or spring snowmelt.
+  ✅ Saved to norrish-creek.json
+
+[129/190] Processing: north-stein-river
+
+Crawling: https://www.bcwhitewater.org/reaches/north-stein-river
+Title: North Stein River
+What It's Like: Remote, multiday, hike in, hard core creeking.  In...
+Difficulty: V+ (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 96-120 hours
+When to Go: July-August, depending on the snowpack.
+  ✅ Saved to north-stein-river.json
+
+[130/190] Processing: pamela-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/pamela-creek
+Title: Pamela Creek
+What It's Like: One of the better creeks in Gold River - excellent...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Rain fed all year, snow melt in the spring.
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+  ✅ Saved to pamela-creek.json
+
+[131/190] Processing: perry-river
+
+Crawling: https://www.bcwhitewater.org/reaches/perry-river
+Title: Perry River
+Contributor: Richard Maggs
+What It's Like: « Old Faithful » for the revelstoke paddler. One o...
+Difficulty: III-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: All spring and summer
+Gauge: 8.26cms↓ (Oct 21 06:15)
+!...
+  ✅ Saved to perry-river.json
+
+[132/190] Processing: pingston-middle
+
+Crawling: https://www.bcwhitewater.org/reaches/pingston-middle
+Title: Pingston - Middle
+Contributor: Michael Reeder
+What It's Like: Excellent quality class 4 with a few bigger rapids...
+Difficulty: IV with a short V section at the end (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Early July
+Gauge: 0.866cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to pingston-middle.json
+
+[133/190] Processing: pitt-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/pitt-river-upper
+Title: Pitt River - Upper
+Contributor: Cam Fenton
+What It's Like: Remote, multi-day wilderness run with tricky logis...
+Difficulty: IV+ with a portage (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 72-120 hours
+When to Go: Late summer & fall
+  ✅ Saved to pitt-river-upper.json
+
+[134/190] Processing: prospect-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/prospect-creek
+Title: Prospect Creek
+Contributor: Scott McBride
+What It's Like: A creeky alternate entrance to Spius Creek; scenic...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Snowmelt May-June
+Gauge: 1.04cms↑ (Oct 21 05:50)
+!...
+  ✅ Saved to prospect-creek.json
+
+[135/190] Processing: puntledge-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/puntledge-river-upper
+Title: Puntledge River - Upper
+Contributor: Scott McBride
+What It's Like: A unique section consisting entirely of massive sl...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Rare dam releases Oct-June, usually during heavy rains or big snowmelt years.
+Gauge: 15.5cms↓ (Oct 21 05:20)
+!...
+Flow range: 80.0-120.0 cms
+Flows description: 1377 chars
+Shuttle description: 599 chars
+On the water description: 1421 chars
+  ✅ Saved to puntledge-river-upper.json
+
+[136/190] Processing: quesnel-river
+
+Crawling: https://www.bcwhitewater.org/reaches/quesnel-river
+Title: Quesnel River
+Contributor: David Wortley
+What It's Like: Big Volume, with play waves at the top. Home of th...
+Difficulty: III+ to IV- (IV at High water) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Summer / Late Summer
+Gauge: 71.9cms↓ (Oct 21 04:55)
+!...
+  ✅ Saved to quesnel-river.json
+
+[137/190] Processing: rogers-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/rogers-creek
+Title: Rogers Creek
+What It's Like: Short run in an amazing gorge - includes the famou...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: July-August - this is a late season run.
+  ✅ Saved to rogers-creek.json
+
+[138/190] Processing: rutherford-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/rutherford-creek
+Title: Rutherford Creek
+What It's Like: Continuous boulder rapids studded with some classi...
+Difficulty: Continuous class IV-V, class V at higher levels. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Whistler high water season - quite a bit of water needs to go over the dam to give good flows.
+Gauge: 1.84cms↑ (Feb 14 11:51)
+!...
+  ✅ Saved to rutherford-creek.json
+
+[139/190] Processing: ryan-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/ryan-river-lower
+Title: Ryan River - Lower
+Contributor: Steve Arns
+What It's Like: Continuous boofalicious boulder gardens....
+Difficulty: Continuous class IV-V. Class V at high flows. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: Any time it's hot.
+Gauge: 9.37cms↓ (Oct 21 04:35)
+!...
+  ✅ Saved to ryan-river-lower.json
+
+[140/190] Processing: ryan-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/ryan-river-upper
+Title: Ryan River - Upper
+What It's Like: Very steep boulder run - a hike-in day trip.  Hard...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 5-6 hours
+When to Go: Late season: September-October.
+Gauge: 36.0cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to ryan-river-upper.json
+
+[141/190] Processing: seton-river
+
+Crawling: https://www.bcwhitewater.org/reaches/seton-river
+Title: Seton River
+Contributor: Scott McBride
+What It's Like: A quick cool down in Lillooet....
+Difficulty: II+ (min: 2, max: 2)
+Scouting/Portaging info found
+Time: 30 minutes
+When to Go: April-September. BC Hydro flow regulated.
+Gauge: 12.4cms↓ (Oct 21 05:10)
+!...
+  ✅ Saved to seton-river.json
+
+[142/190] Processing: seymour-river-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/seymour-river-canyon
+Title: Seymour River Canyon
+What It's Like: Classic kayaking in a deep box canyon.  You would ...
+Difficulty: Highly level dependent - ranges from fun class IV to raging class V. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 5-5 hours
+When to Go: Rain-fed all year, snowmelt in the spring and summer.
+Gauge: 19.751cms↓ (Nov 18 11:00)...
+Coordinates: {'latitude': 7.0, 'longitude': 2014.0}
+  ✅ Saved to seymour-river-canyon.json
+
+[143/190] Processing: seymour-river-lower-run
+
+Crawling: https://www.bcwhitewater.org/reaches/seymour-river-lower-run
+Title: Seymour River - Lower run
+Contributor: Claudia Schwab
+What It's Like: Easy boulder gardens and gravel bars. Many boulder...
+Difficulty: II (III- at high levels) (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Spring run-off and rain
+Gauge: 0.982m↓ (Nov 18 11:00)...
+  ✅ Saved to seymour-river-lower-run.json
+
+[144/190] Processing: seymour-river-upper-run
+
+Crawling: https://www.bcwhitewater.org/reaches/seymour-river-upper-run
+Title: Seymour River – Upper Run
+Contributor: Claudia Schwab
+What It's Like: Pool-drop, some flat sections, gravel bed, low vol...
+Difficulty: III- (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Spring run-off and rain
+Gauge: 19.751cms↓ (Nov 18 11:00)...
+  ✅ Saved to seymour-river-upper-run.json
+
+[145/190] Processing: silverhope-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/silverhope-creek
+Title: Silverhope Creek
+What It's Like: A good quality boulder run with tons of fun boogie...
+Difficulty: IV-IV+ to V, depending on the put in and take out used. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-4 hours
+When to Go: May-July or after rain.
+  ✅ Saved to silverhope-creek.json
+
+[146/190] Processing: similkameen-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/similkameen-canyon
+Title: Similkameen Canyon
+Contributor: David Wortley
+What It's Like: Beautiful Deep Canyon running through some unique ...
+Difficulty: III+/IV-/IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 3-6 hours
+When to Go: Spring/summer
+Gauge: 3.81cms↓ (Oct 21 04:15)
+!...
+  ✅ Saved to similkameen-canyon.json
+
+[147/190] Processing: similkameen-river-bromley-to-stemwinder
+
+Crawling: https://www.bcwhitewater.org/reaches/similkameen-river-bromley-to-stemwinder
+Title: Similkameen River - Bromley to Stemwinder
+Contributor: David Wortley
+What It's Like: Great novice run with warmer water than the coast...
+Difficulty: II (III) (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: Late Spring, early summer
+Gauge: 3.81cms↓ (Oct 21 04:15)
+!...
+  ✅ Saved to similkameen-river-bromley-to-stemwinder.json
+
+[148/190] Processing: skagit-river-wilderness-section
+
+Crawling: https://www.bcwhitewater.org/reaches/skagit-river-wilderness-section
+Title: Skagit River - Wilderness Section
+Contributor: Scott McBride
+What It's Like: A wilderness float through old growth forest...
+Difficulty: II-III (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Late Spring - May-June
+Gauge: 1.08cms↓ (Oct 21 05:05)
+!...
+  ✅ Saved to skagit-river-wilderness-section.json
+
+[149/190] Processing: skookumchuck
+
+Crawling: https://www.bcwhitewater.org/reaches/skookumchuck
+Title: Skookumchuck
+What It's Like: Classic tidal rapid surfing.  Character changes wi...
+Difficulty: III, massive volume. (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Spring through fall.  Usually runs during the night in the winter.
+  ✅ Saved to skookumchuck.json
+
+[150/190] Processing: skookumchuck-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/skookumchuck-creek
+Title: Skookumchuck Creek
+Contributor: Michael Reeder
+What It's Like: 16 km of high quality whitewater. River running at...
+Difficulty: III+-IV (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-5 hours
+When to Go: Spring and Summer
+Flows description: 285 chars
+  ✅ Saved to skookumchuck-creek.json
+
+[151/190] Processing: skookum-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/skookum-creek
+Title: Skookum Creek
+What It's Like: Big, clean waterfalls and tight canyons....
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-4 hours
+When to Go: Peak snowmelt or after heavy rain when the diversion dam is overflowing.  Flows are usually changing quickly.
+Gauge: 2.7cms↓ (Aug 14 10:54)...
+Flow range: 8.0-15.0 cms
+Flows description: 441 chars
+  ✅ Saved to skookum-creek.json
+
+[152/190] Processing: slesse-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/slesse-creek
+Title: Slesse Creek
+Contributor: Claudia Schwab
+What It's Like: Low volume, gravel bed, many boulder gardens with ...
+Difficulty: III with a short IV- canyon (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: Spring-Fall
+Gauge: 11.7cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to slesse-creek.json
+
+[153/190] Processing: small-river
+
+Crawling: https://www.bcwhitewater.org/reaches/small-river
+Title: Small River
+Contributor: Brooke Z
+What It's Like: A Small River packed with big fun! Continuous clas...
+Difficulty: III-IV (optional V at put in) (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 30 mins/lap (trick is to do a bunch of laps!)
+When to Go: June-July
+  ✅ Saved to small-river.json
+
+[154/190] Processing: snowcap-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/snowcap-creek
+Title: Snowcap Creek
+What It's Like: An obscure run near Rogers Creek with good whitewa...
+Difficulty: III-V (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 3-6 hours
+When to Go: A glacial fed river, it runs later in the season - July and August are the best bet.
+Gauge: 6.34cms↓ (Oct 21 06:05)
+!...
+  ✅ Saved to snowcap-creek.json
+
+[155/190] Processing: soo-river
+
+Crawling: https://www.bcwhitewater.org/reaches/soo-river
+Title: Soo River
+What It's Like: Fun river running in a small valley....
+Difficulty: IV at medium levels, somewhat continuous.  Tolerates high water very well, but becomes class V. (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: All summer - runnable over a wide range of levels.
+  ✅ Saved to soo-river.json
+
+[156/190] Processing: soo-river-railroad-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/soo-river-railroad-canyon
+Title: Soo River - Railroad Canyon
+What It's Like: A short, stout addition to the classic section of ...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Summer - preferred when the Soo is medium and lower.
+  ✅ Saved to soo-river-railroad-canyon.json
+
+[157/190] Processing: spillimacheen
+
+Crawling: https://www.bcwhitewater.org/reaches/spillimacheen
+Title: Spillimacheen
+Contributor: Michael Reeder
+What It's Like: Short and sweet, Spilli has 5 major rapids with qu...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Spring and fall - low water season
+Gauge: 7.58cms↓ (Oct 21 05:30)
+!...
+  ✅ Saved to spillimacheen.json
+
+[158/190] Processing: squamish-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/squamish-river-upper
+Title: Squamish River - Upper
+What It's Like: Amazing canyons - unless you're brave, it's an ear...
+Difficulty: III-IV boating through some significant canyons. (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Very early or late season at low water.  Anything but low flows haven't been tested.
+Gauge: 85.8cms↑ (Oct 21 06:05)
+!...
+  ✅ Saved to squamish-river-upper.json
+
+[159/190] Processing: statlu-creek-statlu-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/statlu-creek-statlu-canyon
+Title: Statlu Creek - Statlu Canyon
+What It's Like: Short but high quality, creamy smooth granite bedr...
+Difficulty: V at medium levels. (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: After rainfall or snowmelt in early summer.
+Found 4 Environment Canada gauge station(s)
+  - 08MH103: Chilliwack River above Slesse
+  - 08MH005: Alouette River
+  - 08MF068: Coquihalla River
+  - 08MH147: Stave River
+  ✅ Saved to statlu-creek-statlu-canyon.json
+
+[160/190] Processing: stave-river
+
+Crawling: https://www.bcwhitewater.org/reaches/stave-river
+Title: Stave River
+What It's Like: Stout southwest BC multi-day kayaking.  There's un...
+Difficulty: V (V+ to VI) (min: 5, max: 6)
+Scouting/Portaging info found
+Time: 72-96 hours
+When to Go: Late season, August or September.
+Gauge: 30.0cms↓ (Oct 21 05:00)
+!...
+Main description: 722 chars
+  ✅ Saved to stave-river.json
+
+[161/190] Processing: stawamus-river
+
+Crawling: https://www.bcwhitewater.org/reaches/stawamus-river
+Title: Stawamus River
+What It's Like: A short novelty run in Squamish that's fun when ev...
+Difficulty: III (V) (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 10-30 mintues.
+When to Go: All year after heavy rain.
+Gauge: 1.843m↓ (Oct 21 05:35)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08GA076: Environment Canada online gauge
+  ✅ Saved to stawamus-river.json
+
+[162/190] Processing: stein-river-multiday-trip
+
+Crawling: https://www.bcwhitewater.org/reaches/stein-river-multiday-trip
+Title: Stein River - Multiday Trip
+What It's Like: A nice multiday trip on the arid side of the Coast...
+Difficulty: IV-IV+, V at high water (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 48-96 hours
+When to Go: July-August.
+  ✅ Saved to stein-river-multiday-trip.json
+
+[163/190] Processing: stikine-tahltan-to-telegraph
+
+Crawling: https://www.bcwhitewater.org/reaches/stikine-tahltan-to-telegraph
+Title: Stikine - Tahltan to Telegraph
+Contributor: Scott McBride
+What It's Like: A mellow way to experience the runout of the Grand...
+Difficulty: II-III (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: All summer.
+Gauge: 218.0cms↓ (Oct 21 05:40)
+!...
+Flow range: 250.0-500.0 cms
+Flows description: 336 chars
+Shuttle description: 535 chars
+On the water description: 502 chars
+  ✅ Saved to stikine-tahltan-to-telegraph.json
+
+[164/190] Processing: st-leon-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/st-leon-creek
+Title: St. Leon Creek
+What It's Like: A steep, small creek with hectic boogie interspers...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: May-July in normal years.
+  ✅ Saved to st-leon-creek.json
+
+[165/190] Processing: tamihi-creek-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/tamihi-creek-lower
+Title: Tamihi Creek (Lower)
+Contributor: David Wortley
+What It's Like: Manky boulder garden turning into steep committing...
+Difficulty: IV+ with a mandatory portage (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 3-5 hours
+When to Go: Fall/Winter/Spring
+  ✅ Saved to tamihi-creek-lower.json
+
+[166/190] Processing: tamihi-creek-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/tamihi-creek-upper
+Title: Tamihi Creek - Upper
+Contributor: David Wortley
+What It's Like: Steep boulder gardens, continuous, low volume...
+Difficulty: IV+ / V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: TBC
+When to Go: Snowmelt or Rain
+Gauge: 0.636m↓ (Oct 21 06:05)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08MH103: 0.636m↓ (Oct 21 06:05)
+  ✅ Saved to tamihi-creek-upper.json
+
+[167/190] Processing: tatlow-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/tatlow-creek
+Title: Tatlow Creek
+What It's Like: One of the best class V runs in SW BC.  Waterfalls...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 4-6 hours
+When to Go: Late season run, usually in August.
+Gauge: 3.29cms↑ (Feb 14 11:44)
+!...
+  ✅ Saved to tatlow-creek.json
+
+[168/190] Processing: thompson-river
+
+Crawling: https://www.bcwhitewater.org/reaches/thompson-river
+Title: Thompson River
+What It's Like: Big water boating in a warm climate with some play...
+Difficulty: III, big water. (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 2-5 hours
+When to Go: All year.  Best season is in August-October.
+Gauge: 280.0cms↓ (Oct 21 05:20)
+!...
+Found 1 Environment Canada gauge station(s)
+  - 08LF051: accurate online gauge
+  ✅ Saved to thompson-river.json
+
+[169/190] Processing: thompson-river-goldpan-to-frog
+
+Crawling: https://www.bcwhitewater.org/reaches/thompson-river-goldpan-to-frog
+Title: Thompson River – Goldpan to Frog
+Contributor: Claudia Schwab
+What It's Like: Lots of flat water with some powerful eddylines, w...
+Difficulty: III- (min: 3, max: 3)
+Time: 3-3 hours
+When to Go: Late summer and fall.
+Gauge: 280.0cms↓ (Oct 21 05:20)
+!...
+  ✅ Saved to thompson-river-goldpan-to-frog.json
+
+[170/190] Processing: tingle-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/tingle-creek
+Title: Tingle Creek
+Contributor: Ian Collings
+What It's Like: Beautiful clear turquoise waters, south of the Sta...
+Difficulty: II-III (min: 2, max: 3)
+Scouting/Portaging info found
+Time: 4-4 hours
+When to Go: Spring/Early Summer
+  ✅ Saved to tingle-creek.json
+
+[171/190] Processing: toby-creek-7-canyons
+
+Crawling: https://www.bcwhitewater.org/reaches/toby-creek-7-canyons
+Title: Toby Creek - 7 Canyons
+Contributor: Michael Reeder
+What It's Like: Beautiful class IV+ creeking that just keeps going...
+Difficulty: Mostly class IV/IV+ with one definite class V that can be portaged (min: 4, max: 5)
+Scouting/Portaging info found
+Time: Full day to show yourself down for the first time, half day if you know it.
+When to Go: Later in the summer as water levels come down. Usually a later July to early August run, but can come in at other times.
+Flows description: 458 chars
+  ✅ Saved to toby-creek-7-canyons.json
+
+[172/190] Processing: trent-river
+
+Crawling: https://www.bcwhitewater.org/reaches/trent-river
+Title: Trent River
+Contributor: Scott McBride
+What It's Like: Park and huck waterfall and a mellow paddle out to...
+Difficulty: V for the waterfall; III for the paddle out (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Oct-April after heavy rains
+Gauge: 2.94cms↓ (Oct 21 06:15)
+!...
+Flows description: 341 chars
+Shuttle description: 873 chars
+On the water description: 98 chars
+  ✅ Saved to trent-river.json
+
+[173/190] Processing: trout-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/trout-creek
+Title: Trout Creek
+Contributor: Scott McBride
+What It's Like: A microcreeking epic in wine country, tragically c...
+Difficulty: IV+ (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 4-4 hours
+When to Go: May-June, after peak freshet
+Gauge: 0.03cms↓ (Oct 21 04:15)
+!...
+Flow range: 5.0-10.0 cms
+  ✅ Saved to trout-creek.json
+
+[174/190] Processing: troutline-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/troutline-creek
+Title: Troutline Creek
+Contributor: Scott McBride
+What It's Like: A novelty subalpine float, with stouts downstream ...
+Difficulty: I-II; V+ Canyon Below (min: 1, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: Summer
+Gauge: 13.2cms↓ (Oct 21 05:40)
+!...
+Flows description: 774 chars
+Shuttle description: 783 chars
+On the water description: 1257 chars
+  ✅ Saved to troutline-creek.json
+
+[175/190] Processing: tsable-river-prickly-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/tsable-river-prickly-canyon
+Title: Tsable River - Prickly Canyon
+Contributor: David Wortley
+What It's Like: Steep, continuous and committing with various slid...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-4 hours
+When to Go: Winter - In when most other things around there are too low
+Flow range: 10.0-12.0 cms
+Coordinates: {'latitude': 49.5251663691617, 'longitude': -124.84815684737005}
+  ✅ Saved to tsable-river-prickly-canyon.json
+
+[176/190] Processing: tulameen-river
+
+Crawling: https://www.bcwhitewater.org/reaches/tulameen-river
+Title: Tulameen River
+Contributor: David Wortley
+What It's Like: A chill run with an out of character class IV drop...
+Difficulty: II-III (IV for "Tulameanie Drop" (min: 2, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: Early Summer
+Gauge: 3.19cms↓ (Oct 21 05:20)
+!...
+  ✅ Saved to tulameen-river.json
+
+[177/190] Processing: tutshi-river
+
+Crawling: https://www.bcwhitewater.org/reaches/tutshi-river
+Title: Tutshi River
+Contributor: Ali Marshall and Olly Roy-Jauvin
+What It's Like: Fantastic big volume creeking.  The best and most ...
+Difficulty: III-IV at low water, IV-V at high water (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 2-2 hours
+When to Go: May to August, with the best flows in May/June.
+  ✅ Saved to tutshi-river.json
+
+[178/190] Processing: ucona-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/ucona-river-upper
+Title: Ucona River - Upper
+Contributor: Scott McBride
+What It's Like: Technical waterfalls through coastal rainforest...
+Difficulty: IV with optional V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: During or after rainfall October-March, snowmelt April-June
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+  ✅ Saved to ucona-river-upper.json
+
+[179/190] Processing: upana-river
+
+Crawling: https://www.bcwhitewater.org/reaches/upana-river
+Title: Upana River
+Contributor: Scott McBride
+What It's Like: A short creek run in Gold River with a blind 20 fo...
+Difficulty: IV+ to V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: After rainfall October-March, snowmelt April-June
+Gauge: 119.0cms↓ (Oct 21 06:15)
+!...
+Flow range: {'max': 100.0, 'unit': 'cms'}
+  ✅ Saved to upana-river.json
+
+[180/190] Processing: upper-callaghan
+
+Crawling: https://www.bcwhitewater.org/reaches/upper-callaghan
+Title: Upper Callaghan
+Contributor: David Wortley
+What It's Like: Scenic wilderness-feel but not far from a road. Lo...
+Difficulty: III+ with one IV- easy waterfall (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 5-5 hours
+When to Go: Spring
+  ✅ Saved to upper-callaghan.json
+
+[181/190] Processing: upper-pingston
+
+Crawling: https://www.bcwhitewater.org/reaches/upper-pingston
+Title: Upper Pingston
+Contributor: Michael Reeder
+What It's Like: One of B.C.'s best steep creeks. Classic whitewate...
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 4-8 hours
+When to Go: Late June to mid to late July. Usually run as things are coming down from peak runoff.
+Gauge: 0.36cms↓ (Feb 28 22:00)...
+Found 1 Environment Canada gauge station(s)
+  - 08NE123: Cranberry Creek gauge
+Flow range: 8.0-15.0 cms
+  ✅ Saved to upper-pingston.json
+
+[182/190] Processing: upper-soo
+
+Crawling: https://www.bcwhitewater.org/reaches/upper-soo
+Title: Upper Soo
+Contributor: Ian Collings
+What It's Like: Majestic tributary valley to the Whistler region....
+Difficulty: III (with a major portage, and quite a bit of flat water) (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 10-20 hours
+When to Go: Sprint to late Summer
+  ✅ Saved to upper-soo.json
+
+[183/190] Processing: upper-tulameen
+
+Crawling: https://www.bcwhitewater.org/reaches/upper-tulameen
+Title: Upper Tulameen
+Contributor: Cam Fenton
+What It's Like: Remote, wilderness feel; low-volume canyons...
+Difficulty: III-V (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 48-72 hours
+When to Go: May - June
+Gauge: 0.708cms↓ (Oct 21 04:45)
+!...
+Flow range: 15.0-20.0 cms
+  ✅ Saved to upper-tulameen.json
+
+[184/190] Processing: white-river-canyon
+
+Crawling: https://www.bcwhitewater.org/reaches/white-river-canyon
+Title: White River - Canyon
+Contributor: Scott McBride
+What It's Like: Classic lappable north Island canyon...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: After rainfall October-March, snowmelt April-June
+Gauge: 75.4cms↓ (Oct 21 06:10)
+!...
+Flow range: 50.0-100.0 cms
+Flows description: 1250 chars
+Shuttle description: 672 chars
+On the water description: 1419 chars
+  ✅ Saved to white-river-canyon.json
+
+[185/190] Processing: white-river-lower
+
+Crawling: https://www.bcwhitewater.org/reaches/white-river-lower
+Title: White River - Lower
+Contributor: Scott McBride
+What It's Like: A good intermediate canyon right off the north Isl...
+Difficulty: III (min: 3, max: 3)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: During or after rainfall October-March, snowmelt April-June
+Gauge: 75.4cms↓ (Oct 21 06:10)
+!...
+  ✅ Saved to white-river-lower.json
+
+[186/190] Processing: white-river-nass-tributary
+
+Crawling: https://www.bcwhitewater.org/reaches/white-river-nass-tributary
+Title: White River (Nass tributary)
+Contributor: Scott McBride
+What It's Like: A high volume tributary to the Nass...
+Difficulty: IV (min: 4, max: 4)
+Scouting/Portaging info found
+Time: 2-3 hours
+When to Go: April to October
+Gauge: 600.0cms↓ (Oct 21 06:10)
+!...
+Flows description: 333 chars
+Shuttle description: 605 chars
+On the water description: 1271 chars
+  ✅ Saved to white-river-nass-tributary.json
+
+[187/190] Processing: white-river-upper
+
+Crawling: https://www.bcwhitewater.org/reaches/white-river-upper
+Title: White River - Upper
+Contributor: Scott McBride
+What It's Like: Moderate whitewater but with a difficult portage. ...
+Difficulty: III-IV (P) (min: 3, max: 4)
+Scouting/Portaging info found
+Time: 1-2 hours
+When to Go: After rainfall October-March, snowmelt April-June
+Gauge: 75.4cms↓ (Oct 21 06:10)
+!...
+Flow range: {'max': 50.0, 'unit': 'cms'}
+  ✅ Saved to white-river-upper.json
+
+[188/190] Processing: williams-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/williams-creek
+Title: Williams Creek
+What It's Like: The local home run, with high quality smooth grani...
+Difficulty: IV-V (min: 4, max: 5)
+Scouting/Portaging info found
+Time: 1-3 hours
+When to Go: Early season snowmelt and/or after rain.
+Gauge: 80.7cms↑ (Oct 21 06:00)
+!...
+  ✅ Saved to williams-creek.json
+
+[189/190] Processing: wilson-fitzstubbs-creek
+
+Crawling: https://www.bcwhitewater.org/reaches/wilson-fitzstubbs-creek
+Title: Wilson/Fitzstubbs Creek
+Contributor: Richard Maggs
+What It's Like: A beautiful class fun paddling destination for all...
+Difficulty: III-V (min: 3, max: 5)
+Scouting/Portaging info found
+Time: 1-1 hours
+When to Go: All spring
+Gauge: 1.99cms↑ (Oct 21 04:15)
+!...
+  ✅ Saved to wilson-fitzstubbs-creek.json
+
+[190/190] Processing: yoho
+
+Crawling: https://www.bcwhitewater.org/reaches/yoho
+Title: Yoho
+Contributor: Michael Reeder
+What It's Like: Classic whitewater in an intimidating canyon....
+Difficulty: V (min: 5, max: 5)
+Scouting/Portaging info found
+Time: 3-3 hours
+When to Go: Typically runs in August, however can be caught at runnable flows all summer long and into the late fall if you pay attention to weather and snowpack.
+Gauge: 10.9cms↓ (Oct 21 05:40)
+!...
+Flow range: 60.0-80.0 cms
+  ✅ Saved to yoho.json
+
+============================================================
+EXTRACTION COMPLETE
+============================================================
+✅ Successfully processed: 190/190
+❌ Failed: 0/190
+
+📁 All data saved to: run_data/detailed_runs/
+📊 Total JSON files created: 190

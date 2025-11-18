@@ -1,0 +1,36 @@
+{
+  "id": "lens-creek",
+  "url": "https://www.bcwhitewater.org/reaches/lens-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:50.493742Z",
+  "title": "Lens Creek",
+  "river_name": "Lens Creek",
+  "whats_it_like": "A local favorite on southern Vancouver Island.  An adventurous day of rapids, shuttling and portaging.",
+  "difficulty": {
+    "text": "IV-V at low to medium flows",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate to difficult.  Some must-run whitewater and a complex near-mandatory portage.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 6,
+    "original": "4-6 hours."
+  },
+  "when_to_go": "Fall through spring after rain.  Runs when most other things are low.",
+  "gauge": "1.25cms↓ (Oct 21 06:20)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08HA070",
+      "name": "Harris Creek gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HA070"
+    }
+  ],
+  "flow_range": {
+    "min": 2.5,
+    "max": 4.5,
+    "unit": "cms"
+  }
+}

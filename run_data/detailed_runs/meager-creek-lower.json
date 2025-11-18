@@ -1,0 +1,26 @@
+{
+  "id": "meager-creek-lower",
+  "url": "https://www.bcwhitewater.org/reaches/meager-creek-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:11.153805Z",
+  "title": "Meager Creek - Lower",
+  "river_name": "Meager Creek",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A glacial read and run blitz underneath one of Canada's most unstable volcanoes.",
+  "difficulty": {
+    "text": "IV(+), very continuous",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "The whole run can be scouted from the hike in.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hour hike in, 30 minute paddle out"
+  },
+  "when_to_go": "Summer (June-Sept). Can probably scrape down at other times of year.",
+  "gauge": "36.0cms↓ (Oct 21 06:05)\n!"
+}

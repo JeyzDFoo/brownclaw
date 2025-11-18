@@ -1,0 +1,40 @@
+{
+  "id": "clendinning-creek",
+  "url": "https://www.bcwhitewater.org/reaches/clendinning-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:30.528864Z",
+  "title": "Clendinning Creek",
+  "river_name": "Clendinning Creek",
+  "whats_it_like": "Quality 2 day boulder run with very continuous whitewater and stunning scenery.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate - everything can be walked.",
+  "time": {
+    "hours_min": 48,
+    "hours_max": 48,
+    "original": "2 days."
+  },
+  "when_to_go": "Late August through September.",
+  "gauge": "53.7cms↑ (Oct 21 05:45)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA071",
+      "name": "Elaho gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA071"
+    }
+  ],
+  "flow_range": {
+    "min": 60.0,
+    "max": 70.0,
+    "unit": "cms"
+  },
+  "coordinates": {
+    "latitude": 29.0,
+    "longitude": 2010.0
+  }
+}

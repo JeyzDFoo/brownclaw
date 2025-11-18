@@ -1,0 +1,26 @@
+{
+  "id": "chilliwack-river-slesse-to-tamihi",
+  "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-slesse-to-tamihi",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:21.071998Z",
+  "title": "Chilliwack River - Slesse to Tamihi",
+  "river_name": "Chilliwack River",
+  "section_name": "Slesse to Tamihi",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Gravel bars, pool drop, some floating",
+  "difficulty": {
+    "text": "III, one IV- @ Tamihi",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Easy to scout",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "Year round, may be too low in winter and late summer if it hasn't rained for a while",
+  "gauge": "11.7cms↓ (Oct 21 06:05)\n!"
+}

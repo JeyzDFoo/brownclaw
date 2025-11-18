@@ -1,0 +1,29 @@
+{
+  "id": "kokish-river",
+  "url": "https://www.bcwhitewater.org/reaches/kokish-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:47.289770Z",
+  "title": "Kokish River",
+  "river_name": "Kokish River",
+  "whats_it_like": "One of the greatest class V runs on the Island.  A lengthy river full of complex boulder rapids in a lush canyon. Unfortunately it is dewatered for an IPP.",
+  "difficulty": {
+    "text": "V at medium levels.",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to strenuous river level portaging.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 8,
+    "original": "3-8 hours."
+  },
+  "when_to_go": "Runs unpredictably after heavy rain.  4 possible days of releases per year.",
+  "gauge": "Kokish\n!",
+  "flow_range": {
+    "min": 15.0,
+    "max": 25.0,
+    "unit": "cms"
+  }
+}

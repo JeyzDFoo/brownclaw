@@ -1,0 +1,29 @@
+{
+  "id": "capilano-river",
+  "url": "https://www.bcwhitewater.org/reaches/capilano-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:49.433586Z",
+  "title": "Capilano River",
+  "river_name": "Capilano River",
+  "whats_it_like": "A short run in North Vancouver flowing through a scenic canyon with easy whitewater.",
+  "difficulty": {
+    "text": "III",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Scouting is easy.  It's unlikely you'll need to portage anything unless the river is flooding.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "15 minutes - 2 hours"
+  },
+  "when_to_go": "After heavy rain.  Runs at low water during snowmelt.",
+  "gauge": "23.735cms↓ (Nov 18 11:00)",
+  "flow_range": {
+    "min": 30.0,
+    "max": 40.0,
+    "unit": "cms"
+  }
+}

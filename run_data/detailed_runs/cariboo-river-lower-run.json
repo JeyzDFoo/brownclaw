@@ -1,0 +1,24 @@
+{
+  "id": "cariboo-river-lower-run",
+  "url": "https://www.bcwhitewater.org/reaches/cariboo-river-lower-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:50.900381Z",
+  "title": "Cariboo River - Lower Run",
+  "river_name": "Cariboo River",
+  "section_name": "Lower Run",
+  "contributor": "David Wortley",
+  "whats_it_like": "Big waves, some holes and boulders, a canyon, and flat water at the end. Large Volume",
+  "difficulty": {
+    "text": "II to III (III+ at high water)",
+    "min": 2,
+    "max": 3
+  },
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "Summer and Fall"
+}

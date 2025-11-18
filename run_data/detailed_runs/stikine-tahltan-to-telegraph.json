@@ -1,0 +1,34 @@
+{
+  "id": "stikine-tahltan-to-telegraph",
+  "url": "https://www.bcwhitewater.org/reaches/stikine-tahltan-to-telegraph",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:19.133967Z",
+  "title": "Stikine - Tahltan to Telegraph",
+  "river_name": "Stikine",
+  "section_name": "Tahltan to Telegraph",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A mellow way to experience the runout of the Grand Canyon Stikine",
+  "difficulty": {
+    "text": "II-III",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Sometimes possible. Big canyon.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "All summer.",
+  "gauge": "218.0cms↓ (Oct 21 05:40)\n!",
+  "flow_range": {
+    "min": 250.0,
+    "max": 500.0,
+    "unit": "cms"
+  },
+  "flows_description": "Information for this description is based on flows of 250-500cms (Stikine River at Telegraph Creek). The section is likely runnable higher, although boils could become an issue, as well as other high water risks. Also, locals say the river doesn't freeze much in winter anymore, so off season low water descents may be possible as well.",
+  "shuttle_description": "The run is located about 2 hours west of Dease Lake on the Telegraph Creek Road (BC Highway 51). The put in is at the confluence of the Tahltan and Stikine Rivers. This is an important cultural and fishing site for the Tahltan, so be respectful. The takeout is a further 20km downstream at the town of Telegraph Creek. The Riversong Cafe in Telegraph Creek may be able to provide a shuttle service, and also has camping, meals and accommodation. The run could be extended another 20km of flatwater down to Glenora, where the road ends.",
+  "on_the_water_description": "Much of the run is in a steep sided, craggy and loose canyon. At normal levels the whitewater is pretty straightforward class II-III wave trains and boily eddies, as well as a fair amount of flatwater. A couple of the bigger rapids are on left bends. For comparison, the volume and style of the whitewater is similar to the Thompson River, but a half grade easier. Keep an eye out for a nice waterfall at Seven Mile Creek. The Water Survey gauge cable is about 1km above the takeout at Telegraph Creek."
+}

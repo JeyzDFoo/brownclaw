@@ -1,0 +1,23 @@
+{
+  "id": "north-stein-river",
+  "url": "https://www.bcwhitewater.org/reaches/north-stein-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:24.004259Z",
+  "title": "North Stein River",
+  "river_name": "North Stein River",
+  "whats_it_like": "Remote, multiday, hike in, hard core creeking.  Includes a pleasant paddle out on the main Stein.",
+  "difficulty": {
+    "text": "V+",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate.  Portaging in the steep section is easy compared to the approach.",
+  "time": {
+    "hours_min": 96,
+    "hours_max": 120,
+    "original": "4-5 days, including the main Stein."
+  },
+  "when_to_go": "July-August, depending on the snowpack."
+}

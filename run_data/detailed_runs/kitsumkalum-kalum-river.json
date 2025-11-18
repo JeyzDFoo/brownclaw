@@ -1,0 +1,23 @@
+{
+  "id": "kitsumkalum-kalum-river",
+  "url": "https://www.bcwhitewater.org/reaches/kitsumkalum-kalum-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:42.472777Z",
+  "title": "Kitsumkalum (Kalum) River",
+  "river_name": "Kitsumkalum (Kalum) River",
+  "contributor": "Ali Marshall and Tania Millen",
+  "whats_it_like": "Big water play run.  At high water, one of the best play runs in BC.",
+  "difficulty": {
+    "text": "III+ to IV.  Pushy at high water - a swim would be unpleasant.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Both of the significant rapids can be scouted and portaged with difficulty.",
+  "time": {
+    "original": "30 min - 2 hr.  Level dependent.  Are you stopping to surf?"
+  },
+  "when_to_go": "All year.  May-June for high water snowmelt and best Dog Dish levels.  Fall rain provides frequent high water.",
+  "gauge": "83.7cms↑ (Oct 21 06:05)\n!"
+}

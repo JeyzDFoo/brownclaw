@@ -1,0 +1,25 @@
+{
+  "id": "skookumchuck-creek",
+  "url": "https://www.bcwhitewater.org/reaches/skookumchuck-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:57.520575Z",
+  "title": "Skookumchuck Creek",
+  "river_name": "Skookumchuck Creek",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "16 km of high quality whitewater. River running at medium-high water with more of a creeky feel at medium-low water.",
+  "difficulty": {
+    "text": "III+-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting is not difficult, however it would take far too long to scout all of the rapids on the run from the bank.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 5,
+    "original": "2-5 hours"
+  },
+  "when_to_go": "Spring and Summer",
+  "flows_description": ": There is a painted rock gauge at the takeout. 1 is low, 3 is high. It can certainly be run higher, but does turn very fast and continuous with few eddies and shoreline trees become a real hazard. Typically this river runs at good flows in early to mid summer, after the spring flood."
+}

@@ -1,0 +1,24 @@
+{
+  "id": "upper-callaghan",
+  "url": "https://www.bcwhitewater.org/reaches/upper-callaghan",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:46.185132Z",
+  "title": "Upper Callaghan",
+  "river_name": "Upper Callaghan",
+  "contributor": "David Wortley",
+  "whats_it_like": "Scenic wilderness-feel but not far from a road. Lots to surf!",
+  "difficulty": {
+    "text": "III+ with one IV- easy waterfall",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Main falls can be inspected",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 5,
+    "original": "1-1.5 hours depending on your put-in choice"
+  },
+  "when_to_go": "Spring"
+}

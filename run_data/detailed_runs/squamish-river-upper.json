@@ -1,0 +1,25 @@
+{
+  "id": "squamish-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/squamish-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:10.075291Z",
+  "title": "Squamish River - Upper",
+  "river_name": "Squamish River",
+  "section_name": "Upper",
+  "whats_it_like": "Amazing canyons - unless you're brave, it's an early or late season scenery trip.",
+  "difficulty": {
+    "text": "III-IV boating through some significant canyons.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Moderate. Impossible once in the canyons.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours."
+  },
+  "when_to_go": "Very early or late season at low water.  Anything but low flows haven't been tested.",
+  "gauge": "85.8cms↑ (Oct 21 06:05)\n!"
+}

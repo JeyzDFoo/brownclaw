@@ -1,0 +1,23 @@
+{
+  "id": "cayoosh-creek",
+  "url": "https://www.bcwhitewater.org/reaches/cayoosh-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:55.624643Z",
+  "title": "Cayoosh Creek",
+  "river_name": "Cayoosh Creek",
+  "whats_it_like": "Nice river running through a deep, arid canyon.  Classic scenery and good whitewater.",
+  "difficulty": {
+    "text": "IV+ at medium levels.",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy to difficult.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours."
+  },
+  "when_to_go": "Later half of the SW BC season - July-August.  Spring is possible."
+}

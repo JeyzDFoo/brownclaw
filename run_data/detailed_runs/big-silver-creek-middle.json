@@ -1,0 +1,23 @@
+{
+  "id": "big-silver-creek-middle",
+  "url": "https://www.bcwhitewater.org/reaches/big-silver-creek-middle",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:23.761725Z",
+  "title": "Big Silver Creek - Middle",
+  "river_name": "Big Silver Creek",
+  "section_name": "Middle",
+  "whats_it_like": "Very committing granite gorge with big rapids, marginal waterfalls and hard portages.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult.",
+  "time": {
+    "original": "Full day trip."
+  },
+  "when_to_go": "When water spills over the dam at peak snowmelt, or releases in July/August.",
+  "gauge": "2.04cms↓ (Feb 14 11:47)\n!"
+}

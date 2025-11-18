@@ -1,0 +1,30 @@
+{
+  "id": "upper-tulameen",
+  "url": "https://www.bcwhitewater.org/reaches/upper-tulameen",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:51.239678Z",
+  "title": "Upper Tulameen",
+  "river_name": "Upper Tulameen",
+  "contributor": "Cam Fenton",
+  "whats_it_like": "Remote, wilderness feel; low-volume canyons",
+  "difficulty": {
+    "text": "III-V",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Everything is scoutable and/or portageable, but some portages are steep and brushy.",
+  "time": {
+    "hours_min": 48,
+    "hours_max": 72,
+    "original": "2-3 days for the full run, 3-5 hours per section."
+  },
+  "when_to_go": "May - June",
+  "gauge": "0.708cms↓ (Oct 21 04:45)\n!",
+  "flow_range": {
+    "min": 15.0,
+    "max": 20.0,
+    "unit": "cms"
+  }
+}

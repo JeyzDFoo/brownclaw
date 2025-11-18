@@ -1,0 +1,25 @@
+{
+  "id": "bulkley-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/bulkley-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:44.602679Z",
+  "title": "Bulkley Canyon",
+  "river_name": "Bulkley Canyon",
+  "contributor": "Daniel Helm",
+  "whats_it_like": "The Smithers classic run. Big water canyons with 'boogie water' and plenty of catch on the fly waves in between",
+  "difficulty": {
+    "text": "III+ to IV-",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "One Man Crowd and Featherbed rapids can be scouted from river right. Neither portagable at normal water level. Featherbed can be scouted / portaged form river left at low water.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 6,
+    "original": "4-6 hours."
+  },
+  "when_to_go": "Runnable all season once the ice is off. Typically run after freshet recedes (~ mid-late June) until ~ August.",
+  "gauge": "75.6cms↓ (Oct 21 05:55)\n!"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "cheakamus-river-daisy-lake-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-daisy-lake-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:03.562565Z",
+  "title": "Cheakamus River - Daisy Lake Canyon",
+  "river_name": "Cheakamus River",
+  "section_name": "Daisy Lake Canyon",
+  "whats_it_like": "The hardest regularly run section of the Cheak - excellent boating in a good canyon with a few gnarly spots.",
+  "difficulty": {
+    "text": "V at medium levels.",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate to difficult.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours."
+  },
+  "when_to_go": "Early or late season.",
+  "gauge": "1.875m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA072",
+      "name": "1.875m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA072"
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "id": "ashlu-creek-bottom-mile",
+  "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-bottom-mile",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:02.444348Z",
+  "title": "Ashlu Creek - Bottom Mile",
+  "river_name": "Ashlu Creek",
+  "section_name": "Bottom Mile",
+  "whats_it_like": "The last hurrah of the Ashlu.  Steep boulder piles that equate to difficult but good kayaking.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate, at river level.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours."
+  },
+  "when_to_go": "No definite window - whenever water spills over the dam.",
+  "gauge": "3.29cms↑ (Feb 14 11:44)\n!",
+  "flow_range": {
+    "min": 2.0,
+    "max": 5.0,
+    "unit": "cms"
+  }
+}

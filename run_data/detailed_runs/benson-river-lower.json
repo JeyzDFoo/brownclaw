@@ -1,0 +1,33 @@
+{
+  "id": "benson-river-lower",
+  "url": "https://www.bcwhitewater.org/reaches/benson-river-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:17.318494Z",
+  "title": "Benson River - Lower",
+  "river_name": "Benson River",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A sketchy caving trip in your kayak",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 4,
+    "original": "4 hours"
+  },
+  "when_to_go": "October to April in between rain storms. Spring snowmelt possible",
+  "flow_range": {
+    "min": 10.0,
+    "max": 20.0,
+    "unit": "cms"
+  },
+  "flows_description": "The Benson River has several small lakes which should regulate flow somewhat throughout the winter and spring. However, the Lower Benson should only be attempted at low to medium water in between winter rain events. The river is likely runnable from October through June in the right conditions.  Recommended flows are between 10-20cms, but this will be difficult to estimate with no active gauge and most access points starting on lakes. At very low water portions of the river are reported to flow entirely underground. It's possible to explore around the Devil's Bath Recreation Site to get a feel for the flow through the first canyon. BENSON RIVER NEAR PORT ALICE (08HE003). Historical flow data from a limited record from 1925-1931. Recommended flows are ~10-20cms.",
+  "shuttle_description": "To get to the river, take the north island highway past Port McNeill, turn west on Highway 30 (The Frigon Road) towards Port Alice. After passing Marble River Provincial Park, but before reaching Port Alice, turn left onto the Southeast Main and follow this ~6km to the Link River Campground, a possible takeout. Follow the Southeast Main and the Alice Lake Main up the river left side of the Benson River to the Devils Bath Recreation Site, to scout the first canyon and check the level. From here, either continue upstream to Kathleen Lake Recreation Site to put in on river left, or circle back to the river right to put in at the other end of Kathleen Lake near the Eternal Fountain.",
+  "on_the_water_description": "From either end of Kathleen Lake, paddle 2km to the lake outlet between limestone bluffs. Shortly below the lake, a class III rapid pushes into an undercut wall river right which most likely has a cave tunnel. Around the bend under a set of powerlines, flow appears to emerge from this tunnel at a questionable ledge drop with an old growth log. Even without the log, this area appears constricted and suspiciously little water is flowing on surface, so portaging on the right is recommended. Approximately 100m downstream of the powerlines on river left is the mapped sink for the Devil's Bath cave system, where water flows into the subsurface cave system to join the cenote. Needless to say, stay away from every wall on this run. Just after this headwall, it is possible to eddy out on river left and explore a dry cave. There is a pinch rapid in this section that is the crux of the first canyon (class III+ at medium flows), and if there is a problem with wood or something else it should be possible to escape with difficulty up the caver trails to the Devils Bath parking lot. Below the pinch, it is possible to paddle up into the outlets of the cave system, a highlight of the run. After a couple more class III rapids, the canyon opens up, and if you can explore for a takeout in this area to the nearby road, this first canyon could be paddled very carefully at the class III+ level. Below the first canyon, the river eases off for several km, but just as you expect to reach Alice Lake a horizon line appears. This is the second canyon, a committing class V zone with a lot of unstable rockfall debris. The first significant ledge, Boof or Consequences, has a clean boof in the centre surrounded by undercuts. Portaging or hiking out appears difficult at this point, and once you boof the ledge you are committed to running or portaging the crux, the Green Monster. Three major ledges of varying runnability funnel into an ugly limestone headwall at the bottom. The portage is on river right over unstable rockfall debris, putting in within the sieve pile at the bottom. But wait, there is still a hairy ferry to get out of the eddy, through the outwash of the rapid and just escaping the wall. This section has a lot of objective risk, probably comparable to the Cayoosh Creek landslide rapid, or maybe higher. Once past the crux, there is one more fun rapid and then the river eases off down to Alice Lake and your campsite."
+}

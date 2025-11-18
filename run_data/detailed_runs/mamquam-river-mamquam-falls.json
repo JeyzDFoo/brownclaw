@@ -1,0 +1,23 @@
+{
+  "id": "mamquam-river-mamquam-falls",
+  "url": "https://www.bcwhitewater.org/reaches/mamquam-river-mamquam-falls",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:03.073195Z",
+  "title": "Mamquam River - Mamquam Falls",
+  "river_name": "Mamquam River",
+  "section_name": "Mamquam Falls",
+  "whats_it_like": "One of the world's most sought after big waterfalls, and one of the whitewater crown jewels of the Sea to Sky.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy access for scouting.  Park and huck.",
+  "time": {
+    "original": "A few hours."
+  },
+  "when_to_go": "Peak snowmelt or after rain.  Flow is negatively impacted by a power project and needs high water to be possible.",
+  "gauge": "16.6cms↑ (Oct 21 06:05)\n!"
+}

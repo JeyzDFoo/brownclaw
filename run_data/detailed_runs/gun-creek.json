@@ -1,0 +1,23 @@
+{
+  "id": "gun-creek",
+  "url": "https://www.bcwhitewater.org/reaches/gun-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:19.873909Z",
+  "title": "Gun Creek",
+  "river_name": "Gun Creek",
+  "whats_it_like": "A 12 km long rapid.  Very continuous and splashy whitewater in a beautiful part of BC.",
+  "difficulty": {
+    "text": "III-IV.  Slightly stressful because of wood, and a lack of good eddies.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Easy to moderate.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours."
+  },
+  "when_to_go": "High water snowmelt season in May and June. July is possible in big snow years."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "stave-river",
+  "url": "https://www.bcwhitewater.org/reaches/stave-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:14.459292Z",
+  "title": "Stave River",
+  "river_name": "Stave River",
+  "whats_it_like": "Stout southwest BC multi-day kayaking.  There's unrealized opportunity to go big in there.",
+  "difficulty": {
+    "text": "V (V+ to VI)",
+    "min": 5,
+    "max": 6
+  },
+  "scouting_portaging": "Easy to long and very difficult.",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 96,
+    "original": "3-4 days."
+  },
+  "when_to_go": "Late season, August or September.",
+  "gauge": "30.0cms↓ (Oct 21 05:00)\n!",
+  "description": "The Stave River, one of the truly wild rivers of the South Coast area, is a challenging multiday kayak trip not without some significant difficulties that will probably never see a lot of traffic.  The construction of 2 hydro projects on the lower river below Garibaldi Park in 2009 and 2013 have dewatered almost 1/3 of the good whitewater, drastically reducing the whitewater value and detracting from the overall wilderness experience.  Although there are a few release days per yearprovided by Innergex, they are unlikely to be used because there are no public roads accessing the area.  Furthermore, the releases are in May, which is useless for running the multiday option as the upper river will still be snowed in."
+}

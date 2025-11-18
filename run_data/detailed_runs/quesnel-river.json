@@ -1,0 +1,25 @@
+{
+  "id": "quesnel-river",
+  "url": "https://www.bcwhitewater.org/reaches/quesnel-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:35.119380Z",
+  "title": "Quesnel River",
+  "river_name": "Quesnel River",
+  "contributor": "David Wortley",
+  "whats_it_like": "Big Volume, with play waves at the top. Home of the Unlikely Fest.",
+  "difficulty": {
+    "text": "III+ to IV- (IV at High water)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Crux can be scouted easily",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2hours"
+  },
+  "when_to_go": "Summer / Late Summer",
+  "gauge": "71.9cms↓ (Oct 21 04:55)\n!"
+}

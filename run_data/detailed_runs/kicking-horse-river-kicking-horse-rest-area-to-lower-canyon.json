@@ -1,0 +1,26 @@
+{
+  "id": "kicking-horse-river-kicking-horse-rest-area-to-lower-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/kicking-horse-river-kicking-horse-rest-area-to-lower-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:37.586287Z",
+  "title": "Kicking Horse River - Kicking Horse Rest Area to Lower Canyon",
+  "river_name": "Kicking Horse River",
+  "section_name": "Kicking Horse Rest Area to Lower Canyon",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Continuous, steep river running.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy scouting and portaging along river right train tracks, but watch out for trains and CP employees.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour if scouting, 15 minute race laps."
+  },
+  "when_to_go": "April to November",
+  "gauge": "10.9cms↓ (Oct 21 05:40)\n!"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "birkenhead-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/birkenhead-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:28.514163Z",
+  "title": "Birkenhead River - Upper",
+  "river_name": "Birkenhead River",
+  "section_name": "Upper",
+  "whats_it_like": "Endless, top notch boulder drops that only get better as the run progresses.",
+  "difficulty": {
+    "text": "IV-V at medium, V at medium-high and up.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours for a first trip."
+  },
+  "when_to_go": "July-August snow melt."
+}

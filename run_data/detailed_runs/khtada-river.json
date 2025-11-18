@@ -1,0 +1,22 @@
+{
+  "id": "khtada-river",
+  "url": "https://www.bcwhitewater.org/reaches/khtada-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:34.470255Z",
+  "title": "Khtada River",
+  "river_name": "Khtada River",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "A classic North Coast hike in mission. Large bedrock slides and rapids in the rainforest.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "All rapids can be easily scouted and portaged.",
+  "time": {
+    "original": "Day mission.  30 min paddle across Skeena, and a few hours each of hiking and paddling."
+  },
+  "when_to_go": "May/June for the main runoff season.  Responds well to rainfall."
+}

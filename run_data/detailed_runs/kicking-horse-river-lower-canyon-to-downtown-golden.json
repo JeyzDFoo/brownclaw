@@ -1,0 +1,30 @@
+{
+  "id": "kicking-horse-river-lower-canyon-to-downtown-golden",
+  "url": "https://www.bcwhitewater.org/reaches/kicking-horse-river-lower-canyon-to-downtown-golden",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:39.149412Z",
+  "title": "Kicking Horse River - Lower Canyon to Downtown Golden",
+  "river_name": "Kicking Horse River",
+  "section_name": "Lower Canyon to Downtown Golden",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Classic, continuous river running. Fast, surging waves, powerful holes, satisfying eddies to play with.",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Everything can be scouted from the train tracks on river right. At normal flows competent paddlers can boat scout everything.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Any time the river isn't frozen.",
+  "gauge": "10.9cms↓ (Oct 21 05:40)\n!",
+  "flow_range": {
+    "max": 180.0,
+    "unit": "cms"
+  }
+}

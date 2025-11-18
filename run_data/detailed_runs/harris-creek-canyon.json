@@ -1,0 +1,30 @@
+{
+  "id": "harris-creek-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/harris-creek-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:21.508018Z",
+  "title": "Harris Creek - Canyon",
+  "river_name": "Harris Creek",
+  "section_name": "Canyon",
+  "whats_it_like": "A short run in a small canyon on the southern end of Vancouver Island.  Nice class IV-V boating.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours your first time."
+  },
+  "when_to_go": "Rain fed, fall through spring.",
+  "gauge": "1.25cms↓ (Oct 21 06:20)\n!",
+  "flow_range": {
+    "min": 4.5,
+    "max": 5.0,
+    "unit": "cms"
+  }
+}

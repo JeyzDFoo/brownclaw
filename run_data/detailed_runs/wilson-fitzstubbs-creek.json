@@ -1,0 +1,25 @@
+{
+  "id": "wilson-fitzstubbs-creek",
+  "url": "https://www.bcwhitewater.org/reaches/wilson-fitzstubbs-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:13:00.867696Z",
+  "title": "Wilson/Fitzstubbs Creek",
+  "river_name": "Wilson/Fitzstubbs Creek",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "A beautiful class fun paddling destination for all skill levels.",
+  "difficulty": {
+    "text": "III-V",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is easy. Portaging is difficult and involves ropework on some of the upper sections.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "Approx 1 hour per section."
+  },
+  "when_to_go": "All spring",
+  "gauge": "1.99cms↑ (Oct 21 04:15)\n!"
+}

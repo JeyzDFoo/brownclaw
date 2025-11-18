@@ -1,0 +1,23 @@
+{
+  "id": "elaho-squamish",
+  "url": "https://www.bcwhitewater.org/reaches/elaho-squamish",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:54.425945Z",
+  "title": "Elaho-Squamish",
+  "river_name": "Elaho-Squamish",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Cold water and big waves",
+  "difficulty": {
+    "text": "III (IV-)",
+    "min": 3,
+    "max": 4
+  },
+  "time": {
+    "original": "2-3 h"
+  },
+  "when_to_go": "Summer and fall",
+  "gauge": "53.7cms↑ (Oct 21 05:45)\n!",
+  "flows_description": ": Low: Elaho 60 cms, Squamish 130 cms. Medium: Elaho 150 cms, Squamish 300 cms. High: Elaho 300 cms, Squamish 600 cms."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "chehalis-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/chehalis-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:09.927269Z",
+  "title": "Chehalis River - Upper",
+  "river_name": "Chehalis River",
+  "section_name": "Upper",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A full day adventure through a series of canyons",
+  "difficulty": {
+    "text": "IV with optional V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Mostly scoutable and portageable with some work, except for the lead in to the crux rapid.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 6,
+    "original": "4-6 hours including scouting"
+  },
+  "when_to_go": "Rainfall October-March, snowmelt April-June"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "skookum-creek",
+  "url": "https://www.bcwhitewater.org/reaches/skookum-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:59.091878Z",
+  "title": "Skookum Creek",
+  "river_name": "Skookum Creek",
+  "whats_it_like": "Big, clean waterfalls and tight canyons.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Difficult to almost impossible - it's easier to just walk out if you want to portage the big stuff.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours, or more."
+  },
+  "when_to_go": "Peak snowmelt or after heavy rain when the diversion dam is overflowing.  Flows are usually changing quickly.",
+  "gauge": "2.7cms↓ (Aug 14 10:54)",
+  "flow_range": {
+    "min": 8.0,
+    "max": 15.0,
+    "unit": "cms"
+  },
+  "flows_description": "As of 2021, we have access to a gauge for Skookum Creek. This gauge is located just below the dam and represents the flow in the diversion reach -- what we kayak. We are still working to establish minimums and maximums but 8-15cms is a good starting point with 8 being quite low and 15 being higher than most would want it. Currently, the gauge updates once daily, but in the future we expect to gain access to more regular (hourly) updates."
+}

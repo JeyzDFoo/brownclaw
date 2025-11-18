@@ -1,0 +1,33 @@
+{
+  "id": "cheakamus-river-cheakamus-lake-down",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-cheakamus-lake-down",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:01.988426Z",
+  "title": "Cheakamus River - Cheakamus Lake Down",
+  "river_name": "Cheakamus River",
+  "section_name": "Cheakamus Lake Down",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Paddle out of a beautiful mountain lake into a continuous braided river full of wood.",
+  "difficulty": {
+    "text": "Continuous III+",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "No scouting necessary, but wood portages likely.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours including hike in"
+  },
+  "when_to_go": "Early or late summer - May, August, September. Peak snowmelt not recommended.",
+  "gauge": "1.875m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA072",
+      "name": "1.875m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA072"
+    }
+  ]
+}

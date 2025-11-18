@@ -1,0 +1,30 @@
+{
+  "id": "elaho-river-fear-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/elaho-river-fear-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:51.348420Z",
+  "title": "Elaho River - Fear Canyon",
+  "river_name": "Elaho River",
+  "section_name": "Fear Canyon",
+  "whats_it_like": "A big river with many faces.  Best known as a class IV-V big water run.",
+  "difficulty": {
+    "text": "IV-V depending on level",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is ok.  One of the biggest rapids is a must-run.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours."
+  },
+  "when_to_go": "Year round (often snowed in during winter).",
+  "gauge": "53.7cms↑ (Oct 21 05:45)\n!",
+  "flow_range": {
+    "min": 20.0,
+    "max": 40.0,
+    "unit": "cms"
+  }
+}

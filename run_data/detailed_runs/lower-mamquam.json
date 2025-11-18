@@ -1,0 +1,24 @@
+{
+  "id": "lower-mamquam",
+  "url": "https://www.bcwhitewater.org/reaches/lower-mamquam",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:56.712496Z",
+  "title": "Lower Mamquam",
+  "river_name": "Lower Mamquam",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Good beginner run with small rock garden",
+  "difficulty": {
+    "text": "II+",
+    "min": 2,
+    "max": 2
+  },
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Snowmelt until summer, fall after rain",
+  "gauge": "16.6cms↑ (Oct 21 06:05)\n!"
+}

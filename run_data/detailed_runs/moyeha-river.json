@@ -1,0 +1,27 @@
+{
+  "id": "moyeha-river",
+  "url": "https://www.bcwhitewater.org/reaches/moyeha-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:14.466779Z",
+  "title": "Moyeha River",
+  "river_name": "Moyeha River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A difficult traverse of a pristine watershed",
+  "difficulty": {
+    "text": "Scenic I-III packrafting, or manky IV-V creeking",
+    "min": 1,
+    "max": 5
+  },
+  "scouting_portaging": "Don't ask",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 96,
+    "original": "3-4 days"
+  },
+  "when_to_go": "Spring snowmelt - May-June",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!",
+  "flows_description": "Look for the Gold (GOLD RIVER BELOW UCONA RIVER (08HC001)) to be around 100cms off snowmelt for a medium low kayaking level on the Moyeha, which can usually be found during spring snowmelt in May or June, depending on the snow year. 50cms on the Gold should be adequate for packrafting.",
+  "shuttle_description": "The shuttle is 5 hours each way, so you are going to want to find a shuttle driver or two. Start the hike at Jim Mitchell Lake, just beyond the Bedwell Lakes trailhead in Strathcona Provincial Park, found past the south end of Buttle Lake by branching off BC Highway 28 NW of Campbell River. Takeout is by chartered water taxi from the Moyeha River mouth to Tofino, at the terminus of BC Highway 4."
+}

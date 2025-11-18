@@ -1,0 +1,30 @@
+{
+  "id": "bridge-river-terzaghi-dam-to-yalakom",
+  "url": "https://www.bcwhitewater.org/reaches/bridge-river-terzaghi-dam-to-yalakom",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:41.539482Z",
+  "title": "Bridge River - Terzaghi Dam to Yalakom",
+  "river_name": "Bridge River",
+  "section_name": "Terzaghi Dam to Yalakom",
+  "contributor": "David Wortley",
+  "whats_it_like": "Low Water Boulder garden run which occasionally has releases.",
+  "difficulty": {
+    "text": "III-IV (IV+ at big releases)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Road scout almost everything on the way up, can portage everything.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Early Summer",
+  "gauge": "1.783cms↑ (Nov 18 09:10)",
+  "length": {
+    "km": 15.0,
+    "original": "15km"
+  }
+}

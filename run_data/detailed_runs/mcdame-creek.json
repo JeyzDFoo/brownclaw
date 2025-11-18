@@ -1,0 +1,28 @@
+{
+  "id": "mcdame-creek",
+  "url": "https://www.bcwhitewater.org/reaches/mcdame-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:07.975689Z",
+  "title": "McDame Creek",
+  "river_name": "McDame Creek",
+  "contributor": "Scott McBride",
+  "whats_it_like": "An easy roadside creek",
+  "difficulty": {
+    "text": "II-III",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Would not be practical with continuous river character",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Summer",
+  "gauge": "13.2cms↓ (Oct 21 05:40)\n!",
+  "flows_description": "McDame Creek may be runnable all summer, although it will likely be high during freshet (June) and may be painfully low in the late summer. High water would be hazardous due to placer mining debris and cables in the river. July may be best. The nearest gauge is in a different watershed, but may be helpful for estimating flows (COTTONWOOD RIVER ABOVE BASS CREEK (10AC005)). A flow of ~40cms may suggest medium flows on McDame Creek Historical Max/Min/Mean Hydrometric Data Graph for COTTONWOOD RIVER ABOVE BASS CREEK (10AC005) [BC]. From a different drainage, but may represent flow conditions in the region.",
+  "shuttle_description": "This roadside section is located about 2 hours north of Dease Lake along the Cassiar Highway (Highway 37), just past Jade City. The section described here begins 5km north of Jade City along Highway 37, at an unmarked campsite on Allan Lake which is 200m off the highway. The takeout is 16km north of Jade City along Highway 37 (AKA 11km downstream from the put in), at the confluence with a small creek marked either as 1st North Fork Creek or Centreville Creek, where the highway approaches within 50m of the river. If you want to do some exploring, it definitely looks possible to put in higher or take out lower, but there are some private cabins and placer mining operations to consider when looking for access.",
+  "on_the_water_description": "Putting on Allan Lake is a scenic start with great views of the Cassiar Mountains. The whitewater is not much to write home about, mostly continuous bouncy class II-III with several blind corners and no standout rapids. Keep an eye out for hazards related to placer mining (e.g. cables, old bridges, etc). There are some small cliff banks here and there, but the river never really canyons up. In 2022, this run did not require any wood or debris portages. How many easy creeks in BC can say that?"
+}

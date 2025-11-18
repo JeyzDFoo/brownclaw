@@ -1,0 +1,24 @@
+{
+  "id": "rutherford-creek",
+  "url": "https://www.bcwhitewater.org/reaches/rutherford-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:38.498000Z",
+  "title": "Rutherford Creek",
+  "river_name": "Rutherford Creek",
+  "whats_it_like": "Continuous boulder rapids studded with some classic bedrock drops.",
+  "difficulty": {
+    "text": "Continuous class IV-V, class V at higher levels.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours."
+  },
+  "when_to_go": "Whistler high water season - quite a bit of water needs to go over the dam to give good flows.",
+  "gauge": "1.84cms↑ (Feb 14 11:51)\n!"
+}

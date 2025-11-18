@@ -1,0 +1,28 @@
+{
+  "id": "kleanza-creek",
+  "url": "https://www.bcwhitewater.org/reaches/kleanza-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:45.712147Z",
+  "title": "Kleanza Creek",
+  "river_name": "Kleanza Creek",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "A fantastic North Coast creek run.  High caliber whitewater with a deep and beautiful bedrock canyon.  Wood is a common problem.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "All rapids can be scouted and portaged.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "3 hours"
+  },
+  "when_to_go": "May – June with snowmelt.  After a rain event.",
+  "coordinates": {
+    "latitude": 16.0,
+    "longitude": 15.7
+  }
+}

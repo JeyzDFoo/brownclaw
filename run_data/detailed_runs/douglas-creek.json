@@ -1,0 +1,24 @@
+{
+  "id": "douglas-creek",
+  "url": "https://www.bcwhitewater.org/reaches/douglas-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:43.144766Z",
+  "title": "Douglas Creek",
+  "river_name": "Douglas Creek",
+  "contributor": "Ian Collings",
+  "whats_it_like": "A short exciting run, with more to explore upstream.  A series of scenic waterfalls above from the small hydro dam infrastructure.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Steep canyon, easy scouting",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Spring/Summer"
+}

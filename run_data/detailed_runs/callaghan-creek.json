@@ -1,0 +1,21 @@
+{
+  "id": "callaghan-creek",
+  "url": "https://www.bcwhitewater.org/reaches/callaghan-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:46.198034Z",
+  "title": "Callaghan Creek",
+  "river_name": "Callaghan Creek",
+  "whats_it_like": "Whistler's ultra classic.  Clean waterfalls, bedrock and boulder gardens.",
+  "difficulty": {
+    "text": "IV-V at medium levels.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Relatively easy, except for portaging the big falls.",
+  "time": {
+    "original": "30 minutes to a few hours."
+  },
+  "when_to_go": "Reliable season from May through August - runs after rain in the off season."
+}

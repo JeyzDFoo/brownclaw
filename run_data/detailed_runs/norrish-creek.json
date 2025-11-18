@@ -1,0 +1,23 @@
+{
+  "id": "norrish-creek",
+  "url": "https://www.bcwhitewater.org/reaches/norrish-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:22.421958Z",
+  "title": "Norrish Creek",
+  "river_name": "Norrish Creek",
+  "whats_it_like": "Clean-ish boulders and bedrock with some very tight and deep canyons.",
+  "difficulty": {
+    "text": "IV-IV+ at medium levels.  Mainly class III-IV but one unportagable rapid is tricky and dangerous.",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Usually easy, however 2 rapids including the hardest can't be walked.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours."
+  },
+  "when_to_go": "After rain or spring snowmelt."
+}

@@ -1,0 +1,25 @@
+{
+  "id": "boston-bar-creek",
+  "url": "https://www.bcwhitewater.org/reaches/boston-bar-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:36.274481Z",
+  "title": "Boston Bar Creek",
+  "river_name": "Boston Bar Creek",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A park and huck next to the Coquihalla Highway",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy if you like bushwhacking",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours for full run. Or, a BC roadside park and huck."
+  },
+  "when_to_go": "May-June",
+  "gauge": "0.497cms↓ (Oct 21 04:35)\n!"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "marble-river",
+  "url": "https://www.bcwhitewater.org/reaches/marble-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:06.370689Z",
+  "title": "Marble River",
+  "river_name": "Marble River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A scenic full day paddle with optional class V drops",
+  "difficulty": {
+    "text": "II-III with optional V",
+    "min": 2,
+    "max": 5
+  },
+  "scouting_portaging": "The big drops can be scouted and portaged on river left.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 6,
+    "original": "3-6 hours."
+  },
+  "when_to_go": "October through June, consistent flow from a large lake.",
+  "flow_range": {
+    "min": 20.0,
+    "max": 50.0,
+    "unit": "cms"
+  },
+  "flows_description": "The Marble River has several large lakes which should regulate flow throughout the winter and spring, perhaps similar to the Cowichan River system. However, the class V drops on the Marble are going to be more runnable at low to medium levels in dry periods between rain events. During high water winter rains the class V rapids may get unreasonably high. The sweet spot to run all of the class V drops at a reasonable level might be in the late spring (May, June). The river is possibly runnable into the summer if you want to explore ELF boating like on the Cowichan. Recommended flows are between 20-50cms, on the Environment Canada gauge Marble River at outlet of Alice Lake. MARBLE RIVER AT OUTLET OF ALICE LAKE (08HE001). Limited historical gauge data: from 1925-1930; 1931-1932; 1969-1970; 1971. Recommended flows are 20-50cms.",
+  "shuttle_description": "To get to the put in, take the north island highway past Port McNeill, turn west on Highway 30 (The Frigon Road) towards Port Alice and a bridge over the river at Marble River Provincial Park. The closest take out option is at the Varney log dump on Rupert Inlet, found by doubling back on the highway, turning left (north) onto the Port Hardy Main, and left again (west) onto the Varney Main. It's also possible to take out at Coal Harbour or the head of Rupert Inlet. Another option would be to paddle half the run to Bear Falls, then hike back to the put in on the river left trail.",
+  "on_the_water_description": "The river alternates between class II sections and portageable class V drops. All of the big rapids can be scouted at portaged on river left, sometimes by going up and into the open forest. At winter flows, class III skills are recommended to catch eddies in swift water above class V drops. At low flows in the late spring or summer, the river is reported to have a more pool drop character and class II skills may be adequate. The first rapid visible from the highway, Lake Outlet Falls (V), is a technical slide with a few big holes. Most people will put on below, in the campground. After a section of class II, the first canyon appears. A lead in rapid flows right into a couple drops in the IV-V range. After a short open section, Bear Falls (V) is a riverwide 4m ledge, which is not very clean since it was blasted for fisheries purposes. After more class II, the second canyon starts abruptly at Twin Falls (V). At winter flows, this is a boxed in set of violent ledge holes. Presumably these get more runnable with less water. The rest of the second canyon is beautiful flatwater in a deep canyon, with a couple class II-III rapids with avoidable undercuts. After a long intertidal zone through the estuary, it is another 5-10km paddle across the inlet to whichever takeout you selected. Quatsino Narrows is nearby and has tidal exchanges up to 8 knots. At high tide, it's possible to paddle flatwater upstream from the inlet into the scenic lower canyon."
+}

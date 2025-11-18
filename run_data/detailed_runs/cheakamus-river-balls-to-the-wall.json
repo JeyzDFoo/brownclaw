@@ -1,0 +1,32 @@
+{
+  "id": "cheakamus-river-balls-to-the-wall",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-balls-to-the-wall",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:58.771993Z",
+  "title": "Cheakamus River - Balls To The Wall",
+  "river_name": "Cheakamus River",
+  "section_name": "Balls To The Wall",
+  "whats_it_like": "Extension of the Upper Cheak - great class IV-IV+ river running, and a bonus waterfall.  Some wood.",
+  "difficulty": {
+    "text": "IV-IV+",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting is ok.  Difficult to portage in spots, if you're forced to.  Falls is easy to walk.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours for a relaxed first trip."
+  },
+  "when_to_go": "All season, very pushy at high flows.  Reasonable minimum is 2.1.",
+  "gauge": "1.875m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA072",
+      "name": "1.875m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA072"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "id": "white-river-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/white-river-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:52.932489Z",
+  "title": "White River - Canyon",
+  "river_name": "White River",
+  "section_name": "Canyon",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Classic lappable north Island canyon",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting involves a lot of scrambling. Portaging often means hiking up and out of the canyon.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours with scouting. 30 minute laps when you know it."
+  },
+  "when_to_go": "After rainfall October-March, snowmelt April-June",
+  "gauge": "75.4cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "min": 50.0,
+    "max": 100.0,
+    "unit": "cms"
+  },
+  "flows_description": "There is no online gauge on the White River, but the gauge on the Salmon River near Sayward can help to estimate flows. Appropriate flows happen in the days following rain events in the fall and winter, and more consistently during spring snowmelt. A minimum flow is 50cms on this gauge. At these flows, the White River Canyon is a pool drop class IV section with ample time to catch eddies and scout rapids. Anything over 100cms is getting high, and the river rapidly changes into a class V boily continuous section where scouting and portaging may not always be an option. Keep in mind that the White River is only one of many tributaries to the Salmon River, on which the gauge is located. Also, a certain cms reading may feel higher during snowmelt season, when more water comes from higher up the drainage where the canyon is located. Finally, the riverbed at the put in and takeout is quite wide, while the canyon itself is very tight in places. Judgement is required; if there is a surf wave at the takeout, maybe you should be thinking twice about dropping into a box canyon. 2020 hydrograph and median flows for the Salmon River at Sayward. A guideline is 50-100cms on this gauge as a starting point for good flows in the White River canyon.",
+  "shuttle_description": "The takeout is found just over an hour north from Campbell River, by following Highway 19 to Sayward Junction, turning left across from the gas station, doing a little zig zag to find the start of the White River Main which begins with a steep hill, and following this up the river right side of the White River for ~18km to a bridge at the take out (avoid Victoria Main). The put in is ~4.5km further upstream on river left. Once the road gets close to the river again, look for a fisherman's trail down to a rock ledge next to the water. If you hit White River Provincial Park, you've gone too far. Expect to encounter loaded logging trucks, which have the right of way.",
+  "on_the_water_description": "After a warm up over some gravel bars, the river quickly canyons up into a boat scoutable class IV rapid. The first major rapid follows shortly after, which is a double drop that is scouted on the right. After, the river forms a committing tube which curves to the right, leading safely to an eddy to scout the second major rapid: a broken ledge boofed or seal launched on the right. The third drop can only be partially scouted, by swimming to a boulder on river left. After checking for wood, the line is just to drop in and hold on through a series of curlers and holes, in what is arguably the crux rapid. A section of fun read and run boogie leads to a riverwide ledge. All that remains is the twisting exit to the canyon, which can be tricky to scout but always gets run anyhow. Easy water quickly brings the takeout bridge, and another lap. The entry to the first major rapid. (photo Raife Gehren) The entry to the first major rapid. The exit from the tube. Seal launching into the second rapid. Running the second rapid at lower flows. Unless you swim and climb your way down the left shore, this is all you can see of the entrance to the third rapid, the crux of the run. Dropping into the crux.  (photo Raife Gehren) Powering through the crux. (photo Raife Gehren) A big ledge towards the end. A typical White River canyon scouting experience. The view upstream from the take out bridge at a medium low level."
+}

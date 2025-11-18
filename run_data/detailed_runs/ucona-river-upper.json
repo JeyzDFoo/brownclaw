@@ -1,0 +1,26 @@
+{
+  "id": "ucona-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/ucona-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:43.002298Z",
+  "title": "Ucona River - Upper",
+  "river_name": "Ucona River",
+  "section_name": "Upper",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Technical waterfalls through coastal rainforest",
+  "difficulty": {
+    "text": "IV with optional V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "You'll be scouting almost everything.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "During or after rainfall October-March, snowmelt April-June",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!"
+}

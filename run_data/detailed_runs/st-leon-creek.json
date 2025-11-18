@@ -1,0 +1,23 @@
+{
+  "id": "st-leon-creek",
+  "url": "https://www.bcwhitewater.org/reaches/st-leon-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:20.709931Z",
+  "title": "St. Leon Creek",
+  "river_name": "St. Leon Creek",
+  "whats_it_like": "A steep, small creek with hectic boogie interspersed with some big, clean bedrock drops.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate.  The big drops are walkable.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours."
+  },
+  "when_to_go": "May-July in normal years."
+}

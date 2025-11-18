@@ -1,0 +1,25 @@
+{
+  "id": "gordon-river-flood-run",
+  "url": "https://www.bcwhitewater.org/reaches/gordon-river-flood-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:08.693357Z",
+  "title": "Gordon River - Flood Run",
+  "river_name": "Gordon River",
+  "section_name": "Flood Run",
+  "whats_it_like": "A high water alternative to paddle when everything on the southern Island is flooding.",
+  "difficulty": {
+    "text": "III-IV (V).",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate - there are no canyons, which let it remain runnable at super high water.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours."
+  },
+  "when_to_go": "Fall/winter after heavy rainfall.",
+  "gauge": "1.25cms↓ (Oct 21 06:20)\n!"
+}

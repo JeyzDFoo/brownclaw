@@ -1,0 +1,25 @@
+{
+  "id": "klastline",
+  "url": "https://www.bcwhitewater.org/reaches/klastline",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:44.105437Z",
+  "title": "Klastline",
+  "river_name": "Klastline",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "A northern BC adventure. Remote and with only a handful of descents the Klastline is a good option for anyone who plans to be in the area and wants to run something other than the Stikine. Some class 4 bedrock rapids, 2 big waterfalls (one that has yet to be run) and some steep boulder gardens make for varied if not \"ultra-classic\" whitewater.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Everything can be scouted. There are 2 large waterfalls that are most likely portages",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 72,
+    "original": "3 days"
+  },
+  "when_to_go": "Late August - early September, when the Stikine is in.",
+  "gauge": "218.0cms↓ (Oct 21 05:40)\n!"
+}

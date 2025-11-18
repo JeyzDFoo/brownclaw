@@ -1,0 +1,31 @@
+{
+  "id": "ashnola-river",
+  "url": "https://www.bcwhitewater.org/reaches/ashnola-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:10.394772Z",
+  "title": "Ashnola River",
+  "river_name": "Ashnola River",
+  "whats_it_like": "Continuous river running in the hot and sunny Okanagan area of south central BC.",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy - roadside.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 3,
+    "original": "1-3 hours.  Fast laps on the lower 6 km take 30 min."
+  },
+  "when_to_go": "Early season high water snowmelt in May/June.",
+  "gauge": "1.89cms↓ (Oct 21 05:10)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08NL004",
+      "name": "online gauge for the Ashnola",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NL004"
+    }
+  ]
+}

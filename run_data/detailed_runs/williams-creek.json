@@ -1,0 +1,24 @@
+{
+  "id": "williams-creek",
+  "url": "https://www.bcwhitewater.org/reaches/williams-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:59.251996Z",
+  "title": "Williams Creek",
+  "river_name": "Williams Creek",
+  "whats_it_like": "The local home run, with high quality smooth granite boulders and bedrock.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 3,
+    "original": "1-3 hours.  Quick when you know the run."
+  },
+  "when_to_go": "Early season snowmelt and/or after rain.",
+  "gauge": "80.7cms↑ (Oct 21 06:00)\n!"
+}

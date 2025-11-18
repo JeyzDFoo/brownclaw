@@ -1,0 +1,25 @@
+{
+  "id": "coquihalla-river",
+  "url": "https://www.bcwhitewater.org/reaches/coquihalla-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:35.372390Z",
+  "title": "Coquihalla River",
+  "river_name": "Coquihalla River",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Continuous boulder gardens, pool-drop, gravel bed, short bedrock canyon, some floating sections, medium volume.",
+  "difficulty": {
+    "text": "III+",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Easy to scout",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours"
+  },
+  "when_to_go": "Spring snow-melt (May and early June)",
+  "gauge": "15.1cms↓ (Oct 21 06:05)\n!"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "birkenhead-river-lower",
+  "url": "https://www.bcwhitewater.org/reaches/birkenhead-river-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:26.937052Z",
+  "title": "Birkenhead River - Lower",
+  "river_name": "Birkenhead River",
+  "section_name": "Lower",
+  "contributor": "David Wortley",
+  "whats_it_like": "A fun play run with an optional bigger rapid at the start.",
+  "difficulty": {
+    "text": "III(+), IV if doing the first rapids",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Easy",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Summer"
+}

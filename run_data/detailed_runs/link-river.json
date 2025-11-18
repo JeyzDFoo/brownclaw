@@ -1,0 +1,31 @@
+{
+  "id": "link-river",
+  "url": "https://www.bcwhitewater.org/reaches/link-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:53.773791Z",
+  "title": "Link River",
+  "river_name": "Link River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "The shortest river on Vancouver Island",
+  "difficulty": {
+    "text": "III below the slides",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Boat scoutable below the slides",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours to explore the whole run. 15 minute laps on the lower half."
+  },
+  "when_to_go": "October through May except for dry spells.",
+  "flow_range": {
+    "max": 10.0,
+    "unit": "cms"
+  },
+  "flows_description": "The Link River (upper Marble River on some maps) flows out of the large Victoria Lake, and is likely runnable consistently from October through May with the exception of very dry spells. Level is judged visually at the Southeast Main FSR bridge or at the campsite. If it looks like enough water to kayak, the canyon below the slides will be good to go. MARBLE RIVER AT OUTLET OF VICTORIA LAKE (08HE002). Limited historical gauge data from 1925-1931; 1932; 1933-1941; 1946-1953. Anything over 10cms should be boatable?",
+  "shuttle_description": "To get to the take out, take the north island highway past Port McNeill, turn west on Highway 30 (The Frigon Road) towards Port Alice. After passing Marble River Provincial Park, but before reaching Port Alice, turn left onto the Southeast Main and follow this ~6km to the Link River Campground. The lower put in is reached by taking the West Main (river left) to a bridge over the tiny Jeune Creek. Either drag boats 200m down this creek to the Link River, or bushwhack 100m directly to the confluence. If you must run the slides, the upper put in is reached by taking Victoria Lake Main (river right), and turning right onto a small branch road that leads to the lake outlet.",
+  "on_the_water_description": "The best way to explore the river is to bushwhack directly to the confluence of Jeune Creek and the Link River from river left. This puts you at the base of the slides, and at the start of the 1km section of class III down to the campsite on Alice Lake. At the lower put in, you can explore around to scout the big slide. If you decide to run it, just use the upper put in on Victoria Lake for your second lap."
+}

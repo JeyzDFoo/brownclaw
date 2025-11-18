@@ -1,0 +1,25 @@
+{
+  "id": "jordan-river",
+  "url": "https://www.bcwhitewater.org/reaches/jordan-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:32.909889Z",
+  "title": "Jordan River",
+  "river_name": "Jordan River",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "The crown jewel of Revelstoke. « BC Class 4 » at it’s best.",
+  "difficulty": {
+    "text": "IV+",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy portages and scout on all rapids. A hiking trail runs all the way down river left from #3 onward.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "July-August. Spring is possible",
+  "gauge": "8.26cms↓ (Oct 21 06:15)\n!"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "cheakamus-river-dam-run",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-dam-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:05.058686Z",
+  "title": "Cheakamus River - Dam Run",
+  "river_name": "Cheakamus River",
+  "section_name": "Dam Run",
+  "whats_it_like": "A fun, roadside class III with a short portage around a class V rapid. Runnable year round.",
+  "difficulty": {
+    "text": "III",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Easy",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "Spring for highest flows. All year depending on your low water tolerance.",
+  "gauge": "23.3cms↓ (Oct 21 06:05)\n!"
+}

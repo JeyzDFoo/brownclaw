@@ -1,0 +1,24 @@
+{
+  "id": "tutshi-river",
+  "url": "https://www.bcwhitewater.org/reaches/tutshi-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:41.370424Z",
+  "title": "Tutshi River",
+  "river_name": "Tutshi River",
+  "contributor": "Ali Marshall and Olly Roy-Jauvin",
+  "whats_it_like": "Fantastic big volume creeking.  The best and most accessible whitewater out of Whitehorse, Yukon.",
+  "difficulty": {
+    "text": "III-IV at low water, IV-V at high water",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours to cover 4 km."
+  },
+  "when_to_go": "May to August, with the best flows in May/June."
+}

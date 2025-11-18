@@ -1,0 +1,33 @@
+{
+  "id": "clearwater-river-play-run",
+  "url": "https://www.bcwhitewater.org/reaches/clearwater-river-play-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:25.705929Z",
+  "title": "Clearwater River - Play Run",
+  "river_name": "Clearwater River",
+  "section_name": "Play Run",
+  "contributor": "David Wortley",
+  "whats_it_like": "The Ottawa of BC? Big volume, warm, playboating with big rapids.",
+  "difficulty": {
+    "text": "III+ (IV)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting is possible but portaging would be harder than running everything",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour - many hours if you want to play!"
+  },
+  "when_to_go": "All Summer into Fall",
+  "gauge": "2.384m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08LA001",
+      "name": "2.384m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08LA001"
+    }
+  ]
+}

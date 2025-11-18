@@ -1,0 +1,23 @@
+{
+  "id": "furry-creek",
+  "url": "https://www.bcwhitewater.org/reaches/furry-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:02.330738Z",
+  "title": "Furry Creek",
+  "river_name": "Furry Creek",
+  "whats_it_like": "Short and stout park-n-huck waterfalls.",
+  "difficulty": {
+    "text": "V-V+",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is easy.  You either run it or you don't.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour."
+  },
+  "when_to_go": "Can be hard to catch because of a tight flow window - after rain or snowmelt all year."
+}

@@ -1,0 +1,34 @@
+{
+  "id": "lower-pingston",
+  "url": "https://www.bcwhitewater.org/reaches/lower-pingston",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:58.295852Z",
+  "title": "Lower Pingston",
+  "river_name": "Lower Pingston",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "Hard charging BC creeking at its gnarliest. Hectic continuous class 5 with even scarier portages. Often full of wood. An absolute treat on its own or as the finisher to a long day of Pingston paddling.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting and portaging is difficult and may require rope work or confident scrambling abilities",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "Early spring or late June",
+  "gauge": "0.36cms↓ (Feb 28 22:00)",
+  "gauge_stations": [
+    {
+      "station_id": "08NE123",
+      "name": "Cranberry Creek gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NE123"
+    }
+  ],
+  "flows_description": "This page now shows flow information directly from Pingston dam at the top, but we are still working to understand the correlation between that gauge and runnability. The old correlation was based on the Cranberry Creek gauge : flows between 5 and 10cms are generally a good indicator.",
+  "shuttle_description": "Start from the bridge or continue down from the middle takeout. Leave your car at the beach by the lake. The turn off is pretty obvious on google maps. It's the only road off the Shelter Bay Main Line for 5k."
+}

@@ -1,0 +1,36 @@
+{
+  "id": "babine-river",
+  "url": "https://www.bcwhitewater.org/reaches/babine-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:12.002496Z",
+  "title": "Babine River",
+  "river_name": "Babine River",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "A classic, class 3/4 wilderness multiday.  Big water on the Skeena.",
+  "difficulty": {
+    "text": "III+-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Most rapids can be scouted and portaged.",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 96,
+    "original": "3-4 days (150km)"
+  },
+  "when_to_go": "May – October.  Early summer for the most fun",
+  "gauge": "0.252m↓ (Oct 21 05:55)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08EC013",
+      "name": "0.252m↓ (Oct 21 05:55)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08EC013"
+    }
+  ],
+  "coordinates": {
+    "latitude": 13.0,
+    "longitude": 5.0
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "id": "skagit-river-wilderness-section",
+  "url": "https://www.bcwhitewater.org/reaches/skagit-river-wilderness-section",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:54.490911Z",
+  "title": "Skagit River - Wilderness Section",
+  "river_name": "Skagit River",
+  "section_name": "Wilderness Section",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A wilderness float through old growth forest",
+  "difficulty": {
+    "text": "II-III",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Expect many wood portages",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours, long shuttle"
+  },
+  "when_to_go": "Late Spring - May-June",
+  "gauge": "1.08cms↓ (Oct 21 05:05)\n!"
+}

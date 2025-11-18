@@ -1,0 +1,28 @@
+{
+  "id": "benson-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/benson-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:18.868102Z",
+  "title": "Benson River - Upper",
+  "river_name": "Benson River",
+  "section_name": "Upper",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A short low volume canyon in the middle of nowhere",
+  "difficulty": {
+    "text": "IV+ at low water",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Mostly possible but not always",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "October to April with moderate rain. Spring snowmelt possible",
+  "flows_description": "There are no gauges in this area, but the Upper Benson is a tight low volume creek, and low winter flows are probably best for a safe descent. At the put in, it should look like just enough flow to kayak. Any sort of big rain spike or high flows is going to be class V. This portion of the Benson River is above all the lakes, so flows may be flashy as is typical for the island. Furthermore, the Vanishing River is subtracted through a cave above the Upper Benson, and transferred to the Reappearing River into the Raging River. None of that water flows through this reach.",
+  "shuttle_description": "To get to the put in, drive north on the island highway to just beyond Port McNeill, and turn left on the Keogh FSR to a bridge at 35.5km. The takeout is ~2km downstream on river left along another FSR near Merry Widow Mountain.",
+  "on_the_water_description": "Most, but not all of the rapids can be scouted at river level; those that cannot can be scouted and presumably portaged on river left above the low canyon walls. There are a few points that feel committing, and although the road is close to the left a hike out will probably involve a healthy bushwhack. If this run is full of wood it will be a lot of work to scout, but in 2022 it was totally clean. Although the rock is mostly limestone, the cave factor does not appear to be in play, but there is some pin/piton factor. The character is somewhat reminiscent of the in between boogie rapids on the Cameron River. Take out once the road reappears on river left, or a bit further downstream at a bridge to the Raging River IPP. The first set from the air."
+}

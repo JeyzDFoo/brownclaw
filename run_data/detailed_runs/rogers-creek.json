@@ -1,0 +1,23 @@
+{
+  "id": "rogers-creek",
+  "url": "https://www.bcwhitewater.org/reaches/rogers-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:36.709864Z",
+  "title": "Rogers Creek",
+  "river_name": "Rogers Creek",
+  "whats_it_like": "Short run in an amazing gorge - includes the famous triple falls.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate to difficult.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours on the water."
+  },
+  "when_to_go": "July-August - this is a late season run."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "hurley-river-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/hurley-river-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:28.146441Z",
+  "title": "Hurley River - Canyon",
+  "river_name": "Hurley River",
+  "section_name": "Canyon",
+  "whats_it_like": "An impressive canyon with good class V whitewater.  A different feel from the typical Coast Mountain rivers.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate - despite the size of the canyon, everything can be scouted and/or portaged.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 5,
+    "original": "3-5 hours."
+  },
+  "when_to_go": "A mid to late season run - July/August.",
+  "gauge": "3.83cms↓ (Oct 21 04:25)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08ME027",
+      "name": "a convenient online gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08ME027"
+    }
+  ]
+}

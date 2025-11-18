@@ -1,0 +1,45 @@
+{
+  "id": "big-creek-lower",
+  "url": "https://www.bcwhitewater.org/reaches/big-creek-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:20.549673Z",
+  "title": "Big Creek - Lower",
+  "river_name": "Big Creek",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Scrappy, dangerous whitewater through a remote canyon",
+  "difficulty": {
+    "text": "V with a big portage",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "One major portage around an unrunnable canyon. Several dangerous portages over landslide debris.",
+  "time": {
+    "hours_min": 24,
+    "hours_max": 48,
+    "original": "1-2 days"
+  },
+  "when_to_go": "Snowmelt May-July",
+  "gauge": "2.13cms↑ (Oct 21 06:10)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08MB006",
+      "name": "BIG CREEK ABOVE GROUNDHOG CREEK (08MB006)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MB006"
+    }
+  ],
+  "flow_range": {
+    "min": 10.0,
+    "max": 20.0,
+    "unit": "cms"
+  },
+  "flows_description": "In most years the thin alpine snowpack melts off early during May and June, possibly extending into July. While there are small glaciers in the alpine headwaters, they are not big enough to sustain runnable flows through the summer. In some years (e.g. 2019), major summer thunderstorms can hit the Chilcotin Plateau, and the large area of this plateau can lead to flooding, but in most years this run will be done by July. The information here is from a descent at 12cms in July 2020 ( BIG CREEK ABOVE GROUNDHOG CREEK (08MB006) ), which was a low runnable flow. Below 10cms is not recommended, and while flows up to 20cms may improve the quality of some of the whitewater, the added push may put some of the canyons into the V+ range. Keep in mind that the gauge is upstream of several diversions for agriculture and wetlands, which may influence the actual flow in this reach. 2020 hydrograph for and historical averages for Big Creek. 10-20cms probably represents the runnable flow window.",
+  "shuttle_description": "Access to the take out is one hour out of Williams Lake, by following Highway 20 west for 46km, turning left onto the Farwell Canyon Road (unpaved), and following this 22km down into the Chilcotin River canyon. There are several take out options near the Farwell Canyon bridge, a common one being near the old cabin on river right. To get to the put in, continue along Farwell Canyon Road up and out of the canyon for another 34km, staying right at the Y, until reaching the Erickson Bridge over Big Creek. Much of the land near the put in is private property outside of the road right of way. There are alternate put in options downstream of this bridge which cut out flatwater, but these involve route finding and 4x4 driving in sticky mud. It should be possible to evacuate to Farwell Canyon Road on river right from any point during the run, as it is never further than 5km away cross country to the SE, but this would be a last resort.",
+  "on_the_water_description": "From the bridge, the first ~20km is mellow class II-III whitewater traversing the fields and small forests of the Chilcotin Plateau. There are some logjams and small canyons, but with some luck you shouldn't have to get out of your boat. IMPORTANT - At some point (approximately",
+  "coordinates": {
+    "latitude": 51.78594,
+    "longitude": -122.77957
+  }
+}

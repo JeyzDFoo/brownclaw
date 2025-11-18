@@ -1,0 +1,23 @@
+{
+  "id": "seton-river",
+  "url": "https://www.bcwhitewater.org/reaches/seton-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:43.445542Z",
+  "title": "Seton River",
+  "river_name": "Seton River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A quick cool down in Lillooet.",
+  "difficulty": {
+    "text": "II+",
+    "min": 2,
+    "max": 2
+  },
+  "scouting_portaging": "Read and run",
+  "time": {
+    "original": "30 minutes"
+  },
+  "when_to_go": "April-September. BC Hydro flow regulated.",
+  "gauge": "12.4cms↓ (Oct 21 05:10)\n!"
+}

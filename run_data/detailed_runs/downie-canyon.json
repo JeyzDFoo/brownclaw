@@ -1,0 +1,25 @@
+{
+  "id": "downie-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/downie-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:44.632911Z",
+  "title": "Downie Canyon",
+  "river_name": "Downie Canyon",
+  "contributor": "Richard Maggs",
+  "whats_it_like": "A short committing canyon with some fun technical rapids and beautiful scenery",
+  "difficulty": {
+    "text": "IV with a portage",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting and portaging are difficult and may require rope work or throw and goes.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Late fall",
+  "gauge": "13.5cms↓ (Oct 21 05:25)\n!"
+}

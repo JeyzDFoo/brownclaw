@@ -1,0 +1,30 @@
+{
+  "id": "blaeberry-river-split-creek-to-thompson-falls",
+  "url": "https://www.bcwhitewater.org/reaches/blaeberry-river-split-creek-to-thompson-falls",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:29.974412Z",
+  "title": "Blaeberry River - Split Creek to Thompson Falls",
+  "river_name": "Blaeberry River",
+  "section_name": "Split Creek to Thompson Falls",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "A seldom run, but decent quality intermediate run.",
+  "difficulty": {
+    "text": "III+ to IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Mostly boat scouting/read and run. One of the bigger rapids can sneak up on you and is best scouted from river left.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours on the water"
+  },
+  "when_to_go": "Late May to late August, best above 30cms",
+  "gauge": "5.02cms↓ (Oct 21 05:30)\n!",
+  "flow_range": {
+    "min": 30.0,
+    "unit": "cms"
+  }
+}

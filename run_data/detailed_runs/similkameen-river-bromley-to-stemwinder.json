@@ -1,0 +1,26 @@
+{
+  "id": "similkameen-river-bromley-to-stemwinder",
+  "url": "https://www.bcwhitewater.org/reaches/similkameen-river-bromley-to-stemwinder",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:52.830373Z",
+  "title": "Similkameen River - Bromley to Stemwinder",
+  "river_name": "Similkameen River",
+  "section_name": "Bromley to Stemwinder",
+  "contributor": "David Wortley",
+  "whats_it_like": "Great novice run with warmer water than the coast",
+  "difficulty": {
+    "text": "II (III)",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Easy",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "Late Spring, early summer",
+  "gauge": "3.81cms↓ (Oct 21 04:15)\n!"
+}

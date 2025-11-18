@@ -1,0 +1,25 @@
+{
+  "id": "bedwell-river",
+  "url": "https://www.bcwhitewater.org/reaches/bedwell-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:15.458599Z",
+  "title": "Bedwell River",
+  "river_name": "Bedwell River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A hike in multiday through the heart of Vancouver Island",
+  "difficulty": {
+    "text": "IV+ (P)",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting is reasonable with some effort. Approximately 4 portages.",
+  "time": {
+    "original": "1 very long day to hike in, 2 more days to paddle out"
+  },
+  "when_to_go": "Spring snowmelt May-June",
+  "gauge": "119.0cms↓ (Oct 21 06:15)\n!",
+  "flows_description": "Look for the Gold (GOLD RIVER BELOW UCONA RIVER (08HC001)) to be around 100cms off snowmelt for a nice medium low level on the Bedwell, which can usually be found during spring snowmelt in May or June, depending on the snow year. Pacfish also maintains a staff gauge on the lower Bedwell River. Good levels may be between 0.6-1.0m, however this gauge is not regularly calibrated.",
+  "shuttle_description": "The shuttle is 5 hours each way, so you are going to want to find a shuttle driver or two. Start the hike at Bedwell Lakes trailhead in Strathcona Provincial Park, found past the south end of Buttle Lake, by branching off BC Highway 28 NW of Campbell River. Takeout is by chartered water taxi from the Bedwell River mouth to Tofino, at the terminus of BC Highway 4."
+}

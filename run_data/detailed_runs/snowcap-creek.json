@@ -1,0 +1,24 @@
+{
+  "id": "snowcap-creek",
+  "url": "https://www.bcwhitewater.org/reaches/snowcap-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:03.732526Z",
+  "title": "Snowcap Creek",
+  "river_name": "Snowcap Creek",
+  "whats_it_like": "An obscure run near Rogers Creek with good whitewater and a short, hard to scout canyon in the middle.",
+  "difficulty": {
+    "text": "III-V",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to very difficult.  Dealing with the canyon is a significant challenge.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 6,
+    "original": "3-6 hours."
+  },
+  "when_to_go": "A glacial fed river, it runs later in the season - July and August are the best bet.",
+  "gauge": "6.34cms↓ (Oct 21 06:05)\n!"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "hirsch-creek",
+  "url": "https://www.bcwhitewater.org/reaches/hirsch-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:24.719846Z",
+  "title": "Hirsch Creek",
+  "river_name": "Hirsch Creek",
+  "contributor": "Ali Marshall and Louis Bissonnette",
+  "whats_it_like": "Great whitewater with a deep and committing canyon.  Beautiful scenery.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Triple Drop portage requires ropework.  Patapult is a must run class V deep in a sheer walled canyon.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours."
+  },
+  "when_to_go": "May-October, when other creeks in the area are getting low.",
+  "gauge": "80.7cms↑ (Oct 21 06:00)\n!"
+}

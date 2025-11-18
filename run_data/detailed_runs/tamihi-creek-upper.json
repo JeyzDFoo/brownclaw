@@ -1,0 +1,31 @@
+{
+  "id": "tamihi-creek-upper",
+  "url": "https://www.bcwhitewater.org/reaches/tamihi-creek-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:23.806988Z",
+  "title": "Tamihi Creek - Upper",
+  "river_name": "Tamihi Creek",
+  "section_name": "Upper",
+  "contributor": "David Wortley",
+  "whats_it_like": "Steep boulder gardens, continuous, low volume",
+  "difficulty": {
+    "text": "IV+ / V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Essential for the take-out, to be determined for the rest of the run, the river is mostly road-side.",
+  "time": {
+    "original": "TBC"
+  },
+  "when_to_go": "Snowmelt or Rain",
+  "gauge": "0.636m↓ (Oct 21 06:05)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08MH103",
+      "name": "0.636m↓ (Oct 21 06:05)",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH103"
+    }
+  ]
+}

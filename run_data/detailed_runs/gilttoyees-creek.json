@@ -1,0 +1,24 @@
+{
+  "id": "gilttoyees-creek",
+  "url": "https://www.bcwhitewater.org/reaches/gilttoyees-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:05.607021Z",
+  "title": "Gilttoyees Creek",
+  "river_name": "Gilttoyees Creek",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "Coastal wilderness adventure with breathtaking scenery.  The whitewater is good but not classic.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "There are no canyons and everything can be scouted and portaged.  There's a fair bit of walking if you don't paddle the class V parts.",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 72,
+    "original": "3 days."
+  },
+  "when_to_go": "Late August."
+}

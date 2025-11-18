@@ -1,0 +1,32 @@
+{
+  "id": "big-silver-creek-upper",
+  "url": "https://www.bcwhitewater.org/reaches/big-silver-creek-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:25.338860Z",
+  "title": "Big Silver Creek - Upper",
+  "river_name": "Big Silver Creek",
+  "section_name": "Upper",
+  "whats_it_like": "Boulder rapids in deep gorges, one clean waterfall.  Fantastic scenery.",
+  "difficulty": {
+    "text": "IV-IV+ at medium levels",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy to moderate.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours."
+  },
+  "when_to_go": "Early/mid season run - May through July.  Will get too high at peak snowmelt and too low in mid/late summer.",
+  "gauge": "11.5cms↓ (Oct 21 06:10)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08MF065",
+      "name": "Nahatlatch online gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MF065"
+    }
+  ]
+}

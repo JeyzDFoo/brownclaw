@@ -1,0 +1,22 @@
+{
+  "id": "east-boulder-creek",
+  "url": "https://www.bcwhitewater.org/reaches/east-boulder-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:49.743159Z",
+  "title": "East Boulder Creek",
+  "river_name": "East Boulder Creek",
+  "contributor": "Ali Marshall, Tania Millen and Todd James",
+  "whats_it_like": "A fantastic steep creek.",
+  "difficulty": {
+    "text": "IV+ to V, level dependent.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Everything can be scouted and portaged with difficulty.",
+  "time": {
+    "original": "1 hr."
+  },
+  "when_to_go": "Late May through July and after fall rain."
+}

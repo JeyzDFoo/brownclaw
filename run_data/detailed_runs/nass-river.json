@@ -1,0 +1,32 @@
+{
+  "id": "nass-river",
+  "url": "https://www.bcwhitewater.org/reaches/nass-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:20.838852Z",
+  "title": "Nass River",
+  "river_name": "Nass River",
+  "contributor": "Ali Marshall",
+  "whats_it_like": "Everything from a 5-6 day wilderness trip to a big water play run.",
+  "difficulty": {
+    "text": "III-V",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "All rapids can be scouted/portaged, except for Moose Carcass Canyon where it is hard to stop.",
+  "time": {
+    "hours_min": 24,
+    "hours_max": 216,
+    "original": "1-9 days, depending on the combination of sections."
+  },
+  "gauge": "600.0cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "max": 1800.0,
+    "unit": "cms"
+  },
+  "coordinates": {
+    "latitude": 37.0,
+    "longitude": 386.0
+  }
+}

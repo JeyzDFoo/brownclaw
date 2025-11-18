@@ -1,0 +1,25 @@
+{
+  "id": "cheakamus-paradise-valley",
+  "url": "https://www.bcwhitewater.org/reaches/cheakamus-paradise-valley",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:57.158854Z",
+  "title": "Cheakamus – Paradise Valley",
+  "river_name": "Cheakamus – Paradise Valley",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Fun beginner run",
+  "difficulty": {
+    "text": "II (III)",
+    "min": 2,
+    "max": 3
+  },
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Nearly always runnable",
+  "gauge": "23.3cms↓ (Oct 21 06:05)\n!",
+  "flows_description": ": Low: 25 cms, Medium: 50 cms, High: 100 cms."
+}

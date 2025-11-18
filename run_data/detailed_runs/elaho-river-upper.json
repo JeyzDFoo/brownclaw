@@ -1,0 +1,25 @@
+{
+  "id": "elaho-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/elaho-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:52.940792Z",
+  "title": "Elaho River - Upper",
+  "river_name": "Elaho River",
+  "section_name": "Upper",
+  "whats_it_like": "A late season canyon run with fun whitewater at the end of the road in the Elaho Valley.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Tough to impossible portage options in a few spots.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours"
+  },
+  "when_to_go": "Late season - September or later.",
+  "gauge": "53.7cms↑ (Oct 21 05:45)\n!"
+}

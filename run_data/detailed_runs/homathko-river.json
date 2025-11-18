@@ -1,0 +1,36 @@
+{
+  "id": "homathko-river",
+  "url": "https://www.bcwhitewater.org/reaches/homathko-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:26.524474Z",
+  "title": "Homathko River",
+  "river_name": "Homathko River",
+  "whats_it_like": "Big water wilderness multiday trip - world class.",
+  "difficulty": {
+    "text": "V (V+)",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Moderate to difficult, but almost always possible.  There is some must-run whitewater on day 2.",
+  "time": {
+    "hours_min": 96,
+    "hours_max": 96,
+    "original": "4 days."
+  },
+  "when_to_go": "Early to late fall.  Spring windows are rare but possible.",
+  "gauge": "126.0cms↓ (Oct 21 06:15)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GD004",
+      "name": "this gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GD004"
+    }
+  ],
+  "flow_range": {
+    "min": 150.0,
+    "max": 350.0,
+    "unit": "cms"
+  }
+}

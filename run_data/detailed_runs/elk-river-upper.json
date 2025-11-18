@@ -1,0 +1,30 @@
+{
+  "id": "elk-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/elk-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:57.635985Z",
+  "title": "Elk River - Upper",
+  "river_name": "Elk River",
+  "section_name": "Upper",
+  "whats_it_like": "A short, stout run with challenging rapids and a clean 35 foot waterfall.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy scouting.  The biggest rapid has a tough but doable portage route.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours."
+  },
+  "when_to_go": "Low water - early spring and late summer/fall.",
+  "gauge": "13.5cms↑ (Oct 21 05:40)\n!",
+  "flow_range": {
+    "min": 20.0,
+    "max": 25.0,
+    "unit": "cms"
+  }
+}

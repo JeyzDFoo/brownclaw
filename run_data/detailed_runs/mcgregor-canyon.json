@@ -1,0 +1,23 @@
+{
+  "id": "mcgregor-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/mcgregor-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:09.558703Z",
+  "title": "McGregor Canyon",
+  "river_name": "McGregor Canyon",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "A really nice 5km (ish) canyon located northeast of Prince George. Great character to the whitewater.",
+  "difficulty": {
+    "text": "IV+-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Most things can be scouted fairly easily at river level with a combination of boat scouting and hoping out in a few places. One portage around a logjam (in fall of 2020). The longest rapid would require more work to fully scout, however, most of it can be seen (at a distance) from the river right bank.",
+  "time": {
+    "original": "A full day, especially if you include the driving time."
+  },
+  "when_to_go": "Fall, or anytime the river is low.",
+  "gauge": "201.0cms↑ (Oct 21 06:20)\n!"
+}

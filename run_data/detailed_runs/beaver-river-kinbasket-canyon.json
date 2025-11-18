@@ -1,0 +1,32 @@
+{
+  "id": "beaver-river-kinbasket-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/beaver-river-kinbasket-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:13.597013Z",
+  "title": "Beaver River (Kinbasket Canyon)",
+  "river_name": "Beaver River (Kinbasket Canyon)",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Early season warm up run with a linear class I to IV+ progression.",
+  "difficulty": {
+    "text": "IV/IV+",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Everything is scoutable (the 2nd drop of the double drop is hard to get a really good look at)",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Early Spring",
+  "gauge": "BEAVER RIVER NEAR THE MOUTH\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08NB019",
+      "name": "BEAVER RIVER NEAR THE MOUTH",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NB019"
+    }
+  ]
+}

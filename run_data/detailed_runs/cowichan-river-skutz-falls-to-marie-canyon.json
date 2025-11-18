@@ -1,0 +1,32 @@
+{
+  "id": "cowichan-river-skutz-falls-to-marie-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/cowichan-river-skutz-falls-to-marie-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:38.450153Z",
+  "title": "Cowichan River - Skutz Falls to Marie Canyon",
+  "river_name": "Cowichan River",
+  "section_name": "Skutz Falls to Marie Canyon",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Consistently flowing class III canyon.",
+  "difficulty": {
+    "text": "III (IV)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Easy except one rapid on a blind corner near the end.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "Year round, but very low during summer.",
+  "gauge": "10.8cms↓ (Oct 21 06:05)\n!",
+  "flow_range": {
+    "min": 20.0,
+    "max": 30.0,
+    "unit": "cms"
+  },
+  "flows_description": "Runnable flows in the fall, winter, and spring are fairly consistent by Island standards, fed by the large Cowichan Lake. As flows drop into the summer, a weir at the outlet of the lake retains enough water to release at very low levels. At the current summer base flow of ~7cms, the section is still technically runnable, but will very bony and overrun by inner tubers. A better low-medium flow is around 20-30cms. Unexpectedly, Marie Canyon is not a great high water run, and at flows around 100cms many rapids are washed out. 2020 hydrograph and median for COWICHAN RIVER AT LAKE COWICHAN (08HA002)."
+}

@@ -1,0 +1,26 @@
+{
+  "id": "clearwater-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/clearwater-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:27.205267Z",
+  "title": "Clearwater River - Upper",
+  "river_name": "Clearwater River",
+  "section_name": "Upper",
+  "contributor": "David Wortley",
+  "whats_it_like": "Sabretooth Rapid to The Kettle",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Roadside scouting, all portagable but you won't want to!",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "3 hours"
+  },
+  "when_to_go": "Summer",
+  "gauge": "96.4cms↓ (Oct 21 06:05)\n!"
+}

@@ -1,0 +1,32 @@
+{
+  "id": "coal-river-lower",
+  "url": "https://www.bcwhitewater.org/reaches/coal-river-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:33.897717Z",
+  "title": "Coal River - Lower",
+  "river_name": "Coal River",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A floaty wilderness multiday with an nice whitewater canyon at the end.",
+  "difficulty": {
+    "text": "I-III (IV)",
+    "min": 1,
+    "max": 4
+  },
+  "scouting_portaging": "The two harder drops can be portaged with some effort. Portaging all the rapids would be impractical.",
+  "time": {
+    "hours_min": 48,
+    "hours_max": 120,
+    "original": "2-5 days"
+  },
+  "when_to_go": "Summer (June-Sept).",
+  "gauge": "733.0cms↓ (Oct 21 04:30)\n!",
+  "flow_range": {
+    "min": 1100.0,
+    "max": 1700.0,
+    "unit": "cms"
+  },
+  "flows_description": "There is no gauge on the Coal River, but you can get a general idea of flows from nearby gauges (Liard, Hyland, Nahanni). Flows generally rise high off snowpack melt into May and June, before gradually dropping through the rest of the summer. An early July trip (LIARD RIVER AT LOWER CROSSING @ 4000cms) was a fun medium high flow for kayaking. The guidebook Paddling in Yukon also describes this as a great August or September trip, including for decked canoes (LIARD RIVER AT LOWER CROSSING median flow 1100-1700cms). The actual flow in the Lower Coal reach will only be an estimated ~5-10% of these values. Daily Discharge Graph for LIARD RIVER AT LOWER CROSSING (10BE001)."
+}

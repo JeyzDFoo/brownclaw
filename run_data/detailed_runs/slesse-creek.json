@@ -1,0 +1,25 @@
+{
+  "id": "slesse-creek",
+  "url": "https://www.bcwhitewater.org/reaches/slesse-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:00.533162Z",
+  "title": "Slesse Creek",
+  "river_name": "Slesse Creek",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Low volume, gravel bed, many boulder gardens with a short narrow canyon section (“Keyhole Canyon”).",
+  "difficulty": {
+    "text": "III with a short IV- canyon",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Scout Keyhole Canyon on the drive to the put in",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 2,
+    "original": "2 hours"
+  },
+  "when_to_go": "Spring-Fall",
+  "gauge": "11.7cms↓ (Oct 21 06:05)\n!"
+}

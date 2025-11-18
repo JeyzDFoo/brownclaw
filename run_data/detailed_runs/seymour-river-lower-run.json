@@ -1,0 +1,26 @@
+{
+  "id": "seymour-river-lower-run",
+  "url": "https://www.bcwhitewater.org/reaches/seymour-river-lower-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:46.640371Z",
+  "title": "Seymour River - Lower run",
+  "river_name": "Seymour River",
+  "section_name": "Lower run",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Easy boulder gardens and gravel bars. Many boulder gardens, gravel bed, low volume; can be a challenge for beginners.",
+  "difficulty": {
+    "text": "II (III- at high levels)",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Read and run...",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour"
+  },
+  "when_to_go": "Spring run-off and rain",
+  "gauge": "0.982m↓ (Nov 18 11:00)"
+}

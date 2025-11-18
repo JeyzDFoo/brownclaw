@@ -1,0 +1,28 @@
+{
+  "id": "eagle-river",
+  "url": "https://www.bcwhitewater.org/reaches/eagle-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:48.104534Z",
+  "title": "Eagle River",
+  "river_name": "Eagle River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Remote wilderness expedition with easy whitewater",
+  "difficulty": {
+    "text": "I-III with one portage",
+    "min": 1,
+    "max": 3
+  },
+  "scouting_portaging": "The portage is around one manky 5m waterfall, but may be longer if also portaging the class III lead in",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 240,
+    "original": "3-10 days"
+  },
+  "when_to_go": "Early Summer (May-July)",
+  "gauge": "13.2cms↓ (Oct 21 05:40)\n!",
+  "flows_description": "Freshet usually starts in May and tapers off in July in the Cassiar region. The nearest gauge is in a different watershed, but may be helpful for estimating flows (COTTONWOOD RIVER ABOVE BASS CREEK (10AC005)). A flow of ~40cms may suggest a low but acceptable flow on the Eagle River Historical Max/Min/Mean Hydrometric Data Graph for COTTONWOOD RIVER ABOVE BASS CREEK (10AC005) [BC]. From a different drainage, but may represent flow conditions in the region.",
+  "shuttle_description": "Fly in to Eaglehead Lake from Dease Lake (50km). Packrafters may be able to find a way to hike in. Take out at the road accessible French Creek recreation site approximately 2 hours drive north of Dease Lake along Highway 37. There are earlier takeout possibilities that are not as straightforward.",
+  "on_the_water_description": "The exit from Eaglehead Lake is shallow and will probably require boat dragging until reaching a couple tributaries. Most of the rest of the Eagle River is class I-II boulder dodging. There are two sections of easy class III: a short canyon above the confluence with the Little Eagle, and the lead in to the portage rapid. The portage rapid is a manky 5m waterfall with class III rapids above and below. There is no pool above the drop and it is on a blind corner. There is only one drop to portage, but the portage length could be 100-1000m depending on your comfort level. The Dease River is flat, painfully so at times. Some stretches have awesome island camping, while other sections have steep brushy banks. Keep an eye out for wildlife. On my trip I saw moose, porcupines, beavers, eagles, swans, osprey, otters, a wolverine, and a grizzly bear."
+}

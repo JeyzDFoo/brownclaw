@@ -1,0 +1,26 @@
+{
+  "id": "lillooet-river-between-the-lakes",
+  "url": "https://www.bcwhitewater.org/reaches/lillooet-river-between-the-lakes",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:52.118047Z",
+  "title": "Lillooet River - Between the Lakes",
+  "river_name": "Lillooet River",
+  "section_name": "Between the Lakes",
+  "contributor": "David Wortley",
+  "whats_it_like": "Stunning scenery multi-day option not far from Vancouver.",
+  "difficulty": {
+    "text": "Class II/III+ (IV)",
+    "min": 2,
+    "max": 4
+  },
+  "scouting_portaging": "Only one rapid which may need inspecting",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 7,
+    "original": "2-7 hours"
+  },
+  "when_to_go": "Summer or mid-winter",
+  "gauge": "85.2cms↓ (Oct 21 04:20)\n!"
+}

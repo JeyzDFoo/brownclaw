@@ -1,0 +1,30 @@
+{
+  "id": "white-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/white-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:57.649661Z",
+  "title": "White River - Upper",
+  "river_name": "White River",
+  "section_name": "Upper",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Moderate whitewater but with a difficult portage. The fly in the ointment of the White River drainage",
+  "difficulty": {
+    "text": "III-IV (P)",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Scouting the portage rapid at the takeout is recommended before committing to this run.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "After rainfall October-March, snowmelt April-June",
+  "gauge": "75.4cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "max": 50.0,
+    "unit": "cms"
+  }
+}

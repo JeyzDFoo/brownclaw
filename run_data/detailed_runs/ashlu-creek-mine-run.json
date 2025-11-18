@@ -1,0 +1,37 @@
+{
+  "id": "ashlu-creek-mine-run",
+  "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-mine-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:05.665547Z",
+  "title": "Ashlu Creek - Mine Run",
+  "river_name": "Ashlu Creek",
+  "section_name": "Mine Run",
+  "whats_it_like": "An under-rated classic - bedrock rapids, many big holes.",
+  "difficulty": {
+    "text": "IV-V at medium levels.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "All scoutable.  Tough river level portaging possible in most spots.  One or two must-run rapids.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 4,
+    "original": "2-4 hours."
+  },
+  "when_to_go": "July through early September.",
+  "gauge": "3.29cms↑ (Feb 14 11:44)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA071",
+      "name": "Elaho gauge",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA071"
+    }
+  ],
+  "flow_range": {
+    "min": 5.0,
+    "max": 10.0,
+    "unit": "cms"
+  }
+}

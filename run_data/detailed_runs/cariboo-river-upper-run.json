@@ -1,0 +1,24 @@
+{
+  "id": "cariboo-river-upper-run",
+  "url": "https://www.bcwhitewater.org/reaches/cariboo-river-upper-run",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:52.340062Z",
+  "title": "Cariboo River - Upper Run",
+  "river_name": "Cariboo River",
+  "section_name": "Upper Run",
+  "contributor": "David Wortley",
+  "whats_it_like": "Big waves, big holes, continuous, mellower towards the end, Large Volume.",
+  "difficulty": {
+    "text": "III+ to IV- (IV in high water)",
+    "min": 3,
+    "max": 4
+  },
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours"
+  },
+  "when_to_go": "Summer and Fall"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "soo-river",
+  "url": "https://www.bcwhitewater.org/reaches/soo-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:05.307502Z",
+  "title": "Soo River",
+  "river_name": "Soo River",
+  "whats_it_like": "Fun river running in a small valley.",
+  "difficulty": {
+    "text": "IV at medium levels, somewhat continuous.  Tolerates high water very well, but becomes class V.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours."
+  },
+  "when_to_go": "All summer - runnable over a wide range of levels."
+}

@@ -1,0 +1,31 @@
+{
+  "id": "granite-creek",
+  "url": "https://www.bcwhitewater.org/reaches/granite-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:15.101851Z",
+  "title": "Granite Creek",
+  "river_name": "Granite Creek",
+  "whats_it_like": "Waterfalls.  A great waterfall run with some boulder rapids and a lot of wood.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is reasonable but portaging can be hard.  The biggest drop is not readily portaged.",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 8,
+    "original": "5-8 hours."
+  },
+  "when_to_go": "After rain in the fall and winter.",
+  "gauge": "2.19cms↑ (Oct 21 06:15)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08HA069",
+      "name": "Renfrew Creek",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HA069"
+    }
+  ]
+}

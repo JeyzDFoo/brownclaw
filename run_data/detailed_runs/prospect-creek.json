@@ -1,0 +1,25 @@
+{
+  "id": "prospect-creek",
+  "url": "https://www.bcwhitewater.org/reaches/prospect-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:32.049817Z",
+  "title": "Prospect Creek",
+  "river_name": "Prospect Creek",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A creeky alternate entrance to Spius Creek; scenic but manky",
+  "difficulty": {
+    "text": "IV",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "You can scout almost the entire canyon from the rim ahead of time.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 4,
+    "original": "3-4 hours"
+  },
+  "when_to_go": "Snowmelt May-June",
+  "gauge": "1.04cms↑ (Oct 21 05:50)\n!"
+}

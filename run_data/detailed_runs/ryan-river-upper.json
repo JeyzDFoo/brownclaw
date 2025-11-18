@@ -1,0 +1,25 @@
+{
+  "id": "ryan-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/ryan-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:41.674668Z",
+  "title": "Ryan River - Upper",
+  "river_name": "Ryan River",
+  "section_name": "Upper",
+  "whats_it_like": "Very steep boulder run - a hike-in day trip.  Hard kayaking.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate, at river level.",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 6,
+    "original": "5-6 hours including the hike in."
+  },
+  "when_to_go": "Late season: September-October.",
+  "gauge": "36.0cms↓ (Oct 21 06:05)\n!"
+}

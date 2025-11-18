@@ -1,0 +1,31 @@
+{
+  "id": "thompson-river",
+  "url": "https://www.bcwhitewater.org/reaches/thompson-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:27.362624Z",
+  "title": "Thompson River",
+  "river_name": "Thompson River",
+  "whats_it_like": "Big water boating in a warm climate with some play opportunities.  Interesting scenery.",
+  "difficulty": {
+    "text": "III, big water.",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Easy to moderate - far enough from the road that walking out would be difficult.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 5,
+    "original": "2-5 hours."
+  },
+  "when_to_go": "All year.  Best season is in August-October.",
+  "gauge": "280.0cms↓ (Oct 21 05:20)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08LF051",
+      "name": "accurate online gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08LF051"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "id": "brittania-creek",
+  "url": "https://www.bcwhitewater.org/reaches/brittania-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:42.998155Z",
+  "title": "Brittania Creek",
+  "river_name": "Brittania Creek",
+  "whats_it_like": "A roadside double drop park and huck attraction with easy access and a sketchy take out.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 1,
+    "original": "1 hour."
+  },
+  "when_to_go": "After rain or snowmelt - runs frequently."
+}

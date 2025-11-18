@@ -1,0 +1,765 @@
+[
+  {
+    "url": "https://www.bcwhitewater.org/reaches/adam-river",
+    "name": "Adam River(III+ with one optional V-)Short quality intermediate granite canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/alsek-river",
+    "name": "Alsek River(III-IV (V through Turnback Canyon))One of the most spectacular northern wilderness trips in the world.  Challenging logistics, epic glaciers."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-bottom-mile",
+    "name": "Ashlu Creek - Bottom Mile(V)The last hurrah of the Ashlu.  Steep boulder piles that equate to difficult but good kayaking."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-box-canyon",
+    "name": "Ashlu Creek - Box Canyon(V)The signature run of southwest BC - clean bedrock in a deep box canyon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-mine-run",
+    "name": "Ashlu Creek - Mine Run(IV-V at medium levels.)An under-rated classic - bedrock rapids, many big holes."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashlu-creek-play-run",
+    "name": "Ashlu Creek - Play Run(III+ (IV-))Boulder Garden fun which is now sadly tricky to access!"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashlu-mini-mine",
+    "name": "Ashlu Mini Mine(IV)A short intro to Ashlu paddling, bedrock rapids, boulder gardens and optional waterfall."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ashnola-river",
+    "name": "Ashnola River(IV)Continuous river running in the hot and sunny Okanagan area of south central BC."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/babine-river",
+    "name": "Babine River(III+-IV)A classic, class 3/4 wilderness multiday.  Big water on the Skeena."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/beaver-river-kinbasket-canyon",
+    "name": "Beaver River (Kinbasket Canyon)(IV/IV+)Early season warm up run with a linear class I to IV+ progression."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bedwell-river",
+    "name": "Bedwell River(IV+ (P))A hike in multiday through the heart of Vancouver Island"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/benson-river-lower",
+    "name": "Benson River - Lower(V)A sketchy caving trip in your kayak"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/benson-river-upper",
+    "name": "Benson River - Upper(IV+ at low water)A short low volume canyon in the middle of nowhere"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/big-creek-lower",
+    "name": "Big Creek - Lower(V with a big portage)Scrappy, dangerous whitewater through a remote canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/big-mouth-creek",
+    "name": "Big Mouth Creek(III-IV)A beautiful wilderness adventure, cruising down continuous rapids, surrounded by many unique rock features and old growth forests."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/big-silver-creek-middle",
+    "name": "Big Silver Creek - Middle(V)Very committing granite gorge with big rapids, marginal waterfalls and hard portages."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/big-silver-creek-upper",
+    "name": "Big Silver Creek - Upper(IV-IV+ at medium levels)Boulder rapids in deep gorges, one clean waterfall.  Fantastic scenery."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/birkenhead-river-lower",
+    "name": "Birkenhead River - Lower(III(+), IV if doing the first rapids)A fun play run with an optional bigger rapid at the start."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/birkenhead-river-upper",
+    "name": "Birkenhead River - Upper(IV-V at medium, V at medium-high and up.)Endless, top notch boulder drops that only get better as the run progresses."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/blaeberry-river-split-creek-to-thompson-falls",
+    "name": "Blaeberry River - Split Creek to Thompson Falls(III+ to IV )A seldom run, but decent quality intermediate run."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/blaeberry-river-thompson-falls-section",
+    "name": "Blaeberry River - Thompson Falls Section(IV+ to V)2 short canyons. The first is a gorgeous class 2 slot canyon, the second is a short but intense class 5 canyon followed by a bit of class 3 run out."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/blanket-creek-sutherland-falls",
+    "name": "Blanket Creek (Sutherland Falls)(V)A classic BC park and huck; one of the friendliest and most accessible large waterfalls out there"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bobbie-burns-creek-into-spillimacheen-river",
+    "name": "Bobbie Burns Creek into Spillimacheen River(III+ to IV (V))Lovely class 4 river running. Starts out as boulder gardens, slowly changing into bedrock rapids as the run progresses."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/boston-bar-creek",
+    "name": "Boston Bar Creek(IV)A park and huck next to the Coquihalla Highway"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bowser-river",
+    "name": "Bowser River(II-III with one long IV+ rapid)Paddle up close to several glaciers on this chain of lakes."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bridge-river",
+    "name": "Bridge River(III+-IV)Pool drop with big boulders + flat long scenic canyons"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bridge-river-terzaghi-dam-to-yalakom",
+    "name": "Bridge River - Terzaghi Dam to Yalakom(III-IV (IV+ at big releases))Low Water Boulder garden run which occasionally has releases."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/brittania-creek",
+    "name": "Brittania Creek(IV-V)A roadside double drop park and huck attraction with easy access and a sketchy take out."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/bulkley-canyon",
+    "name": "Bulkley Canyon(III+ to IV-)The Smithers classic run. Big water canyons with 'boogie water' and plenty of catch on the fly waves in between"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/callaghan-creek",
+    "name": "Callaghan Creek(IV-V at medium levels.)Whistler's ultra classic.  Clean waterfalls, bedrock and boulder gardens."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cameron-river",
+    "name": "Cameron River(IV at medium levels)Excellent river-running with small canyons and bedrock rapids."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/capilano-river",
+    "name": "Capilano River(III)A short run in North Vancouver flowing through a scenic canyon with easy whitewater."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cariboo-river-lower-run",
+    "name": "Cariboo River - Lower Run(II to III (III+ at high water))Big waves, some holes and boulders, a canyon, and flat water at the end. Large Volume"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cariboo-river-upper-run",
+    "name": "Cariboo River - Upper Run(III+ to IV- (IV in high water))Big waves, big holes, continuous, mellower towards the end, Large Volume."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cascade-creek",
+    "name": "Cascade Creek(IV-V (V+))Steep, manky boulder rapids, a good bedrock canyon and some enormous waterfalls at the take out."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cayoosh-creek",
+    "name": "Cayoosh Creek(IV+ at medium levels.)Nice river running through a deep, arid canyon.  Classic scenery and good whitewater."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-paradise-valley",
+    "name": "Cheakamus – Paradise Valley(II (III))Fun beginner run"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-balls-to-the-wall",
+    "name": "Cheakamus River - Balls To The Wall(IV-IV+)Extension of the Upper Cheak - great class IV-IV+ river running, and a bonus waterfall.  Some wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-cal-cheak-callaghan-into-cheakamus",
+    "name": "Cheakamus River - Cal-Cheak (Callaghan into Cheakamus)(III)A great short run for intermediate paddlers with some fun surf waves at higher flows"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-cheakamus-lake-down",
+    "name": "Cheakamus River - Cheakamus Lake Down(Continuous III+)Paddle out of a beautiful mountain lake into a continuous braided river full of wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-daisy-lake-canyon",
+    "name": "Cheakamus River - Daisy Lake Canyon(V at medium levels.)The hardest regularly run section of the Cheak - excellent boating in a good canyon with a few gnarly spots."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-dam-run",
+    "name": "Cheakamus River - Dam Run(III)A fun, roadside class III with a short portage around a class V rapid. Runnable year round."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cheakamus-river-upper",
+    "name": "Cheakamus River - Upper(IV at 2.5, continuous.  Gets harder as levels rise.)Classic. Continuous river running at its finest."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chehalis-river-lower-aka-statlu-chehalis",
+    "name": "Chehalis River - Lower (aka Statlu-Chehalis)(III-IV-)The best intermediate run in the Fraser Valley, down a wilderness canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chehalis-river-upper",
+    "name": "Chehalis River - Upper(IV with optional V)A full day adventure through a series of canyons"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chemainus-river-copper-canyon",
+    "name": "Chemainus River - Copper Canyon(III-IV+ at medium levels.)Good moderate difficulty whitewater with some beautiful canyons."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilcotin-river-chilko-chilcotin-fraser",
+    "name": "Chilcotin River  (Chilko-Chilcotin-Fraser)(II-IV)Classic multiday raft trip across the Chilcotin Plateau"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilko-bidwell-to-taseko",
+    "name": "Chilko - Bidwell to Taseko(IV-)Remote, beautiful clear water, big volume."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilliwack-canyon-camp-foley-to-slesse",
+    "name": "Chilliwack Canyon - Camp Foley to Slesse(III-IV low, IV- medium, IV high)Pool-drop at low and medium, continuous at higher levels, bedrock and boulder gardens, medium volume river"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-pointa-vista-to-vedder-bridge",
+    "name": "Chilliwack River - Pointa Vista to Vedder Bridge(II)Braided gravel bed, pool drop, medium volume"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-post-creek-to-camp-foley",
+    "name": "Chilliwack River – Post Creek to Camp Foley(III+)Continuous boulder gardens, medium volum, rarely paddled, watch for wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-slesse-to-tamihi",
+    "name": "Chilliwack River - Slesse to Tamihi(III, one IV- @ Tamihi)Gravel bars, pool drop, some floating"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/chilliwack-river-tamihi-to-pointa-vista",
+    "name": "Chilliwack River - Tamihi to Pointa Vista(III, one IV- @ Tamihi)Some continuous boulder gardens especially at higher levels, pool drop, gravel bed, medium volume."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clearwater-river-gatling-gorge",
+    "name": "Clearwater River - Gatling Gorge(V)Big water canyon with a lot of flat paddling!"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clearwater-river-play-run",
+    "name": "Clearwater River - Play Run(III+ (IV))The Ottawa of BC? Big volume, warm, playboating with big rapids."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clearwater-river-upper",
+    "name": "Clearwater River - Upper(IV)Sabretooth Rapid to The Kettle"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clearwater-river-upper-upper",
+    "name": "Clearwater River - Upper Upper(IV- with optional V)Big Volume Wave train and Big Waterfalls on the same river!?"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clendinning-creek",
+    "name": "Clendinning Creek(IV-V)Quality 2 day boulder run with very continuous whitewater and stunning scenery."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/clore-river-grand-canyon",
+    "name": "Clore River - Grand Canyon(IV-V)A classic fly in multiday.  Steep, continuous rapids in a deep canyon with cheap and easy logistics."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/coal-river-lower",
+    "name": "Coal River - Lower(I-III (IV))A floaty wilderness multiday with an nice whitewater canyon at the end."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/coquihalla-river",
+    "name": "Coquihalla River(III+)Continuous boulder gardens, pool-drop, gravel bed, short bedrock canyon, some floating sections, medium volume."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/coquitlam",
+    "name": "Coquitlam(III (IV-))'Novelty' run. A few boulder gardens, gravel bars and flat water. Rarely paddled because its usually too low. Watch for wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cowichan-river-skutz-falls-to-marie-canyon",
+    "name": "Cowichan River - Skutz Falls to Marie Canyon(III (IV))Consistently flowing class III canyon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/cummins-river",
+    "name": "Cummins River(II-III (with portages))Remote, multi-day packraft trip through wild old growth rainforest"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/dipper-creek",
+    "name": "Dipper Creek(V+)Big waterfalls, mandatory class V, huge commitment.  Top tier adventure boating in a fantastic canyon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/douglas-creek",
+    "name": "Douglas Creek(IV-V)A short exciting run, with more to explore upstream.  A series of scenic waterfalls above from the small hydro dam infrastructure."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/downie-canyon",
+    "name": "Downie Canyon(IV with a portage)A short committing canyon with some fun technical rapids and beautiful scenery"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/duti-river",
+    "name": "Duti River(IV+, depending on the level)The Duti offers challenging whitewater in a spectacular remote wilderness setting."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/eagle-river",
+    "name": "Eagle River(I-III with one portage)Remote wilderness expedition with easy whitewater"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/east-boulder-creek",
+    "name": "East Boulder Creek(IV+ to V, level dependent.)A fantastic steep creek."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/elaho-river-fear-canyon",
+    "name": "Elaho River - Fear Canyon(IV-V depending on level)A big river with many faces.  Best known as a class IV-V big water run."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/elaho-river-upper",
+    "name": "Elaho River - Upper(IV-V)A late season canyon run with fun whitewater at the end of the road in the Elaho Valley."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/elaho-squamish",
+    "name": "Elaho-Squamish(III (IV-))Cold water and big waves"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/elk-river-middle",
+    "name": "Elk River - Middle(IV)Great moderate whitewater in a classic Rockies canyon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/elk-river-upper",
+    "name": "Elk River - Upper(V)A short, stout run with challenging rapids and a clean 35 foot waterfall."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/foley-creek",
+    "name": "Foley Creek(III(+) with potential IV moves with wood.)An alternative start to the Chilliwack Canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/fraser-river-alexandra-bridge-to-yale",
+    "name": "Fraser River – Alexandra Bridge to Yale(II-III, one IV-)Huge volume, pool drop, big crashing waves and swirly eddies, lots of floating. The road is high above the river and accessible only in a few spots."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/furry-creek",
+    "name": "Furry Creek(V-V+)Short and stout park-n-huck waterfalls."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gamsby-river",
+    "name": "Gamsby River(III-V)Ultra-classic, coastal wilderness multiday.  3 days of white water.  2 days of flat."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gilttoyees-creek",
+    "name": "Gilttoyees Creek(IV-V)Coastal wilderness adventure with breathtaking scenery.  The whitewater is good but not classic."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/goldstream-falls",
+    "name": "Goldstream Falls(V)Four sweet park and huck water"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gordon-river-flood-run",
+    "name": "Gordon River - Flood Run(III-IV (V).)A high water alternative to paddle when everything on the southern Island is flooding."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gordon-river-middle-gordon",
+    "name": "Gordon River - Middle Gordon(IV-V)Good pool-drop whitewater with big ledges and clean rapids."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gordon-river-upper-gordon",
+    "name": "Gordon River - Upper Gordon(IV at medium water.)Bedrock pool-drop.  Fun, clean rapids and clear water."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/grand-canyon-of-the-stikine",
+    "name": "Grand Canyon of the Stikine(V)The most famous class 5 multiday in North America. Big volume paddling in a spectacular, committing canyon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/granite-creek",
+    "name": "Granite Creek(V)Waterfalls.  A great waterfall run with some boulder rapids and a lot of wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/granite-creek-tulameen",
+    "name": "Granite Creek (Tulameen)(IV+ (P))A decent low volume canyon run, but not recommended due to very dangerous mining adits"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/green-river-middle",
+    "name": "Green River - Middle(IV-V)Surprisingly good whitewater on a Whistler run that sees little traffic.  Often tragically infested with wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/gun-creek",
+    "name": "Gun Creek(III-IV.  Slightly stressful because of wood, and a lack of good eddies.)A 12 km long rapid.  Very continuous and splashy whitewater in a beautiful part of BC."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/harris-creek-canyon",
+    "name": "Harris Creek - Canyon(IV-V)A short run in a small canyon on the southern end of Vancouver Island.  Nice class IV-V boating."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/heber-river-lower",
+    "name": "Heber River - Lower(IV-V (P))A box canyon ending at a baseball diamond"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/hirsch-creek",
+    "name": "Hirsch Creek(V)Great whitewater with a deep and committing canyon.  Beautiful scenery."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/homathko-river",
+    "name": "Homathko River(V (V+))Big water wilderness multiday trip - world class."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/hurley-river-canyon",
+    "name": "Hurley River - Canyon(V)An impressive canyon with good class V whitewater.  A different feel from the typical Coast Mountain rivers."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/iskut-river",
+    "name": "Iskut River(IV-V)A fantastic northern BC multiday with a long hike out."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/iskut-river-kinaskan-lake-down",
+    "name": "Iskut River - Kinaskan Lake down(II)An easy roadside float"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/jordan-river",
+    "name": "Jordan River(IV+)The crown jewel of Revelstoke. « BC Class 4 » at it’s best.",
+    "difficulty": "4"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/khtada-river",
+    "name": "Khtada River(V)A classic North Coast hike in mission. Large bedrock slides and rapids in the rainforest."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kicking-horse-palliser-to-kicking-horse-rest-area",
+    "name": "Kicking Horse - Palliser to Kicking Horse Rest Area(III+/IV )12 km of high quality river running"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kicking-horse-river-kicking-horse-rest-area-to-lower-canyon",
+    "name": "Kicking Horse River - Kicking Horse Rest Area to Lower Canyon(V)Continuous, steep river running."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kicking-horse-river-lower-canyon-to-downtown-golden",
+    "name": "Kicking Horse River - Lower Canyon to Downtown Golden(IV)Classic, continuous river running. Fast, surging waves, powerful holes, satisfying eddies to play with."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kicking-horse-yoho-park-boundary-to-palliser",
+    "name": "Kicking Horse - Yoho Park Boundary to Palliser(II+)Scenic river running with significant wood hazard"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kitsumkalum-kalum-river",
+    "name": "Kitsumkalum (Kalum) River(III+ to IV.  Pushy at high water - a swim would be unpleasant.)Big water play run.  At high water, one of the best play runs in BC."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/klastline",
+    "name": "Klastline(V)A northern BC adventure. Remote and with only a handful of descents the Klastline is a good option for anyone who plans to be in the area and wants to run something other than the Stikine. Some class 4 bedrock rapids, 2 big waterfalls (one that has yet to be run) and some steep boulder gardens make for varied if not \"ultra-classic\" whitewater."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kleanza-creek",
+    "name": "Kleanza Creek(IV-V)A fantastic North Coast creek run.  High caliber whitewater with a deep and beautiful bedrock canyon.  Wood is a common problem."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/kokish-river",
+    "name": "Kokish River(V at medium levels.)One of the greatest class V runs on the Island.  A lengthy river full of complex boulder rapids in a lush canyon. Unfortunately it is dewatered for an IPP."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/koksilah-river-canyon",
+    "name": "Koksilah River - Canyon(III-IV)A good introductory creeking run near Victoria"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/lens-creek",
+    "name": "Lens Creek(IV-V at low to medium flows)A local favorite on southern Vancouver Island.  An adventurous day of rapids, shuttling and portaging."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/lillooet-river-between-the-lakes",
+    "name": "Lillooet River - Between the Lakes(Class II/III+ (IV))Stunning scenery multi-day option not far from Vancouver.",
+    "difficulty": "II"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/link-river",
+    "name": "Link River(III below the slides)The shortest river on Vancouver Island"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/little-qualicum-falls",
+    "name": "Little Qualicum Falls(V)An exciting double drop draped in mystical Vancouver Island rainforest."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/lower-mamquam",
+    "name": "Lower Mamquam(II+)Good beginner run with small rock garden"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/lower-pingston",
+    "name": "Lower Pingston(V)Hard charging BC creeking at its gnarliest. Hectic continuous class 5 with even scarier portages. Often full of wood. An absolute treat on its own or as the finisher to a long day of Pingston paddling."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/lynn-creek",
+    "name": "Lynn Creek(III at low levels, IV when the water is high.)A popular urban run with a picturesque canyon and fun rapids.  Optional waterfall at the start."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/mahatta-river",
+    "name": "Mahatta River(IV with one harder rapid )A fun west coast canyon hidden at the end of the island."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/mamquam-river-mamquam-falls",
+    "name": "Mamquam River - Mamquam Falls(V)One of the world's most sought after big waterfalls, and one of the whitewater crown jewels of the Sea to Sky."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/mamquam-river-upper",
+    "name": "Mamquam River - Upper(III-IV)A fun and scenic class III+ stretch on the Upper Mamquam. The last two kilometres known as the Middle Mamquam is class IV, but please see the dam warning."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/marble-river",
+    "name": "Marble River(II-III with optional V)A scenic full day paddle with optional class V drops"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/mcdame-creek",
+    "name": "McDame Creek(II-III)An easy roadside creek"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/mcgregor-canyon",
+    "name": "McGregor Canyon(IV+-V)A really nice 5km (ish) canyon located northeast of Prince George. Great character to the whitewater."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/meager-creek-lower",
+    "name": "Meager Creek - Lower(IV(+), very continuous)A glacial read and run blitz underneath one of Canada's most unstable volcanoes."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/middle-memekay-river",
+    "name": "Middle Memekay River(III+ with one IV)Nice long intermediate canyon run from a small creek down into a river."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/moyeha-river",
+    "name": "Moyeha River(Scenic I-III packrafting, or manky IV-V creeking)A difficult traverse of a pristine watershed"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/muelville-creek-falls",
+    "name": "Muelville Creek falls(V)Two park and hucks in a beautiful canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/nahatlach-river-francis-lake-to-apocynum-campground",
+    "name": "Nahatlach River – Francis Lake to Apocynum Campground(III+(IV))Medium volume, continuous boulder gardens, big holes, lots of fun."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/nahatlatch-river-canyon",
+    "name": "Nahatlatch River - Canyon(IV at medium levels.)A short but fun medium volume run on the dry side of the Coast Mountains."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/nass-river",
+    "name": "Nass River(III-V)Everything from a 5-6 day wilderness trip to a big water play run."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/norrish-creek",
+    "name": "Norrish Creek(IV-IV+ at medium levels.  Mainly class III-IV but one unportagable rapid is tricky and dangerous.)Clean-ish boulders and bedrock with some very tight and deep canyons."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/north-stein-river",
+    "name": "North Stein River(V+)Remote, multiday, hike in, hard core creeking.  Includes a pleasant paddle out on the main Stein."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/pamela-creek",
+    "name": "Pamela Creek(IV-V)One of the better creeks in Gold River - excellent bedrock ledges and waterfalls, with some classic Island mank."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/perry-river",
+    "name": "Perry River(III-IV)« Old Faithful » for the revelstoke paddler. One of the first runs to thaw and the last ones to dry up."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/pingston-middle",
+    "name": "Pingston - Middle(IV with a short V section at the end)Excellent quality class 4 with a few bigger rapids near the end. Continuous without being pushy, clean read and run for the first 3/4 with reasonably easy scouting and portaging options for the bigger rapids"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/pitt-river-upper",
+    "name": "Pitt River - Upper(IV+ with a portage )Remote, multi-day wilderness run with tricky logistics and challenging paddling."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/prospect-creek",
+    "name": "Prospect Creek(IV)A creeky alternate entrance to Spius Creek; scenic but manky"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/puntledge-river-upper",
+    "name": "Puntledge River - Upper(V)A unique section consisting entirely of massive slides. Unpredictable dam releases."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/quesnel-river",
+    "name": "Quesnel River(III+ to IV- (IV at High water))Big Volume, with play waves at the top. Home of the Unlikely Fest."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/rogers-creek",
+    "name": "Rogers Creek(IV-V)Short run in an amazing gorge - includes the famous triple falls."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/rutherford-creek",
+    "name": "Rutherford Creek(Continuous class IV-V, class V at higher levels.)Continuous boulder rapids studded with some classic bedrock drops."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ryan-river-lower",
+    "name": "Ryan River - Lower(Continuous class IV-V. Class V at high flows.)Continuous boofalicious boulder gardens.",
+    "difficulty": "V"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ryan-river-upper",
+    "name": "Ryan River - Upper(V)Very steep boulder run - a hike-in day trip.  Hard kayaking."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/seton-river",
+    "name": "Seton River(II+)A quick cool down in Lillooet."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/seymour-river-canyon",
+    "name": "Seymour River Canyon(Highly level dependent - ranges from fun class IV to raging class V.)Classic kayaking in a deep box canyon.  You would never know it's in the heart of North Van."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/seymour-river-lower-run",
+    "name": "Seymour River - Lower run(II (III- at high levels))Easy boulder gardens and gravel bars. Many boulder gardens, gravel bed, low volume; can be a challenge for beginners."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/seymour-river-upper-run",
+    "name": "Seymour River – Upper Run(III-)Pool-drop, some flat sections, gravel bed, low volume"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/silverhope-creek",
+    "name": "Silverhope Creek(IV-IV+ to V, depending on the put in and take out used.)A good quality boulder run with tons of fun boogie."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/similkameen-canyon",
+    "name": "Similkameen Canyon(III+/IV-/IV)Beautiful Deep Canyon running through some unique scenery"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/similkameen-river-bromley-to-stemwinder",
+    "name": "Similkameen River - Bromley to Stemwinder(II (III))Great novice run with warmer water than the coast"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/skagit-river-wilderness-section",
+    "name": "Skagit River - Wilderness Section(II-III)A wilderness float through old growth forest"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/skookumchuck",
+    "name": "Skookumchuck(III, massive volume.)Classic tidal rapid surfing.  Character changes with the speed of the current.  Awesome surroundings."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/skookumchuck-creek",
+    "name": "Skookumchuck Creek(III+-IV )16 km of high quality whitewater. River running at medium-high water with more of a creeky feel at medium-low water."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/skookum-creek",
+    "name": "Skookum Creek(V)Big, clean waterfalls and tight canyons."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/slesse-creek",
+    "name": "Slesse Creek(III with a short IV- canyon)Low volume, gravel bed, many boulder gardens with a short narrow canyon section (“Keyhole Canyon”)."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/small-river",
+    "name": "Small River(III-IV (optional V at put in))A Small River packed with big fun! Continuous class 3, be on the lookout for wood"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/snowcap-creek",
+    "name": "Snowcap Creek(III-V)An obscure run near Rogers Creek with good whitewater and a short, hard to scout canyon in the middle."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/soo-river",
+    "name": "Soo River(IV at medium levels, somewhat continuous.  Tolerates high water very well, but becomes class V.)Fun river running in a small valley."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/soo-river-railroad-canyon",
+    "name": "Soo River - Railroad Canyon(V)A short, stout addition to the classic section of the Soo.  Easy access canyon with big holes."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/spillimacheen",
+    "name": "Spillimacheen(V)Short and sweet, Spilli has 5 major rapids with quality boogie water in between."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/squamish-river-upper",
+    "name": "Squamish River - Upper(III-IV boating through some significant canyons.)Amazing canyons - unless you're brave, it's an early or late season scenery trip."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/statlu-creek-statlu-canyon",
+    "name": "Statlu Creek - Statlu Canyon(V at medium levels.)Short but high quality, creamy smooth granite bedrock and boulders deep in the Fraser Valley."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/stave-river",
+    "name": "Stave River(V (V+ to VI))Stout southwest BC multi-day kayaking.  There's unrealized opportunity to go big in there."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/stawamus-river",
+    "name": "Stawamus River(III (V))A short novelty run in Squamish that's fun when everything in the area is running high."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/stein-river-multiday-trip",
+    "name": "Stein River - Multiday Trip(IV-IV+, V at high water)A nice multiday trip on the arid side of the Coast Mountains.  Expect a lot of portages caused by wood."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/stikine-tahltan-to-telegraph",
+    "name": "Stikine - Tahltan to Telegraph(II-III)A mellow way to experience the runout of the Grand Canyon Stikine"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/st-leon-creek",
+    "name": "St. Leon Creek(V)A steep, small creek with hectic boogie interspersed with some big, clean bedrock drops."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tamihi-creek-lower",
+    "name": "Tamihi Creek (Lower)(IV+ with a mandatory portage)Manky boulder garden turning into steep committing canyon with fun class IV drops towards the end."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tamihi-creek-upper",
+    "name": "Tamihi Creek - Upper(IV+ / V)Steep boulder gardens, continuous, low volume"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tatlow-creek",
+    "name": "Tatlow Creek(V)One of the best class V runs in SW BC.  Waterfalls, slides, electric blue water and difficult access."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/thompson-river",
+    "name": "Thompson River(III, big water.)Big water boating in a warm climate with some play opportunities.  Interesting scenery."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/thompson-river-goldpan-to-frog",
+    "name": "Thompson River – Goldpan to Frog(III-)Lots of flat water with some powerful eddylines, whirlpools and a few waves, huge volume river."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tingle-creek",
+    "name": "Tingle Creek(II-III)Beautiful clear turquoise waters, south of the Stave Valley.  The secluded Tingle Valley runs between Mount Robbie Reid, and the Justice Group (Judge Howay & The Defendant)."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/toby-creek-7-canyons",
+    "name": "Toby Creek - 7 Canyons(Mostly class IV/IV+ with one definite class V that can be portaged)Beautiful class IV+ creeking that just keeps going and going! Easy access, minimal portaging, clean rapids and just enough spice to keep you focused."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/trent-river",
+    "name": "Trent River(V for the waterfall; III for the paddle out)Park and huck waterfall and a mellow paddle out to the ocean"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/trout-creek",
+    "name": "Trout Creek(IV+)A microcreeking epic in wine country, tragically clogged with wood"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/troutline-creek",
+    "name": "Troutline Creek(I-II; V+ Canyon Below)A novelty subalpine float, with stouts downstream left to explore"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tsable-river-prickly-canyon",
+    "name": "Tsable River - Prickly Canyon(V)Steep, continuous and committing with various slides and drops."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tulameen-river",
+    "name": "Tulameen River(II-III (IV for \"Tulameanie Drop\")A chill run with an out of character class IV drop."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/tutshi-river",
+    "name": "Tutshi River(III-IV at low water, IV-V at high water)Fantastic big volume creeking.  The best and most accessible whitewater out of Whitehorse, Yukon."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/ucona-river-upper",
+    "name": "Ucona River - Upper(IV with optional V)Technical waterfalls through coastal rainforest"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/upana-river",
+    "name": "Upana River(IV+ to V)A short creek run in Gold River with a blind 20 footer"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/upper-callaghan",
+    "name": "Upper Callaghan(III+ with one IV- easy waterfall)Scenic wilderness-feel but not far from a road. Lots to surf!"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/upper-pingston",
+    "name": "Upper Pingston(V)One of B.C.'s best steep creeks. Classic whitewater; continuous, clean, few portages and a handful of bigger rapids. Not much is \"must run\", but be prepared to run a good amount of class 5 if you put on as either too much portaging or hiking out would be a lot of work and probably end in the dark. If the upper is too high the middle is a good back up option."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/upper-soo",
+    "name": "Upper Soo(III (with a major portage, and quite a bit of flat water))Majestic tributary valley to the Whistler region."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/upper-tulameen",
+    "name": "Upper Tulameen(III-V)Remote, wilderness feel; low-volume canyons"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/white-river-canyon",
+    "name": "White River - Canyon(IV-V)Classic lappable north Island canyon"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/white-river-lower",
+    "name": "White River - Lower(III)A good intermediate canyon right off the north Island highway"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/white-river-nass-tributary",
+    "name": "White River (Nass tributary)(IV)A high volume tributary to the Nass"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/white-river-upper",
+    "name": "White River - Upper(III-IV (P))Moderate whitewater but with a difficult portage. The fly in the ointment of the White River drainage"
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/williams-creek",
+    "name": "Williams Creek(IV-V)The local home run, with high quality smooth granite boulders and bedrock."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/wilson-fitzstubbs-creek",
+    "name": "Wilson/Fitzstubbs Creek(III-V)A beautiful class fun paddling destination for all skill levels."
+  },
+  {
+    "url": "https://www.bcwhitewater.org/reaches/yoho",
+    "name": "Yoho(V)Classic whitewater in an intimidating canyon."
+  }
+]

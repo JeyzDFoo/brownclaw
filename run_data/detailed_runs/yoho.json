@@ -1,0 +1,30 @@
+{
+  "id": "yoho",
+  "url": "https://www.bcwhitewater.org/reaches/yoho",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:13:02.472622Z",
+  "title": "Yoho",
+  "river_name": "Yoho",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Classic whitewater in an intimidating canyon.",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "Scouting is possible for most rapids. The hardest rapid of the run is impossible to portage, some other rapids could be portaged if wood was in play.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 3,
+    "original": "~3 hours to show yourself down, 1 hour if you know the lines."
+  },
+  "when_to_go": "Typically runs in August, however can be caught at runnable flows all summer long and into the late fall if you pay attention to weather and snowpack.",
+  "gauge": "10.9cms↓ (Oct 21 05:40)\n!",
+  "flow_range": {
+    "min": 60.0,
+    "max": 80.0,
+    "unit": "cms"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "id": "mahatta-river",
+  "url": "https://www.bcwhitewater.org/reaches/mahatta-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:01.499341Z",
+  "title": "Mahatta River",
+  "river_name": "Mahatta River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A fun west coast canyon hidden at the end of the island.",
+  "difficulty": {
+    "text": "IV with one harder rapid",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Reasonable until the canyon, then possible by roping boats",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 5,
+    "original": "4-5 hours"
+  },
+  "when_to_go": "October to April. Needs a good amount of rain.",
+  "flows_description": "The Mahatta is a fairly low elevation watershed, and it is doubtful that there is any snowmelt season. A good west coast rain should get this going; for comparison, it is in a similar climatic zone as the Sarita River near Bamfield. There is no gauge on the Mahatta, but there is on the adjacent Klaskish River (KLASKISH RIVER NEAR KLASKINO INLET (08HE009)). A 20-30mm rain and the Klaskish gauge dropping off a 50cms spike resulted in a medium-high level on the Mahatta River. These rivers will flash up and down quickly. KLASKISH RIVER NEAR KLASKINO INLET (08HE009), 2018 gauge data and maximum flows. You'll have to catch one of these rain spikes to run the Mahatta.",
+  "shuttle_description": "The downside is that this river is way out there, 1.5 hours on a rough road past Port Alice, which is 4.5 hours drive from the Nanaimo ferry terminal. The upside is that with the orientation of the river and the ocean paddle, you don't really need a shuttle car. To find the put in, use your map to follow Marine Drive south out of Port Alice (road radio recommended). The route will wrap around Neroutsos Inlet, climb up a pass in the Teeta Creek drainage (T500 road), and drop into the Mahatta area. There are put in options at the Mahatta River Recreation Site or a nearby FSR bridge. The takeout is a further 4km to the right (north) down the Mahatta FSR, at a logging landing on the ocean.",
+  "on_the_water_description": "Beginning at the Mahatta River Recreation Site, there is ~7km of class I-II, including one easy canyon and probably a logjam or two. The whitewater section is only ~2km long. The start of the gradient is obvious, at the first of two class IV rapids which ramp into 90 degree corners. Following these are two rapids with ledge holes. Below here, the river canyons up noticeably for the crux rapid (class V), which is scouted on the right. This one is worth a scout, as half the river flows through a sieve. There are informal trails to portage on river right. Finally, there is one more clean ledge dropping down to tidewater and the estuary. Turn right (east), and follow the coast ~6km through the Koskimo Islands (sea otter zone), past a fish farm, and across to the takeout at the Mahatta logging landing."
+}

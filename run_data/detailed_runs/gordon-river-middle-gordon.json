@@ -1,0 +1,37 @@
+{
+  "id": "gordon-river-middle-gordon",
+  "url": "https://www.bcwhitewater.org/reaches/gordon-river-middle-gordon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:10.291091Z",
+  "title": "Gordon River - Middle Gordon",
+  "river_name": "Gordon River",
+  "section_name": "Middle Gordon",
+  "whats_it_like": "Good pool-drop whitewater with big ledges and clean rapids.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Usually easy - one of the longer rapids is hard to walk.",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours."
+  },
+  "when_to_go": "Rain fed in the fall and winter.",
+  "gauge": "1.25cms↓ (Oct 21 06:20)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08HA070",
+      "name": "Harris Creek",
+      "url": "http://wateroffice.ec.gc.ca/report/report_e.html?type=realTime&stn=08HA070"
+    }
+  ],
+  "flow_range": {
+    "min": 2.0,
+    "max": 6.0,
+    "unit": "cms"
+  }
+}

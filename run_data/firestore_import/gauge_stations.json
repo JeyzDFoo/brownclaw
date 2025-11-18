@@ -1,0 +1,357 @@
+[
+  {
+    "stationId": "08MB006",
+    "name": "BIG CREEK ABOVE GROUNDHOG CREEK",
+    "riverRunId": "big-creek-lower",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MB006",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:20.549673Z",
+    "updatedAt": "2025-11-18T19:08:20.549673Z",
+    "associatedRiverRunIds": [
+      "big-creek-lower"
+    ]
+  },
+  {
+    "stationId": "08GA071",
+    "name": "Elaho gauge",
+    "riverRunId": "clendinning-creek",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA071",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:09:30.528864Z",
+    "updatedAt": "2025-11-18T19:09:30.528864Z",
+    "associatedRiverRunIds": [
+      "clendinning-creek",
+      "ashlu-creek-mine-run"
+    ]
+  },
+  {
+    "stationId": "08NE123",
+    "name": "Cranberry Creek gauge",
+    "riverRunId": "upper-pingston",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NE123",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:47.906815Z",
+    "updatedAt": "2025-11-18T19:12:47.906815Z",
+    "associatedRiverRunIds": [
+      "upper-pingston",
+      "lower-pingston"
+    ]
+  },
+  {
+    "stationId": "08GD004",
+    "name": "this gauge",
+    "riverRunId": "homathko-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GD004",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:10:26.524474Z",
+    "updatedAt": "2025-11-18T19:10:26.524474Z",
+    "associatedRiverRunIds": [
+      "homathko-river"
+    ]
+  },
+  {
+    "stationId": "08GA076",
+    "name": "Environment Canada online gauge",
+    "riverRunId": "stawamus-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA076",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:15.972768Z",
+    "updatedAt": "2025-11-18T19:12:15.972768Z",
+    "associatedRiverRunIds": [
+      "stawamus-river"
+    ]
+  },
+  {
+    "stationId": "08MH103",
+    "name": "Chilliwack River above Slesse",
+    "riverRunId": "statlu-creek-statlu-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH103",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:12.687255Z",
+    "updatedAt": "2025-11-18T19:12:12.687255Z",
+    "associatedRiverRunIds": [
+      "statlu-creek-statlu-canyon",
+      "tamihi-creek-upper"
+    ]
+  },
+  {
+    "stationId": "08MH005",
+    "name": "Alouette River",
+    "riverRunId": "statlu-creek-statlu-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH005",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:12.687255Z",
+    "updatedAt": "2025-11-18T19:12:12.687255Z",
+    "associatedRiverRunIds": [
+      "statlu-creek-statlu-canyon"
+    ]
+  },
+  {
+    "stationId": "08MF068",
+    "name": "Coquihalla River",
+    "riverRunId": "statlu-creek-statlu-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MF068",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:12.687255Z",
+    "updatedAt": "2025-11-18T19:12:12.687255Z",
+    "associatedRiverRunIds": [
+      "statlu-creek-statlu-canyon"
+    ]
+  },
+  {
+    "stationId": "08MH147",
+    "name": "Stave River",
+    "riverRunId": "statlu-creek-statlu-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MH147",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:12.687255Z",
+    "updatedAt": "2025-11-18T19:12:12.687255Z",
+    "associatedRiverRunIds": [
+      "statlu-creek-statlu-canyon"
+    ]
+  },
+  {
+    "stationId": "08NK002",
+    "name": "Elk River at Fernie gauge",
+    "riverRunId": "elk-river-middle",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NK002",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:09:56.051534Z",
+    "updatedAt": "2025-11-18T19:09:56.051534Z",
+    "associatedRiverRunIds": [
+      "elk-river-middle"
+    ]
+  },
+  {
+    "stationId": "08NB019",
+    "name": "BEAVER RIVER NEAR THE MOUTH",
+    "riverRunId": "beaver-river-kinbasket-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NB019",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:13.597013Z",
+    "updatedAt": "2025-11-18T19:08:13.597013Z",
+    "associatedRiverRunIds": [
+      "beaver-river-kinbasket-canyon"
+    ]
+  },
+  {
+    "stationId": "08LA001",
+    "name": "2.384m↓ (Oct 21 06:05)",
+    "riverRunId": "clearwater-river-upper-upper",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08LA001",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:09:25.705929Z",
+    "updatedAt": "2025-11-18T19:09:25.705929Z",
+    "associatedRiverRunIds": [
+      "clearwater-river-upper-upper",
+      "clearwater-river-play-run"
+    ]
+  },
+  {
+    "stationId": "08NL004",
+    "name": "online gauge for the Ashnola",
+    "riverRunId": "ashnola-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08NL004",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:10.394772Z",
+    "updatedAt": "2025-11-18T19:08:10.394772Z",
+    "associatedRiverRunIds": [
+      "ashnola-river"
+    ]
+  },
+  {
+    "stationId": "08EF005",
+    "name": "online gauge",
+    "riverRunId": "clore-river-grand-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08EF005",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:09:32.112225Z",
+    "updatedAt": "2025-11-18T19:09:32.112225Z",
+    "associatedRiverRunIds": [
+      "clore-river-grand-canyon"
+    ]
+  },
+  {
+    "stationId": "08HA069",
+    "name": "Renfrew Creek",
+    "riverRunId": "granite-creek",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HA069",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:10:15.101851Z",
+    "updatedAt": "2025-11-18T19:10:15.101851Z",
+    "associatedRiverRunIds": [
+      "granite-creek"
+    ]
+  },
+  {
+    "stationId": "08GA072",
+    "name": "1.875m↓ (Oct 21 06:05)",
+    "riverRunId": "cheakamus-river-balls-to-the-wall",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA072",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:09:01.988426Z",
+    "updatedAt": "2025-11-18T19:09:01.988426Z",
+    "associatedRiverRunIds": [
+      "cheakamus-river-balls-to-the-wall",
+      "cheakamus-river-daisy-lake-canyon",
+      "cheakamus-river-cheakamus-lake-down",
+      "cheakamus-river-upper"
+    ]
+  },
+  {
+    "stationId": "08HA070",
+    "name": "Harris Creek",
+    "riverRunId": "lens-creek",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/report_e.html?type=realTime&stn=08HA070",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:10:10.291091Z",
+    "updatedAt": "2025-11-18T19:10:10.291091Z",
+    "associatedRiverRunIds": [
+      "lens-creek",
+      "gordon-river-middle-gordon"
+    ]
+  },
+  {
+    "stationId": "08ME027",
+    "name": "a convenient online gauge",
+    "riverRunId": "hurley-river-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08ME027",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:10:28.146441Z",
+    "updatedAt": "2025-11-18T19:10:28.146441Z",
+    "associatedRiverRunIds": [
+      "hurley-river-canyon"
+    ]
+  },
+  {
+    "stationId": "08EC013",
+    "name": "0.252m↓ (Oct 21 05:55)",
+    "riverRunId": "babine-river",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08EC013",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:12.002496Z",
+    "updatedAt": "2025-11-18T19:08:12.002496Z",
+    "associatedRiverRunIds": [
+      "babine-river"
+    ]
+  },
+  {
+    "stationId": "08MF065",
+    "name": "Nahatlatch online gauge",
+    "riverRunId": "nahatlatch-river-canyon",
+    "dataSource": "Environment Canada",
+    "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MF065",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:25.338860Z",
+    "updatedAt": "2025-11-18T19:08:25.338860Z",
+    "associatedRiverRunIds": [
+      "nahatlatch-river-canyon",
+      "big-silver-creek-upper"
+    ]
+  },
+  {
+    "stationId": "08LF051",
+    "name": "accurate online gauge",
+    "riverRunId": "thompson-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08LF051",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:12:27.362624Z",
+    "updatedAt": "2025-11-18T19:12:27.362624Z",
+    "associatedRiverRunIds": [
+      "thompson-river"
+    ]
+  },
+  {
+    "stationId": "08HB002",
+    "name": "Englishman River gauge",
+    "riverRunId": "cameron-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HB002",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:47.819774Z",
+    "updatedAt": "2025-11-18T19:08:47.819774Z",
+    "associatedRiverRunIds": [
+      "cameron-river"
+    ]
+  },
+  {
+    "stationId": "08HB029",
+    "name": "Little Qualicum River gauge",
+    "riverRunId": "cameron-river",
+    "dataSource": "Environment Canada",
+    "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08HB029",
+    "country": "Canada",
+    "province": "British Columbia",
+    "source": "bcwhitewater.org",
+    "createdAt": "2025-11-18T19:08:47.819774Z",
+    "updatedAt": "2025-11-18T19:08:47.819774Z",
+    "associatedRiverRunIds": [
+      "cameron-river",
+      "little-qualicum-falls"
+    ]
+  }
+]

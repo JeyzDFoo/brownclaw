@@ -1,0 +1,26 @@
+{
+  "id": "clearwater-river-gatling-gorge",
+  "url": "https://www.bcwhitewater.org/reaches/clearwater-river-gatling-gorge",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:24.055874Z",
+  "title": "Clearwater River - Gatling Gorge",
+  "river_name": "Clearwater River",
+  "section_name": "Gatling Gorge",
+  "contributor": "David Wortley",
+  "whats_it_like": "Big water canyon with a lot of flat paddling!",
+  "difficulty": {
+    "text": "V",
+    "min": 5,
+    "max": 5
+  },
+  "scouting_portaging": "All is scoutable but two rapids are must-runs in tight-canyons",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 4,
+    "original": "4 hours including the Upper Sabretooth section."
+  },
+  "when_to_go": "Mid to late summer",
+  "gauge": "96.4cms↓ (Oct 21 06:05)\n!"
+}

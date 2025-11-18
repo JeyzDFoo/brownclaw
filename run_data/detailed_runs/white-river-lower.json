@@ -1,0 +1,26 @@
+{
+  "id": "white-river-lower",
+  "url": "https://www.bcwhitewater.org/reaches/white-river-lower",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:54.502613Z",
+  "title": "White River - Lower",
+  "river_name": "White River",
+  "section_name": "Lower",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A good intermediate canyon right off the north Island highway",
+  "difficulty": {
+    "text": "III",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Read and run in a canyon. Scouting and portaging may involve scrambling and bushwhacking but are not necessary.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 3,
+    "original": "1-3 hours"
+  },
+  "when_to_go": "During or after rainfall October-March, snowmelt April-June",
+  "gauge": "75.4cms↓ (Oct 21 06:10)\n!"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "small-river",
+  "url": "https://www.bcwhitewater.org/reaches/small-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:02.117031Z",
+  "title": "Small River",
+  "river_name": "Small River",
+  "contributor": "Brooke Z",
+  "whats_it_like": "A Small River packed with big fun! Continuous class 3, be on the lookout for wood",
+  "difficulty": {
+    "text": "III-IV (optional V at put in)",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Most of the river is visible from the road. The fast continuous nature of the river makes scouting difficult.",
+  "time": {
+    "original": "30 mins/lap (trick is to do a bunch of laps!)"
+  },
+  "when_to_go": "June-July"
+}

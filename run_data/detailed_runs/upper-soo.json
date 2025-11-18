@@ -1,0 +1,24 @@
+{
+  "id": "upper-soo",
+  "url": "https://www.bcwhitewater.org/reaches/upper-soo",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:49.371182Z",
+  "title": "Upper Soo",
+  "river_name": "Upper Soo",
+  "contributor": "Ian Collings",
+  "whats_it_like": "Majestic tributary valley to the Whistler region.",
+  "difficulty": {
+    "text": "III (with a major portage, and quite a bit of flat water)",
+    "min": 3,
+    "max": 3
+  },
+  "scouting_portaging": "Soo River Falls is a large multi-stage waterfall that has it's own little park on the maps.  Very obvious.",
+  "time": {
+    "hours_min": 10,
+    "hours_max": 20,
+    "original": "10 - 20 hours"
+  },
+  "when_to_go": "Sprint to late Summer"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "bowser-river",
+  "url": "https://www.bcwhitewater.org/reaches/bowser-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:38.080129Z",
+  "title": "Bowser River",
+  "river_name": "Bowser River",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Paddle up close to several glaciers on this chain of lakes.",
+  "difficulty": {
+    "text": "II-III with one long IV+ rapid",
+    "min": 2,
+    "max": 4
+  },
+  "scouting_portaging": "Easy at low water. The crux rapid would get exciting at high water.",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 72,
+    "original": "3 days"
+  },
+  "when_to_go": "Summer (June-Sept).",
+  "gauge": "600.0cms↓ (Oct 21 06:10)\n!",
+  "flow_range": {
+    "min": 800.0,
+    "unit": "cms"
+  },
+  "permit_required": true
+}

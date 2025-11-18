@@ -1,0 +1,37 @@
+{
+  "id": "nahatlatch-river-canyon",
+  "url": "https://www.bcwhitewater.org/reaches/nahatlatch-river-canyon",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:19.090313Z",
+  "title": "Nahatlatch River - Canyon",
+  "river_name": "Nahatlatch River",
+  "section_name": "Canyon",
+  "whats_it_like": "A short but fun medium volume run on the dry side of the Coast Mountains.",
+  "difficulty": {
+    "text": "IV at medium levels.",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Easy scouting, moderate portaging.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 2,
+    "original": "1-2 hours."
+  },
+  "when_to_go": "July-August in a normal year.  Earlier for high water runs.",
+  "gauge": "11.5cms↓ (Oct 21 06:10)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08MF065",
+      "name": "online",
+      "url": "https://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08MF065"
+    }
+  ],
+  "flow_range": {
+    "min": 40.0,
+    "max": 80.0,
+    "unit": "cms"
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "id": "chilcotin-river-chilko-chilcotin-fraser",
+  "url": "https://www.bcwhitewater.org/reaches/chilcotin-river-chilko-chilcotin-fraser",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:13.506458Z",
+  "title": "Chilcotin River  (Chilko-Chilcotin-Fraser)",
+  "river_name": "Chilcotin River  (Chilko-Chilcotin-Fraser)",
+  "contributor": "Scott McBride",
+  "whats_it_like": "Classic multiday raft trip across the Chilcotin Plateau",
+  "difficulty": {
+    "text": "II-IV",
+    "min": 2,
+    "max": 4
+  },
+  "scouting_portaging": "Not always practical - come prepared to read and run the biggest rapids",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 168,
+    "original": "3-7 days for the Chilko-Chilcotin-Fraser multiday"
+  },
+  "when_to_go": "Most popular once water levels drop in late August and September. Runnable at high water all summer.",
+  "gauge": "78.8cms↑ (Oct 21 05:45)\n!",
+  "flow_range": {
+    "min": 50.0,
+    "max": 70.0,
+    "unit": "cms"
+  },
+  "flows_description": "The Chilcotin has one of the most predictable river flows in BC since its sources are the enormous glacier-fed Chilko and Taseko Lakes.",
+  "shuttle_description": "It's a big one: 5 hours each way for the Chilko-Chilcotin-Fraser shuttle, 3 hours each way for the Taseko-Chilko-Chilcotin-Fraser shuttle. Mostly on dirt roads.  Get a GPS and backcountry map that shows forest roads. Any car should make it, but high clearance is recommended, and if the roads are wet AWD/4WD will be nice to have. Fuel up beforehand in Clinton or Williams Lake, and also check the location and hours of gas stations on the shuttle route (e.g. Tl'etinqox, Redstone). Williams Lake is a small city and the best place to get groceries and supplies. You can call around the outdoor stores in town for a possible shuttle service, but there is no dedicated shuttle company. To get to the takeout from the south, turn left (west) off Highway 97 just north of Clinton onto Meadow Lake Road, and follow this for at least an hour down to the Gang Ranch suspension bridge over the Fraser River. Shortly after the bridge, turn left as the takeout is located 1km downstream (south) in Churn Creek Protected Area, down a small 4x4 road to a steep sandy beach on river right of the Fraser River just upstream of the Churn-Fraser confluence. To get to the Chilko River put in at Henry's Crossing, there are a few options depending on how much you like driving on dirt roads. Probably the fastest is west through the private lands of Gang Ranch to Big Creek, and cross the Chilcotin River at Hanceville arriving at Highway 20 at Lee's Corner. Another option is again through Gang Ranch, but head to Highway 20 by crossing the Chilcotin River at Farwell Canyon arriving at Highway 20 at Riske Creek. If you do this, stop at the Farwell Canyon bridge to scout Farwell Rapids. If it has been raining, the ranch roads can be very slippery, so avoid Gang Ranch, cross back to river left of the Fraser and take the Dog Creek Road north to Highway 20.  Whichever way you get to Highway 20, follow it west to Tatla Lake. Turn left (southeast) and follow Tatlayoko Road and Henry's Crossing Road to a bridge over the Chilko River at Henry's Crossing, a common put in. Unless it's closed for bears, you can also put in 15km upstream of Henry's Crossing on Chilko Lake at Gwe Da Ts’ih campground in Ts'ilɂos Park. A typical Chiko-Chilcotin-Fraser shuttle route: through Gang Ranch, across Farwell Canyon Bridge, west on Highway 20, southeast at Tatla Lake to Henry's Crossing. The route to the Taseko River put in at Davidson Bridge Recreation Site also starts west through Gang Ranch, but you stay on the south side of the Chilcotin River, all on dirt roads. There is nowhere to get gas or supplies. Do not try to short cut from Big Creek to Davidson Bridge, you have to drop down almost to the Chilcotin River at Hanceville before turning south again on Taseko Lake Road towards Nemiah Valley. You can also put in 30km upstream of Davidson Bridge at Taseko Lake with some exploratory 4x4 driving. A typical Taseko-Chilko-Chilcotin-Fraser shuttle route.",
+  "on_the_water_description": "The total trip length from Henry's Crossing on the Chilko River to Churn Creek on the Fraser River is ~215km (Chilko-Chilcotin-Fraser). The total trip length from Davidson Bridge on the Taseko River to Churn Creek on the Fraser River is ~230km (Taseko-Chilko-Chilcotin-Fraser). For either option, late summer raft trips generally take 5-7 days on the river, plus shuttle. A typical high water kayak trip is 3 days on the water.",
+  "coordinates": {
+    "latitude": 2.0,
+    "longitude": 500.0
+  }
+}

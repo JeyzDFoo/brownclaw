@@ -1,0 +1,31 @@
+{
+  "id": "mamquam-river-upper",
+  "url": "https://www.bcwhitewater.org/reaches/mamquam-river-upper",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:04.711478Z",
+  "title": "Mamquam River - Upper",
+  "river_name": "Mamquam River",
+  "section_name": "Upper",
+  "whats_it_like": "A fun and scenic class III+ stretch on the Upper Mamquam. The last two kilometres known as the Middle Mamquam is class IV, but please see the dam warning.",
+  "difficulty": {
+    "text": "III-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "More or less roadside",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours"
+  },
+  "when_to_go": "Early summer or after rainfall. The last 2km can be run year-round.",
+  "gauge": "16.6cms↑ (Oct 21 06:05)\n!",
+  "flow_range": {
+    "min": 45.0,
+    "max": 55.0,
+    "unit": "cms"
+  },
+  "flows_description": "The Mamquam gauge is newly online so we have yet to establish a solid correlation. 45-55cms translates to a nice low or medium-low level (though note that this still has a big volume feel for the last two kilometres). The gauge is quite far downstream (near town), so the correlation may not be consistent."
+}

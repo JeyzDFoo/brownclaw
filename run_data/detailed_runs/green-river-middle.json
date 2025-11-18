@@ -1,0 +1,24 @@
+{
+  "id": "green-river-middle",
+  "url": "https://www.bcwhitewater.org/reaches/green-river-middle",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:10:18.272899Z",
+  "title": "Green River - Middle",
+  "river_name": "Green River",
+  "section_name": "Middle",
+  "whats_it_like": "Surprisingly good whitewater on a Whistler run that sees little traffic.  Often tragically infested with wood.",
+  "difficulty": {
+    "text": "IV-V",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to moderate.",
+  "time": {
+    "hours_min": 3,
+    "hours_max": 5,
+    "original": "3-5 hours.  It's hard to bomb because of the constant threat of wood."
+  },
+  "when_to_go": "Mid-season snowmelt - June through early August."
+}

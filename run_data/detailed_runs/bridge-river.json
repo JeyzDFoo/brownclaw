@@ -1,0 +1,25 @@
+{
+  "id": "bridge-river",
+  "url": "https://www.bcwhitewater.org/reaches/bridge-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:08:39.761868Z",
+  "title": "Bridge River",
+  "river_name": "Bridge River",
+  "contributor": "Claudia Schwab",
+  "whats_it_like": "Pool drop with big boulders + flat long scenic canyons",
+  "difficulty": {
+    "text": "III+-IV",
+    "min": 3,
+    "max": 4
+  },
+  "scouting_portaging": "Some tricky scouting in spots, portaging very tricky on one or two rapids.",
+  "time": {
+    "hours_min": 5,
+    "hours_max": 5,
+    "original": "3.5 - 5 hours (add 1.5-2 hours if doing the full 40km)"
+  },
+  "when_to_go": "July-August",
+  "gauge": "3.994cms↓ (Oct 21 04:10)\n!"
+}

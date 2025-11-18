@@ -1,0 +1,24 @@
+{
+  "id": "cummins-river",
+  "url": "https://www.bcwhitewater.org/reaches/cummins-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:09:40.060111Z",
+  "title": "Cummins River",
+  "river_name": "Cummins River",
+  "contributor": "Ralph Burden",
+  "whats_it_like": "Remote, multi-day packraft trip through wild old growth rainforest",
+  "difficulty": {
+    "text": "II-III (with portages)",
+    "min": 2,
+    "max": 3
+  },
+  "scouting_portaging": "Scouting and portaging can be difficult due to the thick bush",
+  "time": {
+    "hours_min": 72,
+    "hours_max": 120,
+    "original": "3-5 days"
+  },
+  "when_to_go": "Probably best in late summer / early fall"
+}

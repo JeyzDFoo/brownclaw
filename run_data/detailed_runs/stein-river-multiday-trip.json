@@ -1,0 +1,24 @@
+{
+  "id": "stein-river-multiday-trip",
+  "url": "https://www.bcwhitewater.org/reaches/stein-river-multiday-trip",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:17.565804Z",
+  "title": "Stein River - Multiday Trip",
+  "river_name": "Stein River",
+  "section_name": "Multiday Trip",
+  "whats_it_like": "A nice multiday trip on the arid side of the Coast Mountains.  Expect a lot of portages caused by wood.",
+  "difficulty": {
+    "text": "IV-IV+, V at high water",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to difficult - the full spectrum.",
+  "time": {
+    "hours_min": 48,
+    "hours_max": 96,
+    "original": "2-4 days."
+  },
+  "when_to_go": "July-August."
+}

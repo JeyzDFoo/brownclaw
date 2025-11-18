@@ -1,0 +1,26 @@
+{
+  "id": "pingston-middle",
+  "url": "https://www.bcwhitewater.org/reaches/pingston-middle",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:28.701462Z",
+  "title": "Pingston - Middle",
+  "river_name": "Pingston",
+  "section_name": "Middle",
+  "contributor": "Michael Reeder",
+  "whats_it_like": "Excellent quality class 4 with a few bigger rapids near the end. Continuous without being pushy, clean read and run for the first 3/4 with reasonably easy scouting and portaging options for the bigger rapids",
+  "difficulty": {
+    "text": "IV with a short V section at the end",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Lots of eddies and reasonably easy scouting/portaging at river level (no canyon sections)",
+  "time": {
+    "hours_min": 2,
+    "hours_max": 3,
+    "original": "2-3 hours (more or less depending on your boat scouting comfort level)"
+  },
+  "when_to_go": "Early July",
+  "gauge": "0.866cms↓ (Oct 21 06:10)\n!"
+}

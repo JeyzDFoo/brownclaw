@@ -1,0 +1,30 @@
+{
+  "id": "trout-creek",
+  "url": "https://www.bcwhitewater.org/reaches/trout-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:35.052236Z",
+  "title": "Trout Creek",
+  "river_name": "Trout Creek",
+  "contributor": "Scott McBride",
+  "whats_it_like": "A microcreeking epic in wine country, tragically clogged with wood",
+  "difficulty": {
+    "text": "IV+",
+    "min": 4,
+    "max": 4
+  },
+  "scouting_portaging": "Scout the canyon under the Trout Creek Trestle before putting on. Everything else can be figured out near river level.",
+  "time": {
+    "hours_min": 4,
+    "hours_max": 4,
+    "original": "4 hours"
+  },
+  "when_to_go": "May-June, after peak freshet",
+  "gauge": "0.03cms↓ (Oct 21 04:15)\n!",
+  "flow_range": {
+    "min": 5.0,
+    "max": 10.0,
+    "unit": "cms"
+  }
+}

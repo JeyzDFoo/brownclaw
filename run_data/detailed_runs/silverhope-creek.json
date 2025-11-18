@@ -1,0 +1,23 @@
+{
+  "id": "silverhope-creek",
+  "url": "https://www.bcwhitewater.org/reaches/silverhope-creek",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:11:49.673766Z",
+  "title": "Silverhope Creek",
+  "river_name": "Silverhope Creek",
+  "whats_it_like": "A good quality boulder run with tons of fun boogie.",
+  "difficulty": {
+    "text": "IV-IV+ to V, depending on the put in and take out used.",
+    "min": 4,
+    "max": 5
+  },
+  "scouting_portaging": "Easy to difficult.",
+  "time": {
+    "hours_min": 1,
+    "hours_max": 4,
+    "original": "1-4 hours."
+  },
+  "when_to_go": "May-July or after rain."
+}

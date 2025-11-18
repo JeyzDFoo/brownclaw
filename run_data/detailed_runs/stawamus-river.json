@@ -1,0 +1,29 @@
+{
+  "id": "stawamus-river",
+  "url": "https://www.bcwhitewater.org/reaches/stawamus-river",
+  "source": "bcwhitewater.org",
+  "country": "Canada",
+  "province": "British Columbia",
+  "last_updated": "2025-11-18T19:12:15.972768Z",
+  "title": "Stawamus River",
+  "river_name": "Stawamus River",
+  "whats_it_like": "A short novelty run in Squamish that's fun when everything in the area is running high.",
+  "difficulty": {
+    "text": "III (V)",
+    "min": 3,
+    "max": 5
+  },
+  "scouting_portaging": "Easy - roadside.",
+  "time": {
+    "original": "10-30 mintues."
+  },
+  "when_to_go": "All year after heavy rain.",
+  "gauge": "1.843m↓ (Oct 21 05:35)\n!",
+  "gauge_stations": [
+    {
+      "station_id": "08GA076",
+      "name": "Environment Canada online gauge",
+      "url": "http://wateroffice.ec.gc.ca/report/real_time_e.html?stn=08GA076"
+    }
+  ]
+}
