@@ -577,15 +577,29 @@ class RiverRunService {
       if (run == null) return null;
 
       // Get associated gauge stations
+      // Query by both riverRunId (legacy single-run) and associatedRiverRunIds (multi-run array)
       final stationsSnapshot = await _firestore
           .collection('gauge_stations')
-          .where('riverRunId', isEqualTo: runId)
           .where('isActive', isEqualTo: true)
           .get();
 
-      final stations = stationsSnapshot.docs.map((doc) {
-        return GaugeStation.fromMap(doc.data(), docId: doc.id);
-      }).toList();
+      // Filter to include stations where:
+      // - riverRunId == runId (legacy single-run link), OR
+      // - associatedRiverRunIds contains runId (new multi-run array)
+      final stations = stationsSnapshot.docs
+          .where((doc) {
+            final data = doc.data();
+            final riverRunId = data['riverRunId'] as String?;
+            final associatedIds =
+                data['associatedRiverRunIds'] as List<dynamic>?;
+
+            return riverRunId == runId ||
+                (associatedIds != null && associatedIds.contains(runId));
+          })
+          .map((doc) {
+            return GaugeStation.fromMap(doc.data(), docId: doc.id);
+          })
+          .toList();
 
       // Get the parent river information
       River? river;
