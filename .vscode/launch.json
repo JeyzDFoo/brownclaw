@@ -14,7 +14,11 @@
         {
             "name": "brownclaw",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--web-browser-flag",
+                "--disable-features=IsolateOrigins,site-per-process"
+            ]
         },
         {
             "name": "brownclaw (profile mode)",

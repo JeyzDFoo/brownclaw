@@ -7,7 +7,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
 import '../services/river_service.dart';
 import '../services/analytics_service.dart';
-import '../services/gauge_station_service.dart';
 import '../models/models.dart'; // Import LiveWaterData model
 import '../providers/providers.dart';
 import '../widgets/user_runs_history_widget.dart';
@@ -546,51 +545,29 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
     }
 
     try {
-      // Get GPS coordinates - prefer run coordinates if available, fallback to gauge_station
-      double? latitude;
-      double? longitude;
-      String? stationName;
-      final stationId = widget.riverData['stationId'] as String?;
-
-      // Check if run has coordinates field (BC runs)
+      // Get GPS coordinates from run data
       final coordinates = widget.riverData['coordinates'];
-      if (coordinates is Map<String, dynamic>) {
-        latitude = coordinates['latitude'] as double?;
-        longitude = coordinates['longitude'] as double?;
-        stationName = widget.riverData['riverName'] as String? ?? 'Unknown';
-
-        if (kDebugMode) {
-          print('🌤️ Using run coordinates: $latitude, $longitude');
-        }
+      if (coordinates is! Map<String, dynamic>) {
+        setState(() {
+          _weatherError = 'No GPS coordinates available';
+          _isLoadingWeather = false;
+        });
+        return;
       }
 
-      // Fallback to gauge_station lookup (existing runs)
+      final latitude = coordinates['latitude'] as double?;
+      final longitude = coordinates['longitude'] as double?;
+
       if (latitude == null || longitude == null) {
-        if (stationId == null || stationId.isEmpty) {
-          setState(() {
-            _weatherError = 'No station linked';
-            _isLoadingWeather = false;
-          });
-          return;
-        }
-
-        final station = await GaugeStationService.getStationById(stationId);
-        if (station == null) {
-          setState(() {
-            _weatherError = 'Station not found';
-            _isLoadingWeather = false;
-          });
-          return;
-        }
-
-        latitude = station.latitude;
-        longitude = station.longitude;
-        stationName = station.name;
-
-        if (kDebugMode) {
-          print('🌤️ Using gauge_station coordinates: $latitude, $longitude');
-        }
+        setState(() {
+          _weatherError = 'Invalid coordinates';
+          _isLoadingWeather = false;
+        });
+        return;
       }
+
+      final stationName = widget.riverData['riverName'] as String? ?? 'Unknown';
+      final stationId = widget.riverData['stationId'] as String?;
 
       if (kDebugMode) {
         print('🌤️ Loading weather for $stationName at $latitude, $longitude');
@@ -599,7 +576,7 @@ class _RiverDetailScreenState extends State<RiverDetailScreen> {
       // Create a minimal GaugeStation object for weather fetching
       final weatherStation = GaugeStation(
         stationId: stationId ?? 'unknown',
-        name: stationName ?? 'Unknown',
+        name: stationName,
         latitude: latitude,
         longitude: longitude,
         isActive: true,
