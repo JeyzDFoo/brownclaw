@@ -464,111 +464,6 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
               final dayFlowPeriods = periodsByDay[dayNumber] ?? [];
               final hasFlow = dayFlowPeriods.isNotEmpty;
 
-              String flowInfo = 'No release';
-              if (hasFlow) {
-                final totalPeriods = dayFlowPeriods.length;
-                if (totalPeriods == 1) {
-                  final period = dayFlowPeriods.first;
-                  // Get arrival times with 15min travel time
-                  final firstEntry = period.entries.first;
-                  final lastEntry = period.entries.last;
-
-                  debugPrint(
-                    'Day $dayNumber has ${period.entries.length} entries',
-                  );
-                  debugPrint(
-                    'First entry: ${firstEntry.period}, Last entry: ${lastEntry.period}',
-                  );
-
-                  final startArrival = firstEntry.getWaterArrivalTime(
-                    travelTimeMinutes: 15,
-                  );
-                  final startTime = _formatTimeShort(startArrival);
-
-                  // For single-hour releases, add 1 hour to the end time
-                  // Otherwise use the last entry's arrival time
-                  final rawEndTime = period.entries.length == 1
-                      ? lastEntry
-                            .getWaterArrivalTime(travelTimeMinutes: 15)
-                            .add(const Duration(hours: 1))
-                      : lastEntry.getWaterArrivalTime(travelTimeMinutes: 15);
-
-                  // Cap end time at civil twilight if it extends past
-                  final twilight = _getCivilTwilight(rawEndTime);
-                  final cappedEndTime =
-                      (twilight != null && rawEndTime.isAfter(twilight))
-                      ? twilight
-                      : rawEndTime;
-
-                  debugPrint(
-                    'Raw end time: $rawEndTime, Capped: $cappedEndTime',
-                  );
-
-                  final hour12 = cappedEndTime.hour == 0
-                      ? 12
-                      : (cappedEndTime.hour > 12
-                            ? cappedEndTime.hour - 12
-                            : cappedEndTime.hour);
-                  final period2 = cappedEndTime.hour < 12 ? 'am' : 'pm';
-                  final minuteStr = cappedEndTime.minute.toString().padLeft(
-                    2,
-                    '0',
-                  );
-                  final endTime = '$hour12:$minuteStr$period2';
-
-                  // Get weather for this period
-                  final weather = _getWeatherForPeriod(period.entries);
-
-                  flowInfo = weather.isNotEmpty
-                      ? '$startTime - $endTime\n$weather'
-                      : '$startTime - $endTime';
-                } else {
-                  // Multiple separate periods in one day
-                  // Show each period on a separate line with weather
-                  final periodTimes = dayFlowPeriods
-                      .map((period) {
-                        final startArrival = period.entries.first
-                            .getWaterArrivalTime(travelTimeMinutes: 15);
-                        final start = _formatTimeShort(startArrival);
-
-                        // For single-hour releases, add 1 hour to the end time
-                        // Otherwise use the last entry's arrival time
-                        final rawEndTime = period.entries.length == 1
-                            ? period.entries.last
-                                  .getWaterArrivalTime(travelTimeMinutes: 15)
-                                  .add(const Duration(hours: 1))
-                            : period.entries.last.getWaterArrivalTime(
-                                travelTimeMinutes: 15,
-                              );
-
-                        // Cap end time at civil twilight if it extends past
-                        final twilight = _getCivilTwilight(rawEndTime);
-                        final cappedEndTime =
-                            (twilight != null && rawEndTime.isAfter(twilight))
-                            ? twilight
-                            : rawEndTime;
-
-                        final hour12 = cappedEndTime.hour == 0
-                            ? 12
-                            : (cappedEndTime.hour > 12
-                                  ? cappedEndTime.hour - 12
-                                  : cappedEndTime.hour);
-                        final period2 = cappedEndTime.hour < 12 ? 'am' : 'pm';
-                        final minuteStr = cappedEndTime.minute
-                            .toString()
-                            .padLeft(2, '0');
-                        final end = '$hour12:$minuteStr$period2';
-
-                        final weather = _getWeatherForPeriod(period.entries);
-                        return weather.isNotEmpty
-                            ? '$start - $end $weather'
-                            : '$start - $end';
-                      })
-                      .join('\n');
-                  flowInfo = periodTimes;
-                }
-              }
-
               return Container(
                 width: 130,
                 margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -619,57 +514,143 @@ class _TransAltaFlowWidgetState extends State<TransAltaFlowWidget> {
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: hasFlow
-                            ? (isDark
-                                  ? Colors.blue.shade800.withOpacity(0.4)
-                                  : Colors.blue.shade100.withOpacity(0.8))
-                            : (isDark
-                                  ? Colors.grey.shade800.withOpacity(0.3)
-                                  : Colors.grey.shade200.withOpacity(0.6)),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            'Dam Release',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                              color: hasFlow
-                                  ? (isDark
-                                        ? Colors.blue.shade200
-                                        : Colors.blue.shade900)
-                                  : (isDark
-                                        ? Colors.grey.shade400
-                                        : Colors.grey.shade700),
+                    // Show each release period in its own bubble
+                    ...dayFlowPeriods.map((period) {
+                      final startArrival = period.entries.first
+                          .getWaterArrivalTime(travelTimeMinutes: 15);
+                      final start = _formatTimeShort(startArrival);
+
+                      // For single-hour releases, add 1 hour to the end time
+                      final rawEndTime = period.entries.length == 1
+                          ? period.entries.last
+                                .getWaterArrivalTime(travelTimeMinutes: 15)
+                                .add(const Duration(hours: 1))
+                          : period.entries.last.getWaterArrivalTime(
+                              travelTimeMinutes: 15,
+                            );
+
+                      // Cap end time at civil twilight if it extends past
+                      final twilight = _getCivilTwilight(rawEndTime);
+                      final cappedEndTime =
+                          (twilight != null && rawEndTime.isAfter(twilight))
+                          ? twilight
+                          : rawEndTime;
+
+                      final hour12 = cappedEndTime.hour == 0
+                          ? 12
+                          : (cappedEndTime.hour > 12
+                                ? cappedEndTime.hour - 12
+                                : cappedEndTime.hour);
+                      final period2 = cappedEndTime.hour < 12 ? 'am' : 'pm';
+                      final minuteStr = cappedEndTime.minute.toString().padLeft(
+                        2,
+                        '0',
+                      );
+                      final timeRange = '$start-$hour12:$minuteStr$period2';
+
+                      final weather = _getWeatherForPeriod(period.entries);
+
+                      return Container(
+                        width: double.infinity,
+                        constraints: const BoxConstraints(minHeight: 58),
+                        margin: const EdgeInsets.only(bottom: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.blue.shade800.withOpacity(0.4)
+                              : Colors.blue.shade100.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (dayFlowPeriods.length == 1)
+                              Text(
+                                'Dam Release',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isDark
+                                      ? Colors.blue.shade200
+                                      : Colors.blue.shade900,
+                                ),
+                              ),
+                            if (dayFlowPeriods.length == 1)
+                              const SizedBox(height: 2),
+                            Text(
+                              timeRange,
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: dayFlowPeriods.length > 1
+                                    ? FontWeight.w500
+                                    : FontWeight.normal,
+                                color: isDark
+                                    ? Colors.blue.shade100
+                                    : Colors.blue.shade800,
+                              ),
+                              textAlign: TextAlign.center,
                             ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            flowInfo,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: hasFlow
-                                  ? (isDark
-                                        ? Colors.blue.shade100
-                                        : Colors.blue.shade800)
-                                  : (isDark
-                                        ? Colors.grey.shade500
-                                        : Colors.grey.shade600),
+                            if (weather.isNotEmpty)
+                              Text(
+                                weather,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: isDark
+                                      ? Colors.blue.shade100
+                                      : Colors.blue.shade800,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    // Show "No release" message if no flow
+                    if (!hasFlow)
+                      Container(
+                        width: double.infinity,
+                        height: 58,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isDark
+                              ? Colors.grey.shade800.withOpacity(0.3)
+                              : Colors.grey.shade200.withOpacity(0.6),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Dam Release',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: isDark
+                                    ? Colors.grey.shade400
+                                    : Colors.grey.shade700,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                            maxLines: 4,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                            const SizedBox(height: 2),
+                            Text(
+                              'No release',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isDark
+                                    ? Colors.grey.shade500
+                                    : Colors.grey.shade600,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
                   ],
                 ),
               );
